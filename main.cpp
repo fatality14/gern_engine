@@ -97,6 +97,7 @@ public:
     }
 };
 
+//rename to Mesh
 class Model{
 public:
     vector<Vertex>* vertices;
@@ -131,6 +132,7 @@ public:
 
 };
 
+//rename to MeshList
 class ModelList{
 public:
     vector<Model> list;
@@ -140,7 +142,7 @@ public:
     void pushModel(Model m){
         list.push_back(m);
     }
-    void popModelByName(string name){
+    void popByName(string name){
         for(int i = 0; i < list.size(); i++){
             if(list.at(i).name == name){
                 list.erase(list.begin() + i);
@@ -227,13 +229,12 @@ public:
     ifstream in_file;
     const GLchar* vertSrc;
     const GLchar* fragSrc;
+    string name;
 
-    Shader(){
-
-    }
-    Shader(string vertexPath, string fragmentPath){
+    Shader(string vertexPath, string fragmentPath, string name = "noname"){
         this->vertexPath = vertexPath;
         this->fragmentPath = fragmentPath;
+        this->name = name;
     }
     ~Shader(){
         glDeleteProgram(program);
@@ -365,6 +366,22 @@ public:
     }
 };
 
+class ShaderList{
+    vector<Shader*> list;
+
+    void pushShader(string vertexPath, string fragmentPath, string name = "noname"){
+        //Shader s(vertexPath, fragmentPath, name);
+        list.push_back(new Shader(vertexPath, fragmentPath, name));
+    }
+    void popByName(string name){
+        for(int i = 0; i < list.size(); i++){
+            if(list.at(i)->name == name){
+                list.erase(list.begin() + i);
+            }
+        }
+    }
+};
+
 class Buffer{
 public:
     Model* model;
@@ -427,8 +444,9 @@ public:
 class TextureList{
 public:
     vector<GLuint> textures;
-    TextureList(){
-
+    Shader* shader;
+    TextureList(Shader& s){
+        shader = &s;
     }
     void loadTexture(string imagePath){
         //load image
@@ -466,6 +484,13 @@ public:
         //free space
         SOIL_free_image_data(image);
     }
+    void bindTexture(GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
+        shader->setUniform1i(uniformName, textureNum);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE_);
+        glBindTexture(GL_TEXTURE_2D, textures.at(textureNum));
+    }
 };
 
 class Perspective{
@@ -490,11 +515,11 @@ public:
         camPosition = glm::vec3(0.f, 0.f, 1.f);
         worlUp = glm::vec3(0.f, 1.f, 0.f);
         camFront = glm::vec3(0.f, 0.f, -1.f);
-        viewMatrix = glm::mat4(1.f);
 
+        //viewMatrix = glm::mat4(1.f);
         viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worlUp);
 
-        projectionMatrix = glm::mat4(1.f);
+        //projectionMatrix = glm::mat4(1.f);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
     void activate(){
@@ -508,6 +533,9 @@ public:
         shader->unuse();
     }
     void update(){
+        //viewMatrix = glm::mat4(1.f);
+        viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worlUp);
+
         glfwGetFramebufferSize(window->window, &window->fbWidth, &window->fbHeight);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
@@ -555,47 +583,111 @@ public:
     }
 };
 
-class ModelDrawer{
+class Object{
 public:
+    Window* window;
     TextureList* texList;
     Shader* shader;
     Model* model;
     Buffer* buffer;
+    Position* position;
+    Perspective* perspective;
 
-    ModelDrawer(TextureList& tl, Shader& s, Model& m){
+    Object(Window& w,TextureList& tl, Shader& s, Model& m, Perspective& p){
         texList = &tl;
+        shader = &s;
+        model = &m;
+        perspective = &p;
+        window = &w;
+
         buffer = new Buffer(m, s);
+        buffer->genBuffers();
+
+        position = new Position(*shader);
     }
-    void
+
+    void draw(){
+        shader->use();
+
+        texList->bindTexture(GL_TEXTURE0, 0, "texture0");
+        texList->bindTexture(GL_TEXTURE1, 1, "specularTex");
+
+        shader->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(position->modelMatrix));
+        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
+
+        shader->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(perspective->viewMatrix));
+        shader->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(perspective->projectionMatrix));
+
+        shader->setUniform3fv("cameraPos", glm::value_ptr(perspective->camPosition));
+
+        position->update();
+        perspective->update();
+
+        if(glfwGetKey(window->window, GLFW_KEY_2) == GLFW_PRESS){
+            position->scale -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_1) == GLFW_PRESS){
+            position->scale += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
+            perspective->camPosition.x -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS){
+            perspective->camPosition.x += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_Q) == GLFW_PRESS){
+            perspective->camPosition.y -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_E) == GLFW_PRESS){
+            perspective->camPosition.y += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS){
+            perspective->camPosition.z += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
+            perspective->camPosition.z -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_Z) == GLFW_PRESS){
+            position->rotation.y -= 5.f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_X) == GLFW_PRESS){
+            position->rotation.y += 5.f;
+        }
+
+        buffer->bind();
+
+        glDrawArrays(GL_TRIANGLES, 0, model->nVertices);
+    }
+};
+
+class Objects{
+public:
+    vector<Object*> list;
+
+    void pushObject(Object& o){
+        list.push_back(&o);
+    }
 };
 
 class Renderer{
 public:
-    ModelList* models;
     Window* window;
-    Shader* shader;
-    Buffer* buffer;
-    TextureList* texList;
-    Position* view;
     Perspective* perspective;
+    Objects* objects;
 
     float r, g, b, a;
 
-    Renderer(ModelList& ml, Window& w, Shader& s, Buffer& b, TextureList& tl, Position& v, Perspective& p){
-        models = &ml;
+    Renderer(Window& w, Perspective& p, Objects& o){
         window = &w;
-        shader = &s;
-        buffer = &b;
-        texList = &tl;
-        view = &v;
         perspective = &p;
+        objects = &o;
     }
     ~Renderer(){
 
     }
 
     bool doContinue = false;
-    void render(void (*frameFunction)(ModelList&, Window&, Shader&, Buffer&, TextureList&, Position&, Perspective&)){
+    void render(void (*frameFunction)(Window&, Perspective&, Objects&)){
         doContinue = true;
         while (!glfwWindowShouldClose(window->window))
         {
@@ -611,7 +703,7 @@ public:
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-            frameFunction(*models, *window, *shader, *buffer, *texList, *view, *perspective);
+            frameFunction(*window, *perspective, *objects);
 
             glfwSwapBuffers(window->window);
             glFlush();
@@ -622,9 +714,6 @@ public:
             }
         }
     }
-    void stopRendering(){
-        doContinue = false;
-    }
     void setBackgroundColor(float r, float g, float b, float a){
         this->r = r;
         this->g = g;
@@ -633,69 +722,12 @@ public:
     }
 };
 
-void drawFrame(ModelList& models, Window& window, Shader& shader, Buffer& buffer, TextureList& texList, Position& position, Perspective& perspective){
-    //use shaders program
-    shader.use();
-    //set texture0 to uniform in fragment shader
-    //WRAP TO BUFFERLIST WHICH WOULD DRAW ALL MODELS WITH SPECIFIED TEXTURE AND SHADER
-    glUniform1i(glGetUniformLocation(shader.program, "texture0"), 0);
-    glUniform1i(glGetUniformLocation(shader.program, "specularTex"), 1);
+void drawFrame(Window& window, Perspective& perspective, Objects& objects){
+    Object* currObj = objects.list.at(0);
+    currObj->draw();
 
-    //use texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texList.textures.at(0));
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texList.textures.at(1));
-
-
-    glUniformMatrix4fv(glGetUniformLocation(shader.program, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(position.modelMatrix));
-
-    position.update();
-    perspective.update();
-
-    if(glfwGetKey(window.window, GLFW_KEY_2) == GLFW_PRESS){
-        position.scale -= 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_1) == GLFW_PRESS){
-        position.scale += 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_A) == GLFW_PRESS){
-        position.position.x += 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_D) == GLFW_PRESS){
-        position.position.x -= 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_Q) == GLFW_PRESS){
-        position.position.y += 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_E) == GLFW_PRESS){
-        position.position.y -= 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_S) == GLFW_PRESS){
-        position.position.z -= 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_W) == GLFW_PRESS){
-        position.position.z += 0.01f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_Z) == GLFW_PRESS){
-        position.rotation.y -= 5.f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_X) == GLFW_PRESS){
-        position.rotation.y += 5.f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_1) == GLFW_PRESS){
-        position.scale -= 0.1f;
-    }
-    if(glfwGetKey(window.window, GLFW_KEY_2) == GLFW_PRESS){
-        position.scale += 0.1f;
-    }
-
-    //set vertex array for shaders to read data from
-    buffer.bind();
-
-    //this function draw elements according to shaders
-    glDrawArrays(GL_TRIANGLES, 0, models.list.at(0).nVertices);
-    //glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);
+    currObj = objects.list.at(1);
+    currObj->draw();
 }
 
 int main (){
@@ -708,14 +740,9 @@ int main (){
     Shader shader("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh");
     shader.compileShaders();
 
-    Buffer buffer(models.list.at(0), shader);
-
-    TextureList texList;
+    TextureList texList(shader);
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
-
-    //BufferList buffers...
-    //BufferList should include model, shader for model, textureList for model
 
     Position position(shader);
     position.activate();
@@ -723,7 +750,16 @@ int main (){
     Perspective perspective(shader, window);
     perspective.activate();
 
-    Renderer renderer(models, window, shader, buffer, texList, position, perspective);
+    Object object(window, texList, shader, models.list.at(0), perspective);
+    Object object1(window, texList, shader, models.list.at(0), perspective);
+
+    object1.position->position.x += 2.f;
+
+    Objects objects;
+    objects.pushObject(object);
+    objects.pushObject(object1);
+
+    Renderer renderer(window, perspective, objects);
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
     return 0;
