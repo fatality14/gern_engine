@@ -28,8 +28,10 @@ class Window{
 public:
     int width;
     int height;
+
     int fbWidth;
     int fbHeight;
+
     GLFWwindow* window;
     GLenum pmFace;
     GLenum pmMode;
@@ -46,7 +48,16 @@ public:
         glfwDestroyWindow(window);
         glfwTerminate();
     }
-
+    void setPolygonMode(GLenum face = GL_FRONT_AND_BACK, GLenum mode = GL_FILL){
+        glPolygonMode(face, mode);
+    }
+    void init(){
+        initGLFW();
+        initWindow();
+        initGLEW();
+        setPolygonMode(pmFace, pmMode);
+    }
+private:
     void initGLFW(){
         glfwInit();
 
@@ -82,23 +93,13 @@ public:
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
-    void setPolygonMode(GLenum face = GL_FRONT_AND_BACK, GLenum mode = GL_FILL){
-        glPolygonMode(face, mode);
-    }
-    void init(){
-        initGLFW();
-        initWindow();
-        initGLEW();
-        setPolygonMode(pmFace, pmMode);
-    }
 
     static void framebufferResizeCallback(GLFWwindow* window, int fbW, int fbH){
         glViewport(0, 0, fbW, fbH);
     }
 };
 
-//rename to Mesh
-class Model{
+class Mesh{
 public:
     vector<Vertex>* vertices;
     vector<GLuint>* indices;
@@ -108,10 +109,7 @@ public:
 
     string name;
 
-    Model(){
-
-    }
-    Model(const Vertex* vertices, unsigned int nVertices, GLuint* indices, unsigned int nIndices, string name = "noname"){
+    Mesh(const Vertex* vertices, unsigned int nVertices, GLuint* indices, unsigned int nIndices, string name = "noname"){
         this->vertices = new vector<Vertex>(vertices, vertices + nVertices);
         this->indices = new vector<GLuint>(indices, indices + nIndices);
 
@@ -129,17 +127,13 @@ public:
         indices->push_back(b);
         indices->push_back(c);
     }
-
 };
 
-//rename to MeshList
-class ModelList{
+class MeshList{
 public:
-    vector<Model> list;
-    ModelList(){
+    vector<Mesh> list;
 
-    }
-    void pushModel(Model m){
+    void pushModel(Mesh m){
         list.push_back(m);
     }
     void popByName(string name){
@@ -150,7 +144,7 @@ public:
         }
     }
     void initCube(){
-        Model* m;
+        Mesh* m;
         Vertex vertices[] = {
             //Postition                           Color                               Texcoords                  Normals
             {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.0f, 1.f),      glm::vec3(0.0f, 0.0f, 1.0f)},//0
@@ -206,7 +200,7 @@ public:
         GLuint indices[] = {};
         unsigned nIndices = sizeof(indices) / sizeof(GLuint);
 
-        m = new Model(vertices, nVertices, indices, nIndices, "cube");
+        m = new Mesh(vertices, nVertices, indices, nIndices, "cube");
         list.push_back(*m);
     }
     void initDefaultList(){
@@ -217,18 +211,6 @@ public:
 class Shader{
 public:
     GLuint program;
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    string vertexPath;
-    string fragmentPath;
-    bool isCompiled = true;
-    char infoLog[512];
-    GLint isError;
-    string temp = "";
-    string src = "";
-    ifstream in_file;
-    const GLchar* vertSrc;
-    const GLchar* fragSrc;
     string name;
 
     Shader(string vertexPath, string fragmentPath, string name = "noname"){
@@ -246,13 +228,45 @@ public:
         compileFragment();
         compileProgram();
 
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
         if (!isCompiled){
             glfwTerminate(); //TODO: replace with throw exception or else
         }
     }
+    void use(){
+        glUseProgram(program);
+    }
+    void unuse(){
+        glUseProgram(0);
+    }
+    void setLayout(string layoutName, int vecSize, size_t offset){
+        //we set the format of data reading below
+        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
+        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
+        glEnableVertexAttribArray(attribLoc);
+    }
+    void setUniformMatrix4fv(string uniformName, const GLfloat* value){
+        glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), 1, GL_FALSE, value);
+    }
+    void setUniform3fv(string uniformName, const GLfloat* value){
+        glUniform3fv(glGetUniformLocation(program, uniformName.data()), 1, value);
+    }
+    void setUniform1i(string uniformName, GLint location){
+        glUniform1i(glGetUniformLocation(program, uniformName.data()), location);
+    }
+private:
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    string vertexPath;
+    string fragmentPath;
+    bool isCompiled = true;
+    char infoLog[512];
+    GLint isError;
+    string temp = "";
+    string src = "";
+    ifstream in_file;
+    const GLchar* vertSrc;
+    const GLchar* fragSrc;
+
     void compileVertex(){
         temp = "";
         src = "";
@@ -337,32 +351,10 @@ public:
             isCompiled = false;
         }
 
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
         //the program should be set in window while cycle
         unuse();
-    }
-    void use(){
-        glUseProgram(program);
-    }
-    void unuse(){
-        glUseProgram(0);
-    }
-    void setLayout(string layoutName, int vecSize, size_t offset){
-        //we set the format of data reading below
-        //3 floats to position, 3 to color and 2 to texcoord
-        //get location of vertex_position variable from shaders (= 0 for vertex_position)
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        //3 is the amount of data in vec3
-        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
-        glEnableVertexAttribArray(attribLoc);
-    }
-    void setUniformMatrix4fv(string uniformName, const GLfloat* value){
-        glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), 1, GL_FALSE, value);
-    }
-    void setUniform3fv(string uniformName, const GLfloat* value){
-        glUniform3fv(glGetUniformLocation(program, uniformName.data()), 1, value);
-    }
-    void setUniform1i(string uniformName, GLint location){
-        glUniform1i(glGetUniformLocation(program, uniformName.data()), location);
     }
 };
 
@@ -384,21 +376,10 @@ class ShaderList{
 
 class Buffer{
 public:
-    Model* model;
-    Shader* shader;
+    Mesh* mesh;
 
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
-
-    Buffer(Model& m, Shader& s){
-        model = &m;
-        shader = &s;
-
-        genBuffers();
-    }
-    ~Buffer(){
-
+    Buffer(Mesh& m){
+        mesh = &m;
     }
 
     //TODO: divide to smaller chunks
@@ -408,14 +389,31 @@ public:
         initVBO();
         initEBO();
 
-        shader->setLayout("vertex_position", 3, offsetof(Vertex, position));
-        shader->setLayout("vertex_color", 3, offsetof(Vertex, color));
-        shader->setLayout("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setLayout("vertex_normal", 3, offsetof(Vertex, normal));
-
         //current vao should be set in while window loop
+        unbind();
+    }
+    void pushToShader(Shader* s){
+        bind();
+
+        s->setLayout("vertex_position", 3, offsetof(Vertex, position));
+        s->setLayout("vertex_color", 3, offsetof(Vertex, color));
+        s->setLayout("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        s->setLayout("vertex_normal", 3, offsetof(Vertex, normal));
+
+        unbind();
+    }
+    void bind(){
+        glBindVertexArray(VAO);
+    }
+    void unbind(){
         glBindVertexArray(0);
     }
+
+private:
+    GLuint VAO;
+    GLuint VBO;
+    GLuint EBO;
+
     void initVAO(){
         //init and use vao that works just like vbo and ebo buffers wrapper
         glCreateVertexArrays(1, &VAO);
@@ -425,29 +423,20 @@ public:
         //vbo push all vertices array data to gpu and interpret it like some data array
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * model->vertices->size(), model->vertices->data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
     }
     void initEBO(){
         //ebo push all indices array data to gpu and interpret it like element array
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * model->indices->size(), model->indices->data(), GL_STATIC_DRAW);
-    }
-    void bind(){
-        glBindVertexArray(VAO);
-    }
-    void unbind(){
-        glBindVertexArray(0);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
     }
 };
 
 class TextureList{
 public:
     vector<GLuint> textures;
-    Shader* shader;
-    TextureList(Shader& s){
-        shader = &s;
-    }
+
     void loadTexture(string imagePath){
         //load image
         int image_width = 0;
@@ -484,7 +473,7 @@ public:
         //free space
         SOIL_free_image_data(image);
     }
-    void bindTexture(GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
+    void bindTexture(Shader* shader, GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
         shader->setUniform1i(uniformName, textureNum);
 
         //use texture
@@ -495,7 +484,6 @@ public:
 
 class Perspective{
 public:
-    Shader* shader;
     Window* window;
 
     glm::vec3 camPosition;
@@ -505,11 +493,10 @@ public:
     glm::mat4 projectionMatrix;
 
     float fov = 90.f;
-    float nearPlane = 0.1f;
+    float nearPlane = 0.001f;
     float farPlane = 1000.f;
 
-    Perspective(Shader& s, Window& w){
-        shader = &s;
+    Perspective(Window& w){
         window = &w;
 
         camPosition = glm::vec3(0.f, 0.f, 1.f);
@@ -522,29 +509,53 @@ public:
         //projectionMatrix = glm::mat4(1.f);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
-    void activate(){
-        shader->use();
+    void pushToShader(Shader* s){
+        s->use();
 
-        shader->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
-        shader->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
+        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
+        s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
 
-        shader->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
+        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
 
-        shader->unuse();
+        s->unuse();
     }
-    void update(){
+    void pushToActiveShader(Shader* s){
+        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
+        s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
+
+        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
+    }
+    void updateMatrices(){
         //viewMatrix = glm::mat4(1.f);
         viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worlUp);
 
         glfwGetFramebufferSize(window->window, &window->fbWidth, &window->fbHeight);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
+    void setWindowEvents(){
+        if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
+            camPosition.x -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS){
+            camPosition.x += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_Q) == GLFW_PRESS){
+            camPosition.y -= 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_E) == GLFW_PRESS){
+            camPosition.y += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS){
+            camPosition.z += 0.01f;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
+            camPosition.z -= 0.01f;
+        }
+    }
 };
 
 class Position{
 public:
-    Shader* shader;
-
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
@@ -552,28 +563,31 @@ public:
     glm::mat4 modelMatrix;
 
     //ADD LIGHT SOURCE CLASS
-    glm::vec3 lightPos0;
+    //glm::vec3 lightPos0;
 
-    Position(Shader& s){
-        shader = &s;
-
+    Position(){
         position = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
         scale = glm::vec3(1.f);
         modelMatrix = glm::mat4(1.f);
 
 
-        lightPos0 = glm::vec3(0.f,0.f, 2.f);
+        //lightPos0 = glm::vec3(0.f,0.f, 2.f);
     }
-    void activate(){
-        shader->use();
+    void pushToShader(Shader* s){
+        s->use();
 
-        shader->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
-        shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
+        s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
+        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
 
-        shader->unuse();
+        s->unuse();
     }
-    void update(){
+    void pushToActiveShader(Shader* s){
+        s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
+        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
+    }
+
+    void updateMatrices(){
         modelMatrix = glm::mat4(1.f);
         modelMatrix = glm::translate(modelMatrix, position);
         modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f));
@@ -583,69 +597,91 @@ public:
     }
 };
 
+class LightSource{
+public:
+    glm::vec3 lightPos;
+
+    LightSource(){
+        lightPos = glm::vec3(0.f, 0.f, 2.f);
+    }
+};
+
+class LightSourceList{
+public:
+    vector<LightSource*> list;
+
+    void pushLightSource(LightSource& ls){
+        list.push_back(&ls);
+    }
+    void pushToShader(Shader* s, int lightSourceNum ,string uniformName){
+        LightSource* currentSource = list.at(lightSourceNum);
+        s->use();
+
+        s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
+
+        s->unuse();
+    }
+    void pushToActiveShader(Shader* s, int lightSourceNum, string uniformName){
+        LightSource* currentSource = list.at(lightSourceNum);
+        s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
+    }
+};
+
 class Object{
 public:
     Window* window;
     TextureList* texList;
     Shader* shader;
-    Model* model;
     Buffer* buffer;
     Position* position;
     Perspective* perspective;
+    LightSourceList* lightSources;
 
-    Object(Window& w,TextureList& tl, Shader& s, Model& m, Perspective& p){
+    Object(Window& w,TextureList& tl, Shader& s, Buffer& b, Perspective& p, LightSourceList& lsl){
+        window = &w;
         texList = &tl;
         shader = &s;
-        model = &m;
+        buffer = &b;
         perspective = &p;
-        window = &w;
+        lightSources = &lsl;
 
-        buffer = new Buffer(m, s);
-        buffer->genBuffers();
-
-        position = new Position(*shader);
+        position = new Position();
     }
 
-    void draw(){
+    //move this function out such as in renderer render function
+    void draw(bool byIndices = true){
         shader->use();
 
-        texList->bindTexture(GL_TEXTURE0, 0, "texture0");
-        texList->bindTexture(GL_TEXTURE1, 1, "specularTex");
+        texList->bindTexture(shader, GL_TEXTURE0, 0, "texture0");
+        texList->bindTexture(shader, GL_TEXTURE1, 1, "specularTex");
 
-        shader->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(position->modelMatrix));
-        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
+        position->updateMatrices();
+        position->pushToActiveShader(shader);
 
-        shader->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(perspective->viewMatrix));
-        shader->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(perspective->projectionMatrix));
+        perspective->updateMatrices();
+        perspective->pushToActiveShader(shader);
 
-        shader->setUniform3fv("cameraPos", glm::value_ptr(perspective->camPosition));
+        lightSources->pushToActiveShader(shader, 0, "lightPos0");
 
-        position->update();
-        perspective->update();
+        setWindowEvents();
 
+        buffer->bind();
+
+        if (byIndices)
+            glDrawElements(GL_TRIANGLES, buffer->mesh->nIndices, GL_UNSIGNED_INT, (void*)0);
+        else
+            glDrawArrays(GL_TRIANGLES, 0, buffer->mesh->nVertices);
+
+        shader->unuse();
+    }
+
+private:
+    void setWindowEvents(){
         if(glfwGetKey(window->window, GLFW_KEY_2) == GLFW_PRESS){
             position->scale -= 0.01f;
         }
         if(glfwGetKey(window->window, GLFW_KEY_1) == GLFW_PRESS){
             position->scale += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
-            perspective->camPosition.x -= 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS){
-            perspective->camPosition.x += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_Q) == GLFW_PRESS){
-            perspective->camPosition.y -= 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_E) == GLFW_PRESS){
-            perspective->camPosition.y += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS){
-            perspective->camPosition.z += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
-            perspective->camPosition.z -= 0.01f;
         }
         if(glfwGetKey(window->window, GLFW_KEY_Z) == GLFW_PRESS){
             position->rotation.y -= 5.f;
@@ -653,10 +689,6 @@ public:
         if(glfwGetKey(window->window, GLFW_KEY_X) == GLFW_PRESS){
             position->rotation.y += 5.f;
         }
-
-        buffer->bind();
-
-        glDrawArrays(GL_TRIANGLES, 0, model->nVertices);
     }
 };
 
@@ -723,16 +755,18 @@ public:
 };
 
 void drawFrame(Window& window, Perspective& perspective, Objects& objects){
+    perspective.setWindowEvents();
+
     Object* currObj = objects.list.at(0);
-    currObj->draw();
+    currObj->draw(false);
 
     currObj = objects.list.at(1);
-    currObj->draw();
+    currObj->draw(false);
 }
 
 int main (){
-    ModelList models;
-    models.initDefaultList();
+    MeshList meshList;
+    meshList.initDefaultList();
 
     Window window(700,1040);
     window.init();
@@ -740,18 +774,27 @@ int main (){
     Shader shader("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh");
     shader.compileShaders();
 
-    TextureList texList(shader);
+    TextureList texList;
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
 
-    Position position(shader);
-    position.activate();
+    Position position;
+    position.pushToShader(&shader);
 
-    Perspective perspective(shader, window);
-    perspective.activate();
+    Perspective perspective(window);
+    perspective.pushToShader(&shader);
 
-    Object object(window, texList, shader, models.list.at(0), perspective);
-    Object object1(window, texList, shader, models.list.at(0), perspective);
+    LightSource light0;
+    LightSourceList lightSources;
+    lightSources.pushLightSource(light0);
+    lightSources.pushToShader(&shader ,0, "lightPos0");
+
+    Buffer buffer(meshList.list.at(0));
+    buffer.genBuffers();
+    buffer.pushToShader(&shader);
+
+    Object object(window, texList, shader, buffer, perspective, lightSources);
+    Object object1(window, texList, shader, buffer, perspective, lightSources);
 
     object1.position->position.x += 2.f;
 
