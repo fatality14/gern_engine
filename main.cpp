@@ -17,6 +17,10 @@
 
 using namespace std;
 
+//TODO:
+//fix add function in all lists, check for repeated names
+//make list abstract class and inherit all list classes from it
+
 struct Vertex{
     glm::vec3 position;
     glm::vec3 color;
@@ -26,13 +30,14 @@ struct Vertex{
 
 class Window{
 public:
+    GLFWwindow* window;
+
     int width;
     int height;
 
     int fbWidth;
     int fbHeight;
 
-    GLFWwindow* window;
     GLenum pmFace;
     GLenum pmMode;
 
@@ -131,15 +136,22 @@ public:
 
 class MeshList{
 public:
-    vector<Mesh> list;
+    vector<Mesh*> list;
 
-    void pushModel(Mesh m){
-        list.push_back(m);
+    void pushModel(Mesh& m){
+        list.push_back(&m);
     }
     void popByName(string name){
         for(int i = 0; i < list.size(); i++){
-            if(list.at(i).name == name){
+            if(list.at(i)->name == name){
                 list.erase(list.begin() + i);
+            }
+        }
+    }
+    Mesh* getByName(string name){
+        for(int i = 0; i < list.size(); i++){
+            if(list.at(i)->name == name){
+                return list.at(i);
             }
         }
     }
@@ -201,7 +213,7 @@ public:
         unsigned nIndices = sizeof(indices) / sizeof(GLuint);
 
         m = new Mesh(vertices, nVertices, indices, nIndices, "cube");
-        list.push_back(*m);
+        list.push_back(m);
     }
     void initDefaultList(){
         initCube();
@@ -232,10 +244,10 @@ public:
             glfwTerminate(); //TODO: replace with throw exception or else
         }
     }
-    void use(){
+    void bind(){
         glUseProgram(program);
     }
-    void unuse(){
+    void unbind(){
         glUseProgram(0);
     }
     void setLayout(string layoutName, int vecSize, size_t offset){
@@ -354,7 +366,7 @@ private:
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         //the program should be set in window while cycle
-        unuse();
+        unbind();
     }
 };
 
@@ -369,6 +381,13 @@ class ShaderList{
         for(int i = 0; i < list.size(); i++){
             if(list.at(i)->name == name){
                 list.erase(list.begin() + i);
+            }
+        }
+    }
+    Shader* getByName(string name){
+        for(int i = 0; i < list.size(); i++){
+            if(list.at(i)->name == name){
+                return list.at(i);
             }
         }
     }
@@ -436,13 +455,41 @@ private:
 class TextureList{
 public:
     vector<GLuint> textures;
+    //TODO: add texture name for each texture
 
     void loadTexture(string imagePath){
         //load image
-        int image_width = 0;
-        int image_height = 0;
-        unsigned char* image = SOIL_load_image(imagePath.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
+        image_width = 0;
+        image_height = 0;
 
+        image = SOIL_load_image(imagePath.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
+
+        initTexture();
+
+        //the texture should be set in while window loop, not here
+        unbindTextures();
+
+        //free space
+        SOIL_free_image_data(image);
+    }
+    void bindTexture(Shader* shader, GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
+        shader->setUniform1i(uniformName, textureNum);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE_);
+        glBindTexture(GL_TEXTURE_2D, textures.at(textureNum));
+    }
+    void unbindTextures(){
+        glActiveTexture(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
+
+    void initTexture(){
         //init and active texture
         textures.push_back(GLuint());
         GLuint& texture = textures.at(textures.size()-1);
@@ -465,31 +512,178 @@ public:
         else{
             cout << "Texture loading failed" << endl;
         }
-
-        //the texture should be set in while window loop, not here
-        glActiveTexture(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        //free space
-        SOIL_free_image_data(image);
     }
-    void bindTexture(Shader* shader, GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
-        shader->setUniform1i(uniformName, textureNum);
+};
 
-        //use texture
-        glActiveTexture(GL_TEXTURE_);
-        glBindTexture(GL_TEXTURE_2D, textures.at(textureNum));
+class MouseListener{
+public:
+    float dt;
+    float currTime;
+    float lastTime;
+
+    double lastMouseX;
+    double lastMouseY;
+
+    double mouseX;
+    double mouseY;
+
+    double mouseOffsetX;
+    double mouseOffsetY;
+
+    bool firstMouse;
+
+    MouseListener(Window& w){
+        window = &w;
+
+        dt = 0;
+        currTime = 0;
+        lastTime = 0;
+
+        lastMouseX = 0;
+        lastMouseY = 0;
+
+        mouseX = 0;
+        mouseY = 0;
+
+        mouseOffsetX = 0;
+        mouseOffsetY = 0;
+
+        firstMouse = true;
     }
+
+    void update(){
+        updateDt();
+        updateInput();
+
+        //cout << dt << " " << mouseOffsetX << " " << mouseOffsetY << endl;
+    }
+    void updateDt(){
+        currTime = static_cast<float>(glfwGetTime());
+        dt = currTime - lastTime;
+        lastTime = currTime;
+    }
+    void updateInput(){
+        glfwGetCursorPos(window->window, &mouseX, &mouseY);
+
+        if(firstMouse){
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            firstMouse = false;
+        }
+
+        mouseOffsetX = mouseX - lastMouseX;
+        mouseOffsetY = lastMouseY - mouseY;
+
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+    }
+private:
+    Window* window;
+};
+
+//class CameraList
+//each camera in list could set the view attributes
+
+class View{
+public:
+    glm::vec3 worldUp;
+
+    glm::mat4 viewMatrix;
+
+    glm::vec3 camPosition;
+    glm::vec3 camUp;
+    glm::vec3 camFront;
+    glm::vec3 camRight;
+
+    GLfloat pitch = 0.f;
+    GLfloat yaw = -90.f;
+    GLfloat roll = 0.f;
+
+    GLfloat movementSpeed = 3.f;
+    GLfloat sensitivity = 5.f;
+
+    View(Window& w, MouseListener& ml){
+        window = &w;
+
+        mouse = &ml;
+
+        worldUp = glm::vec3(0.f, 1.f, 0.f);
+
+        camPosition = glm::vec3(0.f, 0.f, 1.f);
+        camUp = worldUp;
+        camFront = glm::vec3(0.f, 0.f, -1.f);
+        camRight = glm::vec3(0.f);
+
+        //viewMatrix = glm::mat4(1.f);
+        viewMatrix = glm::lookAt(camPosition, camPosition + camFront, camUp);
+    }
+    void pushToShader(Shader* s){
+        s->bind();
+
+        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
+        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
+
+        s->unbind();
+    }
+    void pushToActiveShader(Shader* s){
+        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
+
+        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
+    }
+    void updateCameraPosition(){
+        pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * sensitivity * mouse->dt;
+        yaw += static_cast<GLfloat>(mouse->mouseOffsetX) * sensitivity * mouse->dt;
+
+        if(pitch > 80.f)
+            pitch = 80.f;
+        else if (pitch < -80.f)
+            pitch = -80.f;
+
+        if (yaw > 360.f || yaw < -360.f)
+            yaw = 0.f;
+
+        camFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        camFront.y = sin(glm::radians(pitch));
+        camFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        camFront = glm::normalize(camFront);
+        camRight = glm::normalize(glm::cross(camFront, worldUp));
+        camUp = glm::normalize(glm::cross(camRight, camFront));
+    }
+    void updateMatrices(){
+        //viewMatrix = glm::mat4(1.f);
+        updateCameraPosition();
+        viewMatrix = glm::lookAt(camPosition, camPosition + camFront, camUp);
+    }
+
+    //TODO: make user function to start here, (might move to renderer class - bad idea)
+    void setWindowEvents(){
+        if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
+            camPosition -= camRight * movementSpeed * mouse->dt;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS){
+            camPosition += camRight * movementSpeed * mouse->dt;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_Q) == GLFW_PRESS){
+            camPosition -= camUp * movementSpeed * mouse->dt;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_E) == GLFW_PRESS){
+            camPosition += camUp * movementSpeed * mouse->dt;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS){
+            camPosition -= camFront * movementSpeed * mouse->dt;
+        }
+        if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
+            camPosition += camFront * movementSpeed * mouse->dt;
+        }
+    }
+private:
+    Window* window;
+    MouseListener* mouse;
 };
 
 class Perspective{
 public:
-    Window* window;
-
-    glm::vec3 camPosition;
-    glm::vec3 worlUp;
-    glm::vec3 camFront;
-    glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
     float fov = 90.f;
@@ -499,59 +693,30 @@ public:
     Perspective(Window& w){
         window = &w;
 
-        camPosition = glm::vec3(0.f, 0.f, 1.f);
-        worlUp = glm::vec3(0.f, 1.f, 0.f);
-        camFront = glm::vec3(0.f, 0.f, -1.f);
-
-        //viewMatrix = glm::mat4(1.f);
-        viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worlUp);
-
         //projectionMatrix = glm::mat4(1.f);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
     void pushToShader(Shader* s){
-        s->use();
+        s->bind();
 
-        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
         s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
 
-        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
-
-        s->unuse();
+        s->unbind();
     }
     void pushToActiveShader(Shader* s){
-        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
         s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
-
-        s->setUniform3fv("cameraPos", glm::value_ptr(camPosition));
     }
     void updateMatrices(){
-        //viewMatrix = glm::mat4(1.f);
-        viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worlUp);
-
         glfwGetFramebufferSize(window->window, &window->fbWidth, &window->fbHeight);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
+
+    //TODO: make user function to start here, (might move to renderer class - bad idea)
     void setWindowEvents(){
-        if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
-            camPosition.x -= 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS){
-            camPosition.x += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_Q) == GLFW_PRESS){
-            camPosition.y -= 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_E) == GLFW_PRESS){
-            camPosition.y += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS){
-            camPosition.z += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
-            camPosition.z -= 0.01f;
-        }
+
     }
+private:
+    Window* window;
 };
 
 class Position{
@@ -562,31 +727,23 @@ public:
 
     glm::mat4 modelMatrix;
 
-    //ADD LIGHT SOURCE CLASS
-    //glm::vec3 lightPos0;
-
     Position(){
         position = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
         scale = glm::vec3(1.f);
         modelMatrix = glm::mat4(1.f);
-
-
-        //lightPos0 = glm::vec3(0.f,0.f, 2.f);
     }
+
     void pushToShader(Shader* s){
-        s->use();
+        s->bind();
 
         s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
-        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
 
-        s->unuse();
+        s->unbind();
     }
     void pushToActiveShader(Shader* s){
         s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
-        //shader->setUniform3fv("lightPos0", glm::value_ptr(lightPos0));
     }
-
     void updateMatrices(){
         modelMatrix = glm::mat4(1.f);
         modelMatrix = glm::translate(modelMatrix, position);
@@ -595,13 +752,31 @@ public:
         modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     }
+
+    //TODO: make user function to start here, (might move to renderer class - bad idea)
+    void setWindowEvents(Window* w){
+        if(glfwGetKey(w->window, GLFW_KEY_2) == GLFW_PRESS){
+            scale -= 0.01f;
+        }
+        if(glfwGetKey(w->window, GLFW_KEY_1) == GLFW_PRESS){
+            scale += 0.01f;
+        }
+        if(glfwGetKey(w->window, GLFW_KEY_Z) == GLFW_PRESS){
+            rotation.y -= 5.f;
+        }
+        if(glfwGetKey(w->window, GLFW_KEY_X) == GLFW_PRESS){
+            rotation.y += 5.f;
+        }
+    }
 };
 
 class LightSource{
 public:
+    string name;
     glm::vec3 lightPos;
 
-    LightSource(){
+    LightSource(string name = "noname"){
+        this->name = name;
         lightPos = glm::vec3(0.f, 0.f, 2.f);
     }
 };
@@ -610,16 +785,30 @@ class LightSourceList{
 public:
     vector<LightSource*> list;
 
-    void pushLightSource(LightSource& ls){
+    void add(LightSource& ls){
         list.push_back(&ls);
+    }
+    void popByName(string name){
+        for(int i = 0; i < list.size(); i++){
+            if(list.at(i)->name == name){
+                list.erase(list.begin() + i);
+            }
+        }
+    }
+    LightSource* getByName(string name){
+        for(int i = 0; i < list.size(); i++){
+            if(list.at(i)->name == name){
+                return list.at(i);
+            }
+        }
     }
     void pushToShader(Shader* s, int lightSourceNum ,string uniformName){
         LightSource* currentSource = list.at(lightSourceNum);
-        s->use();
+        s->bind();
 
         s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
 
-        s->unuse();
+        s->unbind();
     }
     void pushToActiveShader(Shader* s, int lightSourceNum, string uniformName){
         LightSource* currentSource = list.at(lightSourceNum);
@@ -634,23 +823,26 @@ public:
     Shader* shader;
     Buffer* buffer;
     Position* position;
+    View* view;
     Perspective* perspective;
     LightSourceList* lightSources;
 
-    Object(Window& w,TextureList& tl, Shader& s, Buffer& b, Perspective& p, LightSourceList& lsl){
+    Object(Window& w, TextureList& tl, Shader& s, Buffer& b, Perspective& p, View& v, LightSourceList& lsl){
         window = &w;
         texList = &tl;
         shader = &s;
         buffer = &b;
         perspective = &p;
+        view = &v;
         lightSources = &lsl;
 
         position = new Position();
     }
 
     //move this function out such as in renderer render function
+    //divide texList initiation, light sources, position update maybe and other to abstract class Draw that should be inplementated by user
     void draw(bool byIndices = true){
-        shader->use();
+        shader->bind();
 
         texList->bindTexture(shader, GL_TEXTURE0, 0, "texture0");
         texList->bindTexture(shader, GL_TEXTURE1, 1, "specularTex");
@@ -661,9 +853,12 @@ public:
         perspective->updateMatrices();
         perspective->pushToActiveShader(shader);
 
+        view->updateMatrices();
+        view->pushToActiveShader(shader);
+
         lightSources->pushToActiveShader(shader, 0, "lightPos0");
 
-        setWindowEvents();
+        position->setWindowEvents(window);
 
         buffer->bind();
 
@@ -672,23 +867,10 @@ public:
         else
             glDrawArrays(GL_TRIANGLES, 0, buffer->mesh->nVertices);
 
-        shader->unuse();
+        shader->unbind();
     }
-
-private:
-    void setWindowEvents(){
-        if(glfwGetKey(window->window, GLFW_KEY_2) == GLFW_PRESS){
-            position->scale -= 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_1) == GLFW_PRESS){
-            position->scale += 0.01f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_Z) == GLFW_PRESS){
-            position->rotation.y -= 5.f;
-        }
-        if(glfwGetKey(window->window, GLFW_KEY_X) == GLFW_PRESS){
-            position->rotation.y += 5.f;
-        }
+    string getDrawObjectName(){
+        return buffer->mesh->name;
     }
 };
 
@@ -705,21 +887,22 @@ class Renderer{
 public:
     Window* window;
     Perspective* perspective;
+    View* view;
     Objects* objects;
+    MouseListener* mouse;
 
     float r, g, b, a;
 
-    Renderer(Window& w, Perspective& p, Objects& o){
+    Renderer(Window& w, Perspective& p, View& v, MouseListener& ml, Objects& o){
         window = &w;
         perspective = &p;
+        view = &v;
+        mouse = &ml;
         objects = &o;
-    }
-    ~Renderer(){
-
     }
 
     bool doContinue = false;
-    void render(void (*frameFunction)(Window&, Perspective&, Objects&)){
+    void render(void (*frameFunction)(Renderer&)){
         doContinue = true;
         while (!glfwWindowShouldClose(window->window))
         {
@@ -735,7 +918,11 @@ public:
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-            frameFunction(*window, *perspective, *objects);
+            mouse->update();
+            perspective->setWindowEvents();
+            view->setWindowEvents();
+
+            frameFunction(*this);
 
             glfwSwapBuffers(window->window);
             glFlush();
@@ -754,17 +941,16 @@ public:
     }
 };
 
-void drawFrame(Window& window, Perspective& perspective, Objects& objects){
-    perspective.setWindowEvents();
-
-    Object* currObj = objects.list.at(0);
+void drawFrame(Renderer& r){
+    Object* currObj = r.objects->list.at(0);
     currObj->draw(false);
 
-    currObj = objects.list.at(1);
+    currObj = r.objects->list.at(1);
     currObj->draw(false);
 }
 
 int main (){
+    //TODO: wrap in some class all from here, might be renderer class
     MeshList meshList;
     meshList.initDefaultList();
 
@@ -778,23 +964,23 @@ int main (){
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
     texList.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
 
-    Position position;
-    position.pushToShader(&shader);
-
     Perspective perspective(window);
-    perspective.pushToShader(&shader);
+
+    MouseListener mouse(window);
+
+    View view(window, mouse);
 
     LightSource light0;
     LightSourceList lightSources;
-    lightSources.pushLightSource(light0);
-    lightSources.pushToShader(&shader ,0, "lightPos0");
+    lightSources.add(light0);
+    //lightSources.pushToShader(&shader ,0, "lightPos0");
 
-    Buffer buffer(meshList.list.at(0));
+    Buffer buffer(*meshList.list.at(0));
     buffer.genBuffers();
     buffer.pushToShader(&shader);
 
-    Object object(window, texList, shader, buffer, perspective, lightSources);
-    Object object1(window, texList, shader, buffer, perspective, lightSources);
+    Object object(window, texList, shader, buffer, perspective, view, lightSources);
+    Object object1(window, texList, shader, buffer, perspective, view, lightSources);
 
     object1.position->position.x += 2.f;
 
@@ -802,7 +988,7 @@ int main (){
     objects.pushObject(object);
     objects.pushObject(object1);
 
-    Renderer renderer(window, perspective, objects);
+    Renderer renderer(window, perspective, view, mouse, objects);
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
     return 0;
