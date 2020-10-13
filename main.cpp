@@ -18,10 +18,9 @@
 using namespace std;
 
 //TODO:
-//fix add function in all lists, check for repeated names
-
 //check in renderer and some other classes that such objects as perspective, view etc use the same window
 //also check other similar cases
+//may be solved by making Renderer and Object field private
 
 struct Vertex{
     glm::vec3 position;
@@ -45,11 +44,14 @@ public:
         }
     }
     T* getByName(string name){
-        for(int i = 0; i < list.size(); i++){
+        for(size_t i = 0; i < list.size(); i++){
             if(list.at(i)->name == name){
                 return list.at(i);
             }
         }
+    }
+    T* at(unsigned int i){
+        return list.at(i);
     }
 };
 
@@ -378,11 +380,11 @@ private:
 
 class ShaderList : public List<Shader>{
     void pushNew(string vertexPath, string fragmentPath, string name = "noname"){
-        //Shader s(vertexPath, fragmentPath, name);
         list.push_back(new Shader(vertexPath, fragmentPath, name));
     }
 };
 
+//maybe add BufferList
 class Buffer{
 public:
     Mesh* mesh;
@@ -444,48 +446,29 @@ private:
     }
 };
 
-class Textures{
+class Texture{
 public:
-    vector<GLuint> textures;
-    vector<string> paths;
-    //TODO: add texture name for each texture
+    GLuint textureId;
+    string name; //same as path
 
-    void loadTexture(string imagePath){
+    Texture(string path){
+        name = path;
+    }
+    ~Texture(){
+        glDeleteTextures(1, &textureId);
+    }
+
+    void loadTexture(){
         //load image
         image_width = 0;
         image_height = 0;
 
-        image = SOIL_load_image(imagePath.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
+        image = SOIL_load_image(name.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
         initTexture();
-        paths.push_back(imagePath);
-
-        //the texture should be set in while window loop, not here
-        unbindTextures();
 
         //free space
         SOIL_free_image_data(image);
-    }
-    void bindTexture(Shader* shader, GLenum GL_TEXTURE_, GLint textureNum, string uniformName){
-        shader->setUniform1i(uniformName, textureNum);
-
-        //use texture
-        glActiveTexture(GL_TEXTURE_);
-        glBindTexture(GL_TEXTURE_2D, textures.at(textureNum));
-    }
-    void unbindTextures(){
-        glActiveTexture(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    void removeTextureByPath(string path){
-        for(int i = 0; i < paths.size(); i++){
-            if(paths.at(i) == path){
-                glDeleteTextures(1, &textures.at(i));
-
-                paths.erase(paths.begin() + i);
-                textures.erase(textures.begin() + i);
-            }
-        }
     }
 private:
     int image_width;
@@ -495,11 +478,8 @@ private:
 
     void initTexture(){
         //init and active texture
-        textures.push_back(GLuint());
-        GLuint& texture = textures.at(textures.size()-1);
-
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
 
         //setup texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -516,6 +496,34 @@ private:
         else{
             cout << "Texture loading failed" << endl;
         }
+    }
+};
+
+class TextureList : List<Texture>{
+public:
+    void pushNew(string path){
+        Texture* t = new Texture(path);
+        t->loadTexture();
+        list.push_back(t);
+        unbindTextures();
+    }
+    void bindTextureByIndex(Shader* shader, GLenum GL_TEXTURE_n, GLint textureIndex, string uniformName){
+        shader->setUniform1i(uniformName, textureIndex);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE_n);
+        glBindTexture(GL_TEXTURE_2D, list.at(textureIndex)->textureId);
+    }
+    void bindTextureByName(Shader* shader, GLenum GL_TEXTURE_n, GLint textureNum, string uniformName, string path){
+        shader->setUniform1i(uniformName, textureNum);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE_n);
+        glBindTexture(GL_TEXTURE_2D, getByName(path)->textureId);
+    }
+    void unbindTextures(){
+        glActiveTexture(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 };
 
@@ -611,7 +619,13 @@ public:
 };
 
 class CameraList : public List<Camera>{
-
+public:
+    CameraList(){
+        push(*(new Camera("default")));
+    }
+    Camera* getDefaultCam(){
+        return at(0);
+    }
 };
 
 class View{
@@ -643,7 +657,7 @@ public:
     }
 
     //TODO: make user function to start here, (might move to renderer class - bad idea)
-    void setWindowEvents(){
+    void setWindowEvents(void (*userEvents)(View&)){
         if(glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS){
             camera->position -= camera->right * camera->movementSpeed * mouse->dt;
         }
@@ -662,6 +676,8 @@ public:
         if(glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS){
             camera->position += camera->front * camera->movementSpeed * mouse->dt;
         }
+
+        userEvents(*this);
     }
 private:
     Window* window;
@@ -700,7 +716,6 @@ public:
     Perspective(Window& w){
         window = &w;
 
-        //projectionMatrix = glm::mat4(1.f);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
 
@@ -712,9 +727,9 @@ public:
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
 
-    //TODO: make user function to start here, (might move to renderer class - bad idea)
-    void setWindowEvents(){
-
+    //TODO: fill with smth later
+    void setWindowEvents(void (*userEvents)(Perspective&)){
+        userEvents(*this);
     }
 private:
     Window* window;
@@ -747,8 +762,7 @@ public:
         modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     }
 
-    //TODO: make user function to start here, (might move to renderer class - bad idea)
-    void setWindowEvents(Window* w){
+    void setWindowEvents(Window* w, void (*userEvents)(Position&)){
         if(glfwGetKey(w->window, GLFW_KEY_2) == GLFW_PRESS){
             scale -= 0.01f;
         }
@@ -761,6 +775,28 @@ public:
         if(glfwGetKey(w->window, GLFW_KEY_X) == GLFW_PRESS){
             rotation.y += 5.f;
         }
+
+        userEvents(*this);
+    }
+    void move(float x, float y, float z){
+        position.x += x;
+        position.y += y;
+        position.z += z;
+    }
+    void moveTo(float x, float y, float z){
+        position.x = x;
+        position.y = y;
+        position.z = z;
+    }
+    void rotate(float x, float y, float z){
+        rotation.x += x;
+        rotation.y += y;
+        rotation.z += z;
+    }
+    void scaleTo(float x, float y, float z){
+        scale.x = x;
+        scale.y = y;
+        scale.z = z;
     }
 };
 
@@ -777,6 +813,9 @@ public:
 
 class LightSourceList : public List<LightSource>{
 public:
+    void pushNew(string name = "noname"){
+        push(*(new LightSource(name)));
+    }
     void pushToShader(Shader* s, int lightSourceNum, string uniformName){
         LightSource* currentSource = list.at(lightSourceNum);
         s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
@@ -786,7 +825,7 @@ public:
 class Object{
 public:
     Window* window;
-    Textures* tex;
+    TextureList* tex;
     Shader* shader;
     Buffer* buffer;
     Position* position;
@@ -794,7 +833,7 @@ public:
     Perspective* perspective;
     LightSourceList* lightSources;
 
-    Object(Window& w, Textures& t, Shader& s, Buffer& b, Perspective& p, View& v, LightSourceList& lsl){
+    Object(Window& w, TextureList& t, Shader& s, Buffer& b, Perspective& p, View& v, LightSourceList& lsl){
         window = &w;
         tex = &t;
         shader = &s;
@@ -806,16 +845,13 @@ public:
         position = new Position();
     }
 
-    //move this function out such as in renderer render function
-    //divide texList initiation, light sources, position update maybe and other to abstract class Draw that should be inplementated by user
-    void draw(bool byIndices = true){
+    void draw(void (*drawObjectFunction)(Object&), void (*userEvents)(Position&), bool byIndices = true){
         shader->bind();
-
-        tex->bindTexture(shader, GL_TEXTURE0, 0, "texture0");
-        tex->bindTexture(shader, GL_TEXTURE1, 1, "specularTex");
 
         position->updateMatrices();
         position->pushToShader(shader);
+
+        position->setWindowEvents(window, userEvents);
 
         perspective->updateMatrices();
         perspective->pushToShader(shader);
@@ -823,9 +859,7 @@ public:
         view->updateMatrices();
         view->pushToShader(shader);
 
-        lightSources->pushToShader(shader, 0, "lightPos0");
-
-        position->setWindowEvents(window);
+        drawObjectFunction(*this);
 
         buffer->bind();
 
@@ -836,8 +870,20 @@ public:
 
         shader->unbind();
     }
-    const string& getDrawObjectName(){
+    const string& getDrawMeshName(){
         return buffer->getMeshName();
+    }
+    void move(float x, float y, float z){
+        position->move(x,y,z);
+    }
+    void moveTo(float x, float y, float z){
+        position->moveTo(x,y,z);
+    }
+    void rotate(float x, float y, float z){
+        position->rotate(x,y,z);
+    }
+    void scaleTo(float x, float y, float z){
+        position->scaleTo(x,y,z);
     }
 };
 
@@ -845,8 +891,18 @@ class Objects{
 public:
     vector<Object*> list;
 
-    void pushObject(Object& o){
+    void push(Object& o){
         list.push_back(&o);
+    }
+    Object* at(unsigned int index){
+        return list.at(index);
+    }
+    Object* getByMeshName(string meshName){
+        for(size_t i = 0; i < list.size(); i++){
+            if(list.at(i)->getDrawMeshName() == meshName){
+                return list.at(i);
+            }
+        }
     }
 };
 
@@ -857,19 +913,42 @@ public:
     View* view;
     Objects* objects;
     MouseListener* mouse;
+    CameraList* camList;
 
     float r, g, b, a;
 
-    Renderer(Window& w, Perspective& p, View& v, MouseListener& ml, Objects& o){
+    Renderer(){
+        window = new Window(700, 1040);
+        window->init();
+
+        perspective = new Perspective(*window);
+        mouse = new MouseListener(*window);
+        camList = new CameraList();
+        view = new View(*window, *mouse, *camList->at(0));
+        objects = new Objects;
+    }
+    Renderer(Window& w, Perspective& p, View& v, MouseListener& ml, Objects& o, CameraList* cl = nullptr){
         window = &w;
         perspective = &p;
         view = &v;
         mouse = &ml;
         objects = &o;
+        camList = cl;
+        if (camList == nullptr){
+            camList = new CameraList;
+        }
     }
 
-    bool doContinue = false;
-    void render(void (*frameFunction)(Renderer&)){
+    void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl){
+        Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl);
+        objects->push(*o);
+    }
+    Object* getObjectByIndex(unsigned int index){
+        return  objects->at(index);
+    }
+    void render(void (*frameFunction)(Renderer&),
+                void (*userViewEvents)(View&),
+                void (*userPerspectiveEvents)(Perspective&)){
         doContinue = true;
         while (!glfwWindowShouldClose(window->window))
         {
@@ -886,8 +965,8 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
             mouse->update();
-            perspective->setWindowEvents();
-            view->setWindowEvents();
+            perspective->setWindowEvents(userPerspectiveEvents);
+            view->setWindowEvents(userViewEvents);
 
             frameFunction(*this);
 
@@ -906,40 +985,43 @@ public:
         this->b = b;
         this->a = a;
     }
+private:
+    bool doContinue = false;
 };
+
+void viewEvents(View& v){}
+void perspectiveEvents(Perspective& p){}
+void positionEvents(Position& p){}
+
+void drawObject(Object& o){
+    o.tex->bindTextureByIndex(o.shader, GL_TEXTURE0, 0, "texture0");
+    o.tex->bindTextureByIndex(o.shader, GL_TEXTURE1, 1, "specularTex");
+
+    o.lightSources->pushToShader(o.shader, 0, "lightPos0");
+}
 
 void drawFrame(Renderer& r){
     Object* currObj = r.objects->list.at(0);
-    currObj->draw(false);
+    currObj->draw(drawObject, positionEvents, false);
 
     currObj = r.objects->list.at(1);
-    currObj->draw(false);
+    currObj->draw(drawObject, positionEvents, false);
 }
 
 int main (){
-    //TODO: wrap in some class all from here, might be renderer class
-    //might move every object initiation in Renderer class
+    Renderer renderer;
+
     MeshList meshList;
     meshList.initDefaultList();
-
-    Window window(700,1040);
-    window.init();
 
     Shader shader("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh");
     shader.compileShaders();
 
-    Textures tex;
-    tex.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
-    tex.loadTexture("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
+    TextureList tex;
+    tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
+    tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
 
-    Perspective perspective(window);
-
-    MouseListener mouse(window);
-    Camera cam;
-
-    View view(window, mouse, cam);
-
-    LightSource light0;
+    LightSource light0("default");
     LightSourceList lightSources;
     lightSources.push(light0);
 
@@ -947,17 +1029,11 @@ int main (){
     buffer.genBuffers();
     buffer.setLayouts(&shader);
 
-    Object object(window, tex, shader, buffer, perspective, view, lightSources);
-    Object object1(window, tex, shader, buffer, perspective, view, lightSources);
+    renderer.addNewObject(tex, shader, buffer, lightSources);
+    renderer.addNewObject(tex, shader, buffer, lightSources);
+    renderer.getObjectByIndex(1)->move(2.f,0,0);
 
-    object1.position->position.x += 2.f;
-
-    Objects objects;
-    objects.pushObject(object);
-    objects.pushObject(object1);
-
-    Renderer renderer(window, perspective, view, mouse, objects);
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
-    renderer.render(drawFrame);
+    renderer.render(drawFrame, viewEvents, perspectiveEvents);
     return 0;
 }
