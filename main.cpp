@@ -22,11 +22,26 @@ using namespace std;
         Code;\
     }\
 
+
+//TODO: divide some functions to smaller pieces
+//TODO: add notes that camera and mesh classes needed to contain data, rename classes or smth else
 struct Vertex{
     glm::vec3 position;
     glm::vec3 color;
     glm::vec2 texcoord;
     glm::vec3 normal;
+};
+
+struct intvec3{
+    intvec3(int x, int y, int z){
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+
+    int x;
+    int y;
+    int z;
 };
 
 template<class T>
@@ -142,10 +157,17 @@ public:
     vector<Vertex>* vertices;
     vector<GLuint>* indices;
 
-    unsigned int nVertices;
-    unsigned int nIndices;
+    unsigned int nVertices = 0;
+    unsigned int nIndices = 0;
 
     string name;
+
+    Mesh(string name = "noname"){
+        this->name = name;
+
+        vertices = new vector<Vertex>();
+        this->indices = new vector<GLuint>();
+    }
 
     Mesh(const Vertex* vertices, unsigned int nVertices, GLuint* indices, unsigned int nIndices, string name = "noname"){
         this->vertices = new vector<Vertex>(vertices, vertices + nVertices);
@@ -160,10 +182,276 @@ public:
     void pushVertex(Vertex v){
         vertices->push_back(v);
     }
-    void addPolyByIndices(GLuint a, GLuint b, GLuint c){
+    void addPolyIndices(GLuint a, GLuint b, GLuint c){
         indices->push_back(a);
         indices->push_back(b);
         indices->push_back(c);
+    }
+};
+
+class MeshLoader{
+public:
+    Mesh* mesh;
+
+    vector<glm::vec3> poses;
+    vector<glm::vec3> norms;
+    vector<glm::vec2> texes;
+
+    vector<intvec3> indexes;
+    vector<vector<intvec3>> allPolyIndexes;
+
+    ~MeshLoader(){
+        poses.clear();
+        norms.clear();
+        texes.clear();
+        indexes.clear();
+        allPolyIndexes.clear();
+    }
+
+    //make it done
+    void load(string path, string meshName = "noname"){
+        ifstream f;
+        f.open(path);
+
+        string line;
+
+        int switchCase;
+        bool end;
+
+        while(!f.eof()){
+            delimiter = " ";
+            switchCase = -1;
+
+            getline(f, line);
+
+            token = bite(delimiter, line, end);
+
+            if(token == "v"){
+                switchCase = 0;
+            }
+            if(token == "vn"){
+                switchCase = 1;
+            }
+            if(token == "vt"){
+                switchCase = 2;
+            }
+            if(token == "f"){
+                delimiter = "/";
+                switchCase = 3;
+            }
+
+            switch (switchCase) {
+            case -1:
+                break;
+            case 0:
+                poses.push_back(parsePos(line));
+                break;
+            case 1:
+                norms.push_back(parseNorm(line));
+                break;
+            case 2:
+                texes.push_back(parseNorm(line));
+                break;
+            case 3:
+                allPolyIndexes.push_back(parseIndexes(line, calcNumArgsDividedBy(" ", line)));
+                break;
+            }
+        }
+        buildMesh(meshName);
+    }
+private:
+    string token;
+    string delimiter;
+
+    string& bite(const string& delimiter, string& line, bool& end){
+        size_t pos = 0;
+        string* token = new string;
+
+        pos = line.find(delimiter);
+        end = false;
+
+        if(pos != string::npos){
+            *token = line.substr(0, pos);
+            line.erase(0, pos + delimiter.length());
+        }
+        else{
+            end = true;
+            token = &line;
+        }
+        return *token;
+    }
+    glm::vec3& parsePos(string& line){
+        float pos[3];
+        int i = -1;
+        delimiter = " ";
+        bool end;
+
+        while (true){
+            ++i;
+            token = bite(delimiter, line, end);
+            if(i < 3)
+                pos[i] = stof(token);
+            if(end)
+                break;
+        }
+        return *new glm::vec3(pos[0], pos[1], pos[2]);
+    }
+    glm::vec3& parseNorm(string& line){
+        float norm[3];
+        int i = -1;
+        delimiter = " ";
+        bool end;
+
+        while (true){
+            ++i;
+            token = bite(delimiter, line, end);
+            if(i < 3)
+                norm[i] = stof(token);
+            if(end)
+                break;
+        }
+        return *new glm::vec3(norm[0], norm[1], norm[2]);
+    }
+    glm::vec2& parseTex(string& line){
+        float norm[2];
+        int i = -1;
+        delimiter = " ";
+        bool end;
+
+        while (true){
+            ++i;
+            token = bite(delimiter, line, end);
+            if(i < 2)
+                norm[i] = stof(token);
+            if(end)
+                break;
+        }
+        return *new glm::vec2(norm[0], norm[1]);
+    }
+    vector<intvec3>& parseIndexes(string& line, int numArgsF){
+        int ind[3];
+        string copyLine = line;
+        bool end;
+        int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
+
+        vector<intvec3>* indexes = new vector<intvec3>;
+
+        //cout << token << " ";
+        while (true){
+            if(numInd == 1){
+                delimiter = " ";
+                token = bite(delimiter, line, end);
+                ind[0] = stoi(token);
+                ind[1] = ind[2] = 0;
+            }
+            if(numInd == 2){
+                delimiter = "/";
+                token = bite(delimiter, line, end);
+                ind[0] = stoi(token);
+                delimiter = " ";
+                token = bite(delimiter, line, end);
+                ind[1] = stoi(token);
+                ind[2] = 0;
+            }
+            if(numInd == 3){
+                delimiter = "/";
+                token = bite(delimiter, line, end);
+                ind[0] = stoi(token);
+                token = bite(delimiter, line, end);
+                ind[1] = stoi(token);
+                delimiter = " ";
+                ind[2] = stoi(token);
+            }
+
+            --numArgsF;
+            indexes->push_back(intvec3(ind[0], ind[1], ind[2]));
+
+            if(numArgsF == 0)
+                break;
+        }
+        return *indexes;
+    }
+    int calcNumArgsDividedBy(string delimiter, string line){
+        int numArgs = 0;
+        string token;
+        bool end;
+
+        while(true){
+            token = bite(delimiter, line, end);
+            ++numArgs;
+            //the tokens are different and end condition is good
+            if(end)
+                break;
+        }
+        return numArgs;
+    }
+    void buildMesh(string& name){
+        Mesh* m = new Mesh(name);
+
+        dividePolygonsToTriangles();
+
+        for(auto& currPolyIndexes : allPolyIndexes){
+            for(auto& indexVec : currPolyIndexes){
+                Vertex v;
+                v.position = poses.at(indexVec.x - 1);
+
+                if(texes.size() != 0)
+                    v.texcoord = texes.at(indexVec.y - 1);
+                else
+                    v.texcoord = glm::vec3(0.f);
+
+                if(norms.size() != 0)
+                    v.normal = norms.at(indexVec.z - 1);
+
+                v.color = glm::vec3(0.f);
+
+                m->vertices->push_back(v);
+                ++m->nVertices;
+            }
+        }
+
+        m->nIndices = 0;
+        mesh = m;
+
+        if(norms.size() == 0){
+            calcNormals();
+        }
+    }
+    void calcNormals(){
+        for(size_t i = 0; i < mesh->vertices->size(); i += 3){
+            glm::vec3 normal;
+            normal = glm::normalize(glm::cross(mesh->vertices->at(i).position - mesh->vertices->at(i+1).position,
+                                               mesh->vertices->at(i+1).position - mesh->vertices->at(i+2).position));
+            if(glm::isnan(normal.x))
+                normal = glm::vec3(0.f);
+
+            mesh->vertices->at(i).normal = normal;
+            mesh->vertices->at(i+1).normal = normal;
+            mesh->vertices->at(i+2).normal = normal;
+        }
+    }
+    void dividePolygonsToTriangles(){
+        vector<intvec3> newPolyIndexes;
+        vector<vector<intvec3>> newAllPolyIndexes;
+        bool isAllTriangles = true;
+        int i;
+        for(auto& currPolyIndexes : allPolyIndexes){
+            if(currPolyIndexes.size() > 3){
+                isAllTriangles = false;
+                i = 1;
+                newPolyIndexes.clear();
+                for(size_t j = 0; j < currPolyIndexes.size() - 2; j++){
+                    newPolyIndexes.push_back(currPolyIndexes.at(0));
+                    newPolyIndexes.push_back(currPolyIndexes.at(i));
+                    newPolyIndexes.push_back(currPolyIndexes.at(i+1));
+                    ++i;
+                }
+                newAllPolyIndexes.push_back(newPolyIndexes);
+            }
+        }
+        if(!isAllTriangles){
+            allPolyIndexes = newAllPolyIndexes;
+        }
     }
 };
 
@@ -396,8 +684,9 @@ public:
 //maybe add BufferList
 class Buffer{
 public:
-    Buffer(Mesh& m){
+    Buffer(Mesh& m, Shader& s){
         mesh = &m;
+        shader= &s;
 
         genBuffers();
     }
@@ -406,17 +695,6 @@ public:
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
         glDeleteVertexArrays(1, &VAO);
-    }
-    void setLayouts(Shader* s){
-        //no need to bind shader here
-        bind();
-
-        s->setLayout("vertex_position", 3, offsetof(Vertex, position));
-        s->setLayout("vertex_color", 3, offsetof(Vertex, color));
-        s->setLayout("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        s->setLayout("vertex_normal", 3, offsetof(Vertex, normal));
-
-        unbind();
     }
     void bind(){
         glBindVertexArray(VAO);
@@ -437,6 +715,7 @@ private:
     GLuint EBO;
 
     Mesh* mesh;
+    Shader* shader;
 
     void initVAO(){
         //init and use vao that works just like vbo and ebo buffers wrapper
@@ -455,10 +734,17 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
     }
+    void setLayouts(){
+        shader->setLayout("vertex_position", 3, offsetof(Vertex, position));
+        shader->setLayout("vertex_color", 3, offsetof(Vertex, color));
+        shader->setLayout("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        shader->setLayout("vertex_normal", 3, offsetof(Vertex, normal));
+    }
     void genBuffers(){
         initVAO();
         initVBO();
         initEBO();
+        setLayouts();
 
         //current vao should be set in while window loop
         unbind();
@@ -646,8 +932,6 @@ class CameraList : public List<Camera>{
 
 class View{
 public:
-    glm::vec3 worldUp;
-
     View(Window& w, MouseListener& ml, Camera& c){
         window = &w;
         mouse = &ml;
@@ -663,8 +947,8 @@ public:
         s->setUniform3fv("cameraPos", glm::value_ptr(camera->position));
     }
     void updateMatrices(){
-        //viewMatrix = glm::mat4(1.f);
         updateCameraPosition();
+        //camera->position + camera->front is camera direction vector
         viewMatrix = glm::lookAt(camera->position, camera->position + camera->front, camera->up);
     }
     void setDefaultEvents(){
@@ -691,6 +975,7 @@ private:
     Camera* camera;
 
     glm::mat4 viewMatrix;
+    glm::vec3 worldUp;
 
     void updateCameraPosition(){
         camera->pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;
@@ -701,9 +986,12 @@ private:
         else if (camera->pitch < -80.f)
             camera->pitch = -80.f;
 
-        if (camera->yaw > 360.f || camera->yaw < -360.f)
-            camera->yaw = 0.f;
+        if(camera->yaw > 360.f || camera->yaw < -360.f){
+            camera->yaw = 0;
+        }
 
+        //hypotenuse = 1, so yaw and pitch projection calculates by cosA = x/h = x, sinA = y
+        //the coefficient is relative cause cos * cos and other projection combinations gives number in range [-1;1]
         camera->front.x = cos(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
         camera->front.y = sin(glm::radians(camera->pitch));
         camera->front.z = sin(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
@@ -771,8 +1059,8 @@ public:
     }
 
     void setDefaultEvents(Window* w){
-        setEvent(w->window, 2, scale -= 0.01f);
-        setEvent(w->window, 1, scale += 0.01f);
+        setEvent(w->window, 2, scale -= 0.1f);
+        setEvent(w->window, 1, scale += 0.1f);
         setEvent(w->window, Z, rotation.y -= 5.f);
         setEvent(w->window, X, rotation.y += 5.f);
     }
@@ -822,7 +1110,6 @@ public:
     }
 };
 
-//TODO: add check if view, perspective and other using the same window
 class Object{
 public:
     Window* window;
@@ -861,24 +1148,27 @@ public:
         position->updateMatrices();
         position->pushToShader(shader);
 
-        position->setDefaultEvents(window);
-
         perspective->updateMatrices();
         perspective->pushToShader(shader);
 
         view->updateMatrices();
         view->pushToShader(shader);
 
-        drawObjectFunction(*this);
+        position->setDefaultEvents(window);
 
         buffer->bind();
+        //buffer->setLayouts(shader);
+
+        drawObjectFunction(*this);
 
         if (byIndices)
             glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
         else
             glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices);
 
+        buffer->unbind();
         shader->unbind();
+        texList->unbindTextures();
     }
     const string& getDrawMeshName(){
         return buffer->getMeshName();
@@ -996,8 +1286,12 @@ void drawFrame(Renderer& r){
 int main (){
     Renderer renderer(700, 1040);
 
+    MeshLoader meshLoader;
+    meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model.obj", "loaded");
+
     MeshList meshList;
     meshList.initDefaultList();
+    meshList.push(*meshLoader.mesh);
 
     ShaderList shaders;
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
@@ -1010,12 +1304,13 @@ int main (){
     LightSourceList lightSources;
     lightSources.push(*new LightSource("default"));
 
-    Buffer buffer(*meshList.list.at(0));
-    buffer.setLayouts(shaders.getByName("default"));
+    Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
+    Buffer buffer1(*meshList.at(1), *shaders.getByName("default"));
 
     renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
-    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
+    renderer.addNewObject(tex, *shaders.getByName("default"), buffer1, lightSources);
     renderer.getObjectByIndex(1)->move(2.f,0,0);
+    renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
