@@ -198,6 +198,8 @@ public:
 
     //make it done
     Mesh& load(string path, string meshName = "noname"){
+        mesh = new Mesh(meshName);
+
         ifstream f;
         f.open(path);
 
@@ -211,7 +213,7 @@ public:
             switchCase = -1;
 
             getline(f, line);
-            removeSideSpaces(line);
+            removeBadSpaces(line);
 
             token = bite(delimiter, line, end);
 
@@ -228,7 +230,6 @@ public:
                 switchCase = 3;
             }
 
-            removeSideSpaces(line);
             switch (switchCase) {
             case -1:
                 break;
@@ -246,7 +247,7 @@ public:
                 break;
             }
         }
-        buildMesh(meshName);
+        buildMesh();
 
         return *mesh;
     }
@@ -263,19 +264,29 @@ private:
     vector<intvec3> indexes;
     vector<vector<intvec3>>* allPolyIndexes;
 
-    void removeSideSpaces(string& line){
+    void removeBadSpaces(string& line){
+        size_t i = -1;
+        while(true){
+            ++i;
+            if(i >= line.size() - 1 || line.size() < 2)
+                break;
+            if(line.at(i) == line.at(i+1) && line.at(i) == ' '){
+                line.erase(line.begin()+i);
+                --i;
+            }
+        }
         if(line.size() == 0)
             return;
 
         while(true){
             if(line.at(line.size()-1) == ' ')
-                line.erase(line.size()-1);
+                line.erase(line.begin() + line.size()-1);
             else
                 break;
         }
         while(true){
             if(line.at(0) == ' ')
-                line.erase(0);
+                line.erase(line.begin());
             else
                 break;
         }
@@ -452,8 +463,7 @@ private:
         delete allPolyIndexes;
         allPolyIndexes = newAllPolyIndexes;
     }
-    void buildMesh(string& name){
-        Mesh* m = new Mesh(name);
+    void buildMesh(){
 
         dividePolygonsToTriangles();
 
@@ -472,13 +482,12 @@ private:
 
                 v.color = glm::vec3(0.f);
 
-                m->vertices->push_back(v);
-                ++m->nVertices;
+                mesh->vertices->push_back(v);
+                ++mesh->nVertices;
             }
         }
 
-        m->nIndices = 0;
-        mesh = m;
+        mesh->nIndices = 0;
 
         if(norms.size() == 0){
             calcNormals();
@@ -1320,22 +1329,19 @@ void drawFrame(Renderer& r){
     currObj->draw(drawObject, false);
 
     static float defaultSpeed = r.view->getCamera().movementSpeed;
-    bool shiftPressed = false;
 
-    setEvent(r.window->window, LEFT_SHIFT, shiftPressed = true);
-    if(shiftPressed){
+    bool isShiftPressed = false;
+    setEvent(r.window->window, LEFT_SHIFT, isShiftPressed = true);
+    if(isShiftPressed)
         r.view->getCamera().movementSpeed = defaultSpeed * 2;
-    }
-    else{
+    else
         r.view->getCamera().movementSpeed = defaultSpeed;
-    }
 }
 
 int main (){
     Renderer renderer(700, 1040);
 
     MeshLoader meshLoader;
-
 
     MeshList meshList;
     //meshList.initDefaultList();
@@ -1361,7 +1367,6 @@ int main (){
     renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
     renderer.getObjectByIndex(1)->move(2.f,0,0);
     renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
-
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
