@@ -156,6 +156,7 @@ class Mesh{
 public:
     vector<Vertex>* vertices;
     vector<GLuint>* indices;
+    vector<int> partIds;
 
     unsigned int nVertices = 0;
     unsigned int nIndices = 0;
@@ -191,25 +192,12 @@ public:
 
 class MeshLoader{
 public:
-    Mesh* mesh;
-
-    vector<glm::vec3> poses;
-    vector<glm::vec3> norms;
-    vector<glm::vec2> texes;
-
-    vector<intvec3> indexes;
-    vector<vector<intvec3>> allPolyIndexes;
-
-    ~MeshLoader(){
-        poses.clear();
-        norms.clear();
-        texes.clear();
-        indexes.clear();
-        allPolyIndexes.clear();
+    MeshLoader(){
+        allPolyIndexes = new vector<vector<intvec3>>;
     }
 
     //make it done
-    void load(string path, string meshName = "noname"){
+    Mesh& load(string path, string meshName = "noname"){
         ifstream f;
         f.open(path);
 
@@ -223,6 +211,7 @@ public:
             switchCase = -1;
 
             getline(f, line);
+            removeSideSpaces(line);
 
             token = bite(delimiter, line, end);
 
@@ -236,10 +225,10 @@ public:
                 switchCase = 2;
             }
             if(token == "f"){
-                delimiter = "/";
                 switchCase = 3;
             }
 
+            removeSideSpaces(line);
             switch (switchCase) {
             case -1:
                 break;
@@ -253,16 +242,44 @@ public:
                 texes.push_back(parseNorm(line));
                 break;
             case 3:
-                allPolyIndexes.push_back(parseIndexes(line, calcNumArgsDividedBy(" ", line)));
+                allPolyIndexes->push_back(parseIndexes(line, calcNumArgsDividedBy(" ", line)));
                 break;
             }
         }
         buildMesh(meshName);
+
+        return *mesh;
     }
 private:
+    Mesh* mesh;
+
     string token;
     string delimiter;
 
+    vector<glm::vec3> poses;
+    vector<glm::vec3> norms;
+    vector<glm::vec2> texes;
+
+    vector<intvec3> indexes;
+    vector<vector<intvec3>>* allPolyIndexes;
+
+    void removeSideSpaces(string& line){
+        if(line.size() == 0)
+            return;
+
+        while(true){
+            if(line.at(line.size()-1) == ' ')
+                line.erase(line.size()-1);
+            else
+                break;
+        }
+        while(true){
+            if(line.at(0) == ' ')
+                line.erase(0);
+            else
+                break;
+        }
+    }
     string& bite(const string& delimiter, string& line, bool& end){
         size_t pos = 0;
         string* token = new string;
@@ -332,6 +349,7 @@ private:
         int ind[3];
         string copyLine = line;
         bool end;
+        delimiter = "/";
         int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
 
         vector<intvec3>* indexes = new vector<intvec3>;
@@ -342,7 +360,7 @@ private:
                 delimiter = " ";
                 token = bite(delimiter, line, end);
                 ind[0] = stoi(token);
-                ind[1] = ind[2] = 0;
+                ind[1] = ind[2] = 1;//very important to set 1
             }
             if(numInd == 2){
                 delimiter = "/";
@@ -350,24 +368,38 @@ private:
                 ind[0] = stoi(token);
                 delimiter = " ";
                 token = bite(delimiter, line, end);
-                ind[1] = stoi(token);
-                ind[2] = 0;
+                if(token != "")
+                    ind[1] = stoi(token);
+                else
+                    ind[1] = 1;
+                ind[2] = 1;
             }
             if(numInd == 3){
                 delimiter = "/";
                 token = bite(delimiter, line, end);
                 ind[0] = stoi(token);
+
                 token = bite(delimiter, line, end);
-                ind[1] = stoi(token);
+                if(token != "")
+                    ind[1] = stoi(token);
+                else
+                    ind[1] = 1;
+
                 delimiter = " ";
-                ind[2] = stoi(token);
+                token = bite(delimiter, line, end);
+                if(token != "")
+                    ind[2] = stoi(token);
+                else
+                    ind[2] = 1;
             }
 
             --numArgsF;
             indexes->push_back(intvec3(ind[0], ind[1], ind[2]));
 
-            if(numArgsF == 0)
+            if(numArgsF == 0){
+
                 break;
+            }
         }
         return *indexes;
     }
@@ -379,18 +411,53 @@ private:
         while(true){
             token = bite(delimiter, line, end);
             ++numArgs;
-            //the tokens are different and end condition is good
             if(end)
                 break;
         }
         return numArgs;
+    }
+    void calcNormals(){
+        for(size_t i = 0; i < mesh->vertices->size(); i += 3){
+            glm::vec3 normal;
+            normal = glm::normalize(glm::cross(mesh->vertices->at(i).position - mesh->vertices->at(i+1).position,
+                                               mesh->vertices->at(i+1).position - mesh->vertices->at(i+2).position));
+            if(glm::isnan(normal.x))
+                normal = glm::vec3(0.f);
+
+            mesh->vertices->at(i).normal = normal;
+            mesh->vertices->at(i+1).normal = normal;
+            mesh->vertices->at(i+2).normal = normal;
+        }
+    }
+    void dividePolygonsToTriangles(){
+        vector<intvec3> newPolyIndexes;
+        vector<vector<intvec3>>* newAllPolyIndexes = new vector<vector<intvec3>>;
+        int i;
+        for(auto& currPolyIndexes : *allPolyIndexes){
+            newPolyIndexes.clear();
+            if(currPolyIndexes.size() > 3){
+                i = 1;
+                for(size_t j = 0; j < currPolyIndexes.size() - 2; j++){
+                    newPolyIndexes.push_back(currPolyIndexes.at(0));
+                    newPolyIndexes.push_back(currPolyIndexes.at(i));
+                    newPolyIndexes.push_back(currPolyIndexes.at(i+1));
+                    ++i;
+                }
+                newAllPolyIndexes->push_back(newPolyIndexes);
+            }
+            else
+                newAllPolyIndexes->push_back(currPolyIndexes);
+        }
+
+        delete allPolyIndexes;
+        allPolyIndexes = newAllPolyIndexes;
     }
     void buildMesh(string& name){
         Mesh* m = new Mesh(name);
 
         dividePolygonsToTriangles();
 
-        for(auto& currPolyIndexes : allPolyIndexes){
+        for(auto& currPolyIndexes : *allPolyIndexes){
             for(auto& indexVec : currPolyIndexes){
                 Vertex v;
                 v.position = poses.at(indexVec.x - 1);
@@ -416,42 +483,15 @@ private:
         if(norms.size() == 0){
             calcNormals();
         }
-    }
-    void calcNormals(){
-        for(size_t i = 0; i < mesh->vertices->size(); i += 3){
-            glm::vec3 normal;
-            normal = glm::normalize(glm::cross(mesh->vertices->at(i).position - mesh->vertices->at(i+1).position,
-                                               mesh->vertices->at(i+1).position - mesh->vertices->at(i+2).position));
-            if(glm::isnan(normal.x))
-                normal = glm::vec3(0.f);
 
-            mesh->vertices->at(i).normal = normal;
-            mesh->vertices->at(i+1).normal = normal;
-            mesh->vertices->at(i+2).normal = normal;
-        }
+        clean();
     }
-    void dividePolygonsToTriangles(){
-        vector<intvec3> newPolyIndexes;
-        vector<vector<intvec3>> newAllPolyIndexes;
-        bool isAllTriangles = true;
-        int i;
-        for(auto& currPolyIndexes : allPolyIndexes){
-            if(currPolyIndexes.size() > 3){
-                isAllTriangles = false;
-                i = 1;
-                newPolyIndexes.clear();
-                for(size_t j = 0; j < currPolyIndexes.size() - 2; j++){
-                    newPolyIndexes.push_back(currPolyIndexes.at(0));
-                    newPolyIndexes.push_back(currPolyIndexes.at(i));
-                    newPolyIndexes.push_back(currPolyIndexes.at(i+1));
-                    ++i;
-                }
-                newAllPolyIndexes.push_back(newPolyIndexes);
-            }
-        }
-        if(!isAllTriangles){
-            allPolyIndexes = newAllPolyIndexes;
-        }
+    void clean(){
+        poses.clear();
+        norms.clear();
+        texes.clear();
+        indexes.clear();
+        allPolyIndexes->clear();
     }
 };
 
@@ -943,6 +983,7 @@ public:
     }
 
     void pushToShader(Shader* s){
+        updateMatrices();
         s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
         s->setUniform3fv("cameraPos", glm::value_ptr(camera->position));
     }
@@ -1015,6 +1056,7 @@ public:
     }
 
     void pushToShader(Shader* s){
+        updateMatrices();
         s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
     }
     void updateMatrices(){
@@ -1047,6 +1089,7 @@ public:
     }
 
     void pushToShader(Shader* s){
+        updateMatrices();
         s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
     }
     void updateMatrices(){
@@ -1145,19 +1188,13 @@ public:
     void draw(void (*drawObjectFunction)(Object&), bool byIndices = true){
         shader->bind();
 
-        position->updateMatrices();
         position->pushToShader(shader);
-
-        perspective->updateMatrices();
         perspective->pushToShader(shader);
-
-        view->updateMatrices();
         view->pushToShader(shader);
 
         position->setDefaultEvents(window);
 
         buffer->bind();
-        //buffer->setLayouts(shader);
 
         drawObjectFunction(*this);
 
@@ -1281,17 +1318,29 @@ void drawFrame(Renderer& r){
 
     currObj = r.getObjectByIndex(1);
     currObj->draw(drawObject, false);
+
+    static float defaultSpeed = r.view->getCamera().movementSpeed;
+    bool shiftPressed = false;
+
+    setEvent(r.window->window, LEFT_SHIFT, shiftPressed = true);
+    if(shiftPressed){
+        r.view->getCamera().movementSpeed = defaultSpeed * 2;
+    }
+    else{
+        r.view->getCamera().movementSpeed = defaultSpeed;
+    }
 }
 
 int main (){
     Renderer renderer(700, 1040);
 
     MeshLoader meshLoader;
-    meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model.obj", "loaded");
+
 
     MeshList meshList;
-    meshList.initDefaultList();
-    meshList.push(*meshLoader.mesh);
+    //meshList.initDefaultList();
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_star.obj", "loaded1"));
 
     ShaderList shaders;
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
@@ -1309,8 +1358,10 @@ int main (){
 
     renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
     renderer.addNewObject(tex, *shaders.getByName("default"), buffer1, lightSources);
+    renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
     renderer.getObjectByIndex(1)->move(2.f,0,0);
     renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
