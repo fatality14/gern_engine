@@ -49,6 +49,10 @@ class List{
 public:
     //add check for repeating names in list
     vector<T*> list;
+
+    size_t size(){
+        return list.size();
+    }
     void push(T& m){
         list.push_back(&m);
     }
@@ -156,7 +160,7 @@ class Mesh{
 public:
     vector<Vertex>* vertices;
     vector<GLuint>* indices;
-    vector<int> partIds;
+    vector<int> partEndVertexIds;
 
     unsigned int nVertices = 0;
     unsigned int nIndices = 0;
@@ -196,7 +200,9 @@ public:
         allPolyIndexes = new vector<vector<intvec3>>;
     }
 
-    //make it done
+    //TODO:
+    //need to load mesh pieces indexes and do something with texture loading
+    //class Object should call drawArrays method for current binded textures
     Mesh& load(string path, string meshName = "noname"){
         mesh = new Mesh(meshName);
 
@@ -208,16 +214,23 @@ public:
         int switchCase;
         bool end;
 
+        bool next = false;
+        int lastPolyId = -1;
+
         while(!f.eof()){
-            delimiter = " ";
             switchCase = -1;
 
             getline(f, line);
             removeBadSpaces(line);
 
-            token = bite(delimiter, line, end);
+            token = bite(" ", line, end);
 
             if(token == "v"){
+                if(next){
+                    lastPolyIds.push_back(lastPolyId);
+                    next = false;
+                }
+                //lastPolyId = -1;
                 switchCase = 0;
             }
             if(token == "vn"){
@@ -227,7 +240,9 @@ public:
                 switchCase = 2;
             }
             if(token == "f"){
+                ++lastPolyId;
                 switchCase = 3;
+                next = true;
             }
 
             switch (switchCase) {
@@ -247,6 +262,10 @@ public:
                 break;
             }
         }
+
+        if(next == true){
+            lastPolyIds.push_back(lastPolyId);
+        }
         buildMesh();
 
         return *mesh;
@@ -255,7 +274,6 @@ private:
     Mesh* mesh;
 
     string token;
-    string delimiter;
 
     vector<glm::vec3> poses;
     vector<glm::vec3> norms;
@@ -263,6 +281,8 @@ private:
 
     vector<intvec3> indexes;
     vector<vector<intvec3>>* allPolyIndexes;
+
+    vector<int> lastPolyIds;
 
     void removeBadSpaces(string& line){
         size_t i = -1;
@@ -311,12 +331,11 @@ private:
     glm::vec3& parsePos(string& line){
         float pos[3];
         int i = -1;
-        delimiter = " ";
         bool end;
 
         while (true){
             ++i;
-            token = bite(delimiter, line, end);
+            token = bite(" ", line, end);
             if(i < 3)
                 pos[i] = stof(token);
             if(end)
@@ -327,12 +346,11 @@ private:
     glm::vec3& parseNorm(string& line){
         float norm[3];
         int i = -1;
-        delimiter = " ";
         bool end;
 
         while (true){
             ++i;
-            token = bite(delimiter, line, end);
+            token = bite(" ", line, end);
             if(i < 3)
                 norm[i] = stof(token);
             if(end)
@@ -343,12 +361,11 @@ private:
     glm::vec2& parseTex(string& line){
         float norm[2];
         int i = -1;
-        delimiter = " ";
         bool end;
 
         while (true){
             ++i;
-            token = bite(delimiter, line, end);
+            token = bite(" ", line, end);
             if(i < 2)
                 norm[i] = stof(token);
             if(end)
@@ -360,7 +377,7 @@ private:
         int ind[3];
         string copyLine = line;
         bool end;
-        delimiter = "/";
+        string delimiter = "/";
         int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
 
         vector<intvec3>* indexes = new vector<intvec3>;
@@ -408,7 +425,6 @@ private:
             indexes->push_back(intvec3(ind[0], ind[1], ind[2]));
 
             if(numArgsF == 0){
-
                 break;
             }
         }
@@ -456,16 +472,28 @@ private:
                 }
                 newAllPolyIndexes->push_back(newPolyIndexes);
             }
-            else
+            else{
                 newAllPolyIndexes->push_back(currPolyIndexes);
+            }
         }
 
         delete allPolyIndexes;
         allPolyIndexes = newAllPolyIndexes;
     }
     void buildMesh(){
-
         dividePolygonsToTriangles();
+
+        int startFrom = 0;
+        for(size_t i = 0; i < lastPolyIds.size(); ++i){
+            if(mesh->partEndVertexIds.size() > 0)
+                mesh->partEndVertexIds.push_back(mesh->partEndVertexIds.at(i-1));
+            else
+                mesh->partEndVertexIds.push_back(0);
+            for(int j = startFrom; j < lastPolyIds.at(i)+1; ++j){
+                    mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
+            }
+            startFrom = lastPolyIds.at(i)+1;
+        }
 
         for(auto& currPolyIndexes : *allPolyIndexes){
             for(auto& indexVec : currPolyIndexes){
@@ -501,6 +529,7 @@ private:
         texes.clear();
         indexes.clear();
         allPolyIndexes->clear();
+        lastPolyIds.clear();
     }
 };
 
@@ -856,22 +885,39 @@ private:
     }
 };
 
-class TextureList : List<Texture>{
+struct TextureLayout{
+    void pushTexture(GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
+        GL_ENUM_nS.push_back(GL_TEXTURE_n);
+        ns.push_back(n);
+        textureIndexes.push_back(textureIndex);
+        uniformNames.push_back(uniformName);
+        ++layoutSize;
+    }
+
+    int layoutSize = 0;
+    vector<GLenum> GL_ENUM_nS;
+    vector<size_t> ns;
+    vector<GLint> textureIndexes;
+    vector<string> uniformNames;
+};
+
+class TextureList : public List<Texture>{
 public:
     void pushNew(string path){
         Texture* t = new Texture(path);
         list.push_back(t);
         unbindTextures();
     }
-    void bindTextureByIndex(Shader* shader, GLenum GL_TEXTURE_n, GLint textureIndex, string uniformName){
-        shader->setUniform1i(uniformName, textureIndex);
+    //GLenum GL_TEXTURE_n, GLint textureNum - unite using define
+    void bindTextureByIndex(Shader* shader, GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
+        shader->setUniform1i(uniformName, n);
 
         //use texture
         glActiveTexture(GL_TEXTURE_n);
         glBindTexture(GL_TEXTURE_2D, list.at(textureIndex)->textureId);
     }
-    void bindTextureByName(Shader* shader, GLenum GL_TEXTURE_n, GLint textureNum, string uniformName, string path){
-        shader->setUniform1i(uniformName, textureNum);
+    void bindTextureByName(Shader* shader, GLenum GL_TEXTURE_n, GLint n, string uniformName, string path){
+        shader->setUniform1i(uniformName, n);
 
         //use texture
         glActiveTexture(GL_TEXTURE_n);
@@ -881,6 +927,29 @@ public:
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+    void appendTextureToLayout(size_t layoutId, GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
+        texLayouts.at(layoutId).pushTexture(GL_TEXTURE_n, n, textureIndex, uniformName);
+    }
+    void addLayouts(int amount){
+        for(int i = 0; i < amount; ++i){
+            texLayouts.push_back(TextureLayout());
+        }
+    }
+    void bindLayout(size_t layoutId, Shader* shader){
+        TextureLayout* currLayout = &texLayouts.at(layoutId);
+        for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){
+            bindTextureByIndex(shader, currLayout->GL_ENUM_nS.at(i),
+                               currLayout->ns.at(i),
+                               currLayout->textureIndexes.at(i),
+                               currLayout->uniformNames.at(i));
+        }
+    }
+    size_t texLayoutsAmount(){
+        return texLayouts.size();
+    }
+private:
+    vector<TextureLayout> texLayouts;
 };
 
 class MouseListener{
@@ -1194,7 +1263,7 @@ public:
         position = new Position();
     }
 
-    void draw(void (*drawObjectFunction)(Object&), bool byIndices = true){
+    void draw(void (*drawObjectFunction)(Object&)){
         shader->bind();
 
         position->pushToShader(shader);
@@ -1207,10 +1276,33 @@ public:
 
         drawObjectFunction(*this);
 
-        if (byIndices)
+        if (buffer->getMesh().nIndices != 0)
             glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
-        else
-            glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices);
+        else{
+            Mesh* currMesh = &buffer->getMesh();
+            //cout << "Draw mesh: " << currMesh->name << endl;
+            int startFrom = 0;
+            bool first = true;
+            size_t textureI = 0;
+            for(size_t i = 0; i < currMesh->partEndVertexIds.size(); ++i){
+                if(textureI == texList->texLayoutsAmount()){
+                    textureI = 0;
+                }
+                texList->bindLayout(textureI, shader);
+                ++textureI;
+
+                if(first){
+                    //cout << "Draw " << i << " part." << endl;
+                    first = false;
+                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i));
+                }
+                else{
+                    //cout << "Draw " << i << " part." << endl;
+                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
+                    startFrom = currMesh->partEndVertexIds.at(i);
+                }
+            }
+        }
 
         buffer->unbind();
         shader->unbind();
@@ -1312,8 +1404,9 @@ private:
 
 void drawObject(Object& o){
     //TODO: #define bindTextureByIndex
-    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE0, 0, "texture0");
-    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE1, 1, "specularTex");
+//    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE0, 0, 2, "texture0");
+//    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE1, 1, 3, "specularTex");
+    //o.texList->bindLayout(1, o.shader);
 
     o.lightSources->pushToShader(o.shader, 0, "lightPos0");
 
@@ -1323,10 +1416,10 @@ void drawObject(Object& o){
 }
 void drawFrame(Renderer& r){
     Object* currObj = r.getObjectByIndex(0);
-    currObj->draw(drawObject, false);
+    currObj->draw(drawObject);
 
     currObj = r.getObjectByIndex(1);
-    currObj->draw(drawObject, false);
+    currObj->draw(drawObject);
 
     static float defaultSpeed = r.view->getCamera().movementSpeed;
 
@@ -1339,36 +1432,56 @@ void drawFrame(Renderer& r){
 }
 
 int main (){
-    Renderer renderer(700, 1040);
+    bool test = false;
+    if(test){
+        MeshLoader meshLoader;
 
-    MeshLoader meshLoader;
+        MeshList meshList;
+        //meshList.initDefaultList();
+        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_star.obj", "loaded"));
+        //meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_test.obj", "loaded1"));
+    }
+    else{
+        Renderer renderer(700, 1040);
 
-    MeshList meshList;
-    //meshList.initDefaultList();
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_star.obj", "loaded1"));
+        MeshLoader meshLoader;
 
-    ShaderList shaders;
-    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
+        MeshList meshList;
+        //meshList.initDefaultList();
+        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
+        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_phone.obj", "loaded1"));
 
-    TextureList tex;
-    tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");
-    tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");
+        ShaderList shaders;
+        shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
 
-    //TODO: add events to light sources
-    LightSourceList lightSources;
-    lightSources.push(*new LightSource("default"));
+        TextureList tex;
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii.png");//2
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii1.png");//3
 
-    Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
-    Buffer buffer1(*meshList.at(1), *shaders.getByName("default"));
+        tex.addLayouts(2);
+        tex.appendTextureToLayout(0, GL_TEXTURE0, 0, 0, "texture0");
+        tex.appendTextureToLayout(0, GL_TEXTURE1, 1, 1, "specularTex");
 
-    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
-    renderer.addNewObject(tex, *shaders.getByName("default"), buffer1, lightSources);
-    renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
-    renderer.getObjectByIndex(1)->move(2.f,0,0);
-    renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+        tex.appendTextureToLayout(1, GL_TEXTURE0, 0, 2, "texture0");
+        tex.appendTextureToLayout(1, GL_TEXTURE1, 1, 3, "specularTex");
 
-    renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
-    renderer.render(drawFrame);
+        //TODO: add events to light sources
+        LightSourceList lightSources;
+        lightSources.push(*new LightSource("default"));
+
+        Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
+        Buffer buffer1(*meshList.at(1), *shaders.getByName("default"));
+
+        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
+        renderer.addNewObject(tex, *shaders.getByName("default"), buffer1, lightSources);
+        renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
+        renderer.getObjectByIndex(1)->move(2.f,0,0);
+        renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+
+        renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
+        renderer.render(drawFrame);
+    }
     return 0;
 }
