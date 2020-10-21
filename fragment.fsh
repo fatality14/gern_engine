@@ -13,21 +13,32 @@ uniform sampler2D specularTex;
 uniform vec3 lightPos0;
 uniform vec3 cameraPos;
 
+struct Material{
+    vec3 ambientColor;
+    vec3 diffuseColor;
+    vec3 specularColor;
+
+    float specularHighlights;
+    float opticalDensity;
+    float dissolve;
+};
+
+uniform Material material;
+
 void main()
 {
-    vec3 ambientLight = vec3(0.01f, 0.01f, 0.01f);
-
     vec3 posToLightDirVec = normalize(lightPos0 - vs_position);
-    vec3 diffuseColor = vec3(1.f, 1.f, 1.f);
     float diffuse = dot(posToLightDirVec, normalize(vs_normal));
-    vec3 diffuseFinal = diffuseColor * diffuse;
+    vec3 diffuseFinal = material.diffuseColor * diffuse;
 
     vec3 lightToPosDirVec = normalize(vs_position - lightPos0);
     vec3 reflectDirVec = normalize(reflect(lightToPosDirVec, normalize(vs_normal)));
     vec3 posToViewDirVec = normalize(cameraPos - vs_position);
     float specularConstant = pow(max(dot(posToViewDirVec, reflectDirVec), 0), 30);
-    vec3 specularFinal = vec3(1.f, 1.f, 1.f) * specularConstant * texture(specularTex, vs_texcoord).rgb;
+    vec3 specularFinal = material.specularColor * specularConstant * texture(specularTex, vs_texcoord).rgb;
 
-    fs_color = texture(texture0, vs_texcoord) * /*vec4(vs_color, 1.f) **/
-                      (vec4(ambientLight, 1.f) + vec4(diffuseFinal, 1.f) + vec4(specularFinal, 1.f));
+    vec4 tex = texture(texture0, vs_texcoord);
+    vec3 lightning = (material.ambientColor + diffuseFinal + specularFinal) * 1/length(lightPos0 - vs_position) * 5 * vec3(0.788f, 0.584f, 0.725f);
+
+    fs_color = tex * vec4(lightning, 1.f);
 }
