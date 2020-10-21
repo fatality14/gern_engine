@@ -22,7 +22,6 @@ using namespace std;
         Code;\
     }\
 
-
 //TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes needed to contain data, rename classes or smth else
 struct Vertex{
@@ -200,9 +199,6 @@ public:
         allPolyIndexes = new vector<vector<intvec3>>;
     }
 
-    //TODO:
-    //need to load mesh pieces indexes and do something with texture loading
-    //class Object should call drawArrays method for current binded textures
     Mesh& load(string path, string meshName = "noname"){
         mesh = new Mesh(meshName);
 
@@ -624,7 +620,7 @@ public:
     void unbind(){
         glUseProgram(0);
     }
-    void setLayout(string layoutName, int vecSize, size_t offset){
+    void setVertexAttribPointer(string layoutName, int vecSize, size_t offset){
         //we set the format of data reading below
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
@@ -636,8 +632,11 @@ public:
     void setUniform3fv(string uniformName, const GLfloat* value){
         glUniform3fv(glGetUniformLocation(program, uniformName.data()), 1, value);
     }
-    void setUniform1i(string uniformName, GLint location){
-        glUniform1i(glGetUniformLocation(program, uniformName.data()), location);
+    void setUniform1i(string uniformName, GLint value){
+        glUniform1i(glGetUniformLocation(program, uniformName.data()), value);
+    }
+    void setUniform1f(string uniformName, GLfloat value){
+        glUniform1f(glGetUniformLocation(program, uniformName.data()), value);
     }
 private:
     GLuint vertexShader;
@@ -813,10 +812,10 @@ private:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
     }
     void setLayouts(){
-        shader->setLayout("vertex_position", 3, offsetof(Vertex, position));
-        shader->setLayout("vertex_color", 3, offsetof(Vertex, color));
-        shader->setLayout("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setLayout("vertex_normal", 3, offsetof(Vertex, normal));
+        shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
+        shader->setVertexAttribPointer("vertex_color", 3, offsetof(Vertex, color));
+        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
     }
     void genBuffers(){
         initVAO();
@@ -834,6 +833,9 @@ public:
     GLuint textureId;
     string name; //same as path
 
+    Texture(){
+
+    }
     Texture(string path){
         name = path;
 
@@ -843,12 +845,6 @@ public:
     ~Texture(){
         glDeleteTextures(1, &textureId);
     }
-
-private:
-    int image_width;
-    int image_height;
-
-    unsigned char* image;
 
     void loadTexture(){
         //load image
@@ -862,6 +858,15 @@ private:
         //free space
         SOIL_free_image_data(image);
     }
+    void setPath(string path){
+        this->name = path;
+    }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
+
     void initTexture(){
         //init and active texture
         glGenTextures(1, &textureId);
@@ -886,8 +891,7 @@ private:
 };
 
 struct TextureLayout{
-    void pushTexture(GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
-        GL_ENUM_nS.push_back(GL_TEXTURE_n);
+    void pushTexture(GLint n, size_t textureIndex, string uniformName){
         ns.push_back(n);
         textureIndexes.push_back(textureIndex);
         uniformNames.push_back(uniformName);
@@ -895,9 +899,8 @@ struct TextureLayout{
     }
 
     int layoutSize = 0;
-    vector<GLenum> GL_ENUM_nS;
-    vector<size_t> ns;
-    vector<GLint> textureIndexes;
+    vector<GLint> ns;
+    vector<size_t> textureIndexes;
     vector<string> uniformNames;
 };
 
@@ -908,28 +911,27 @@ public:
         list.push_back(t);
         unbindTextures();
     }
-    //GLenum GL_TEXTURE_n, GLint textureNum - unite using define
-    void bindTextureByIndex(Shader* shader, GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
+    void bindTextureByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
         shader->setUniform1i(uniformName, n);
 
         //use texture
-        glActiveTexture(GL_TEXTURE_n);
+        activeTexture(n);
         glBindTexture(GL_TEXTURE_2D, list.at(textureIndex)->textureId);
     }
-    void bindTextureByName(Shader* shader, GLenum GL_TEXTURE_n, GLint n, string uniformName, string path){
-        shader->setUniform1i(uniformName, n);
+//    void bindTextureByName(Shader* shader, GLenum GL_TEXTUREn, GLint n, string uniformName, string path){
+//        shader->setUniform1i(uniformName, n);
 
-        //use texture
-        glActiveTexture(GL_TEXTURE_n);
-        glBindTexture(GL_TEXTURE_2D, getByName(path)->textureId);
-    }
+//        //use texture
+//        glActiveTexture(GL_TEXTUREn);
+//        glBindTexture(GL_TEXTURE_2D, getByName(path)->textureId);
+//    }
     void unbindTextures(){
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void appendTextureToLayout(size_t layoutId, GLenum GL_TEXTURE_n, GLint n, size_t textureIndex, string uniformName){
-        texLayouts.at(layoutId).pushTexture(GL_TEXTURE_n, n, textureIndex, uniformName);
+    void appendTextureToLayout(size_t layoutId, GLint n, size_t textureIndex, string uniformName){
+        texLayouts.at(layoutId).pushTexture(n, textureIndex, uniformName);
     }
     void addLayouts(int amount){
         for(int i = 0; i < amount; ++i){
@@ -939,7 +941,7 @@ public:
     void bindLayout(size_t layoutId, Shader* shader){
         TextureLayout* currLayout = &texLayouts.at(layoutId);
         for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){
-            bindTextureByIndex(shader, currLayout->GL_ENUM_nS.at(i),
+            bindTextureByIndex(shader,
                                currLayout->ns.at(i),
                                currLayout->textureIndexes.at(i),
                                currLayout->uniformNames.at(i));
@@ -950,6 +952,107 @@ public:
     }
 private:
     vector<TextureLayout> texLayouts;
+
+    void activeTexture(GLint n){
+        switch (n) {
+        case 0:
+            glActiveTexture(GL_TEXTURE0);
+            break;
+        case 1:
+            glActiveTexture(GL_TEXTURE1);
+            break;
+        case 2:
+            glActiveTexture(GL_TEXTURE2);
+            break;
+        case 3:
+            glActiveTexture(GL_TEXTURE3);
+            break;
+        case 4:
+            glActiveTexture(GL_TEXTURE4);
+            break;
+        case 5:
+            glActiveTexture(GL_TEXTURE5);
+            break;
+        case 6:
+            glActiveTexture(GL_TEXTURE6);
+            break;
+        case 7:
+            glActiveTexture(GL_TEXTURE7);
+            break;
+        case 8:
+            glActiveTexture(GL_TEXTURE8);
+            break;
+        case 9:
+            glActiveTexture(GL_TEXTURE9);
+            break;
+        case 10:
+            glActiveTexture(GL_TEXTURE10);
+            break;
+        case 11:
+            glActiveTexture(GL_TEXTURE11);
+            break;
+        case 12:
+            glActiveTexture(GL_TEXTURE12);
+            break;
+        case 13:
+            glActiveTexture(GL_TEXTURE13);
+            break;
+        case 14:
+            glActiveTexture(GL_TEXTURE14);
+            break;
+        case 15:
+            glActiveTexture(GL_TEXTURE15);
+            break;
+        case 16:
+            glActiveTexture(GL_TEXTURE16);
+            break;
+        case 17:
+            glActiveTexture(GL_TEXTURE17);
+            break;
+        case 18:
+            glActiveTexture(GL_TEXTURE18);
+            break;
+        case 19:
+            glActiveTexture(GL_TEXTURE19);
+            break;
+        case 20:
+            glActiveTexture(GL_TEXTURE20);
+            break;
+        case 21:
+            glActiveTexture(GL_TEXTURE21);
+            break;
+        case 22:
+            glActiveTexture(GL_TEXTURE22);
+            break;
+        case 23:
+            glActiveTexture(GL_TEXTURE23);
+            break;
+        case 24:
+            glActiveTexture(GL_TEXTURE24);
+            break;
+        case 25:
+            glActiveTexture(GL_TEXTURE25);
+            break;
+        case 26:
+            glActiveTexture(GL_TEXTURE26);
+            break;
+        case 27:
+            glActiveTexture(GL_TEXTURE27);
+            break;
+        case 28:
+            glActiveTexture(GL_TEXTURE28);
+            break;
+        case 29:
+            glActiveTexture(GL_TEXTURE29);
+            break;
+        case 30:
+            glActiveTexture(GL_TEXTURE30);
+            break;
+        case 31:
+            glActiveTexture(GL_TEXTURE31);
+            break;
+        }
+    }
 };
 
 class MouseListener{
@@ -1231,6 +1334,49 @@ public:
     }
 };
 
+class Material{
+public:
+    void pushToShader(Shader* s, string uniformName){
+        s->setUniform3fv(uniformName + ".ambientColor", glm::value_ptr(ambientColor));
+        s->setUniform3fv(uniformName + ".diffuseColor", glm::value_ptr(diffuseColor));
+        s->setUniform3fv(uniformName + ".specularColor", glm::value_ptr(specularColor));
+
+        s->setUniform1f(uniformName + ".specularHighlights", specularHighlights);
+        s->setUniform1f(uniformName + ".opticalDensity", opticalDensity);
+        s->setUniform1f(uniformName + ".dissolve", dissolve);
+    }
+
+    void setAmbientColor(float r, float g, float b){
+        ambientColor = glm::vec3(r,g,b);
+    }
+    void setDiffuseColor(float r, float g, float b){
+        diffuseColor = glm::vec3(r,g,b);
+    }
+    void setSpecularColor(float r, float g, float b){
+        specularColor = glm::vec3(r,g,b);
+    }
+    void setSpecularHighlights(float specularHighlights){
+        this->specularHighlights = specularHighlights;
+    }
+
+    void setOticalDensity(float density){
+        opticalDensity = density;
+    }
+    void setDissolve(float dissolve){
+        this->dissolve = dissolve;
+    }
+private:
+    glm::vec3 ambientColor = glm::vec3(1.f);
+    glm::vec3 diffuseColor = glm::vec3(1.f);
+    glm::vec3 specularColor = glm::vec3(1.f);
+
+    float specularHighlights = 1.f;
+    float opticalDensity = 1.f;
+    float dissolve = 1.f;
+
+    //Texture* colorTexture;
+};
+
 class Object{
 public:
     Window* window;
@@ -1241,10 +1387,16 @@ public:
     View* view;
     Perspective* perspective;
     LightSourceList* lightSources;
+    Material* material;
 
     string name;
 
-    Object(Window& w, TextureList& t, Shader& s, Buffer& b, Perspective& p, View& v, LightSourceList& lsl, string name = "noname"){
+    Object(Window& w, TextureList& t,
+           Shader& s, Buffer& b,
+           Perspective& p, View& v,
+           LightSourceList& lsl, Material& m,
+           string name = "noname")
+    {
         if (w.window != p.getWindowPtr().window || p.getWindowPtr().window != v.getWindowPtr().window){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";
@@ -1258,6 +1410,7 @@ public:
         perspective = &p;
         view = &v;
         lightSources = &lsl;
+        material = &m;
         this->name = name;
 
         position = new Position();
@@ -1266,9 +1419,11 @@ public:
     void draw(void (*drawObjectFunction)(Object&)){
         shader->bind();
 
+        //make positionm, perspective and view push like material push
         position->pushToShader(shader);
         perspective->pushToShader(shader);
         view->pushToShader(shader);
+        material->pushToShader(shader, "material");
 
         position->setDefaultEvents(window);
 
@@ -1350,8 +1505,8 @@ public:
         objects = new Objects;
     }
 
-    void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl){
-        Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl);
+    void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl, Material& m){
+        Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl, m);
         objects->push(*o);
     }
     Object* getObjectByIndex(unsigned int index){
@@ -1404,8 +1559,6 @@ private:
 
 void drawObject(Object& o){
     //TODO: #define bindTextureByIndex
-//    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE0, 0, 2, "texture0");
-//    o.texList->bindTextureByIndex(o.shader, GL_TEXTURE1, 1, 3, "specularTex");
     //o.texList->bindLayout(1, o.shader);
 
     o.lightSources->pushToShader(o.shader, 0, "lightPos0");
@@ -1425,10 +1578,17 @@ void drawFrame(Renderer& r){
 
     bool isShiftPressed = false;
     setEvent(r.window->window, LEFT_SHIFT, isShiftPressed = true);
-    if(isShiftPressed)
+    if(isShiftPressed){
         r.view->getCamera().movementSpeed = defaultSpeed * 2;
-    else
+    }
+    bool isCtrlPressed = false;
+    setEvent(r.window->window, LEFT_CONTROL, isCtrlPressed = true);
+    if(isCtrlPressed){
+        r.view->getCamera().movementSpeed = defaultSpeed / 3;
+    }
+    if(!isShiftPressed && !isCtrlPressed){
         r.view->getCamera().movementSpeed = defaultSpeed;
+    }
 }
 
 int main (){
@@ -1455,17 +1615,19 @@ int main (){
         shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
 
         TextureList tex;
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii.png");//2
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii1.png");//3
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/screen.jpg");//0
+        //tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
+        tex.addLayouts(1);
+        tex.appendTextureToLayout(0, 0, 0, "texture0");
+        //tex.appendTextureToLayout(0, GL_TEXTURE1, 1, 1, "specularTex");
 
-        tex.addLayouts(2);
-        tex.appendTextureToLayout(0, GL_TEXTURE0, 0, 0, "texture0");
-        tex.appendTextureToLayout(0, GL_TEXTURE1, 1, 1, "specularTex");
+        TextureList tex1;
+        tex1.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
+        tex1.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii.png");//1
 
-        tex.appendTextureToLayout(1, GL_TEXTURE0, 0, 2, "texture0");
-        tex.appendTextureToLayout(1, GL_TEXTURE1, 1, 3, "specularTex");
+        tex1.addLayouts(1);
+        tex1.appendTextureToLayout(0, 0, 0, "texture0");
+        tex1.appendTextureToLayout(0, 1, 1, "specularTex");
 
         //TODO: add events to light sources
         LightSourceList lightSources;
@@ -1474,8 +1636,11 @@ int main (){
         Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
         Buffer buffer1(*meshList.at(1), *shaders.getByName("default"));
 
-        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources);
-        renderer.addNewObject(tex, *shaders.getByName("default"), buffer1, lightSources);
+        Material mat;
+        mat.setAmbientColor(0.01f,0.01f,0.01f);
+
+        renderer.addNewObject(tex1, *shaders.getByName("default"), buffer, lightSources, mat);
+        renderer.addNewObject(tex1, *shaders.getByName("default"), buffer1, lightSources, mat);
         renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
         renderer.getObjectByIndex(1)->move(2.f,0,0);
         renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
