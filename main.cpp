@@ -1283,8 +1283,8 @@ public:
     }
 
     void setDefaultEvents(Window* w){
-        setEvent(w->window, 2, scale -= 0.1f);
-        setEvent(w->window, 1, scale += 0.1f);
+        setEvent(w->window, 2, scale -= 0.01f);
+        setEvent(w->window, 1, scale += 0.01f);
         setEvent(w->window, Z, rotation.y -= 5.f);
         setEvent(w->window, X, rotation.y += 5.f);
     }
@@ -1607,40 +1607,32 @@ int main (){
         MeshLoader meshLoader;
 
         MeshList meshList;
-        //meshList.initDefaultList();
         meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
-        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_phone.obj", "loaded1"));
+        //meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_phone.obj", "loaded1"));
 
         ShaderList shaders;
         shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
 
         TextureList tex;
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/screen.jpg");//0
-        //tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
+        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
+
         tex.addLayouts(1);
         tex.appendTextureToLayout(0, 0, 0, "texture0");
-        //tex.appendTextureToLayout(0, GL_TEXTURE1, 1, 1, "specularTex");
-
-        TextureList tex1;
-        tex1.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
-        tex1.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/ii.png");//1
-
-        tex1.addLayouts(1);
-        tex1.appendTextureToLayout(0, 0, 0, "texture0");
-        tex1.appendTextureToLayout(0, 1, 1, "specularTex");
+        tex.appendTextureToLayout(0, 1, 1, "specularTex");
 
         //TODO: add events to light sources
         LightSourceList lightSources;
         lightSources.push(*new LightSource("default"));
 
         Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
-        Buffer buffer1(*meshList.at(1), *shaders.getByName("default"));
 
         Material mat;
         mat.setAmbientColor(0.01f,0.01f,0.01f);
+        mat.setSpecularHighlights(300);
 
-        renderer.addNewObject(tex1, *shaders.getByName("default"), buffer, lightSources, mat);
-        renderer.addNewObject(tex1, *shaders.getByName("default"), buffer1, lightSources, mat);
+        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
+        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
         renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
         renderer.getObjectByIndex(1)->move(2.f,0,0);
         renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
