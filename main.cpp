@@ -194,14 +194,6 @@ public:
     void pushVertex(Vertex v){
         vertices->push_back(v);
     }
-    void pushPositionVertex(float x, float y, float z){
-        Vertex v;
-        v.color = glm::vec3(0.f);
-        v.normal = glm::vec3(0.f);
-        v.texcoord = glm::vec3(0.f);
-
-        v.position = glm::vec3(x,y,z);
-    }
     void addPolyIndices(GLuint a, GLuint b, GLuint c){
         indices->push_back(a);
         indices->push_back(b);
@@ -226,7 +218,7 @@ public:
         int switchCase;
         bool end;
 
-        bool next = false;
+        bool nextPart = false;
         int lastPolyId = -1;
 
         while(!f.eof()){
@@ -238,9 +230,9 @@ public:
             token = bite(" ", line, end);
 
             if(token == "v"){
-                if(next){
+                if(nextPart){
                     lastPolyIds.push_back(lastPolyId);
-                    next = false;
+                    nextPart = false;
                 }
                 //lastPolyId = -1;
                 switchCase = 0;
@@ -254,7 +246,7 @@ public:
             if(token == "f"){
                 ++lastPolyId;
                 switchCase = 3;
-                next = true;
+                nextPart = true;
             }
 
             switch (switchCase) {
@@ -275,7 +267,7 @@ public:
             }
         }
 
-        if(next == true){
+        if(nextPart == true){
             lastPolyIds.push_back(lastPolyId);
         }
         buildMesh();
@@ -389,7 +381,6 @@ private:
         int ind[3];
         string copyLine = line;
         bool end;
-        string delimiter = "/";
         int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
 
         vector<intvec3>* indexes = new vector<intvec3>;
@@ -397,17 +388,14 @@ private:
         //cout << token << " ";
         while (true){
             if(numInd == 1){
-                delimiter = " ";
-                token = bite(delimiter, line, end);
+                token = bite(" ", line, end);
                 ind[0] = stoi(token);
                 ind[1] = ind[2] = 1;//very important to set 1
             }
             if(numInd == 2){
-                delimiter = "/";
-                token = bite(delimiter, line, end);
+                token = bite("/", line, end);
                 ind[0] = stoi(token);
-                delimiter = " ";
-                token = bite(delimiter, line, end);
+                token = bite(" ", line, end);
                 if(token != "")
                     ind[1] = stoi(token);
                 else
@@ -415,18 +403,16 @@ private:
                 ind[2] = 1;
             }
             if(numInd == 3){
-                delimiter = "/";
-                token = bite(delimiter, line, end);
+                token = bite("/", line, end);
                 ind[0] = stoi(token);
 
-                token = bite(delimiter, line, end);
+                token = bite("/", line, end);
                 if(token != "")
                     ind[1] = stoi(token);
                 else
                     ind[1] = 1;
 
-                delimiter = " ";
-                token = bite(delimiter, line, end);
+                token = bite(" ", line, end);
                 if(token != "")
                     ind[2] = stoi(token);
                 else
@@ -546,71 +532,7 @@ private:
 };
 
 class MeshList : public List<Mesh>{
-public:
-    void initCube(){
-        Mesh* m;
-        Vertex vertices[] = {
-            //Postition                           Color                               Texcoords                  Normals
-            {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.0f, 1.f),      glm::vec3(0.0f, 0.0f, 1.0f)},//0
-            {glm::vec3(-0.5f, -0.5f, 0.0f),       glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 0.f),       glm::vec3(0.0f, 0.0f, 1.0f)},//1
-            {glm::vec3(0.5f, -0.5f, 0.0f),        glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 0.f),       glm::vec3(0.0f, 0.0f, 1.0f)},//2
 
-            {glm::vec3(0.5f, -0.5f, 0.0f),        glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.0f, 0.f),      glm::vec3(0.0f, 0.0f, 1.0f)},//2
-            {glm::vec3(0.5f, 0.5f, 0.0f),         glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, 0.0f, 1.0f)},//3
-            {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(0.0f, 0.0f, 1.0f)},//0
-
-            {glm::vec3(0.5f, 0.5f, 0.0f),         glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(0.0f, 1.f),      glm::vec3(1.0f, 0.0f, 0.0f)},//3
-            {glm::vec3(0.5f, -0.5f, 0.0f),        glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(0.f, 0.f),       glm::vec3(1.0f, 0.0f, 0.0f)},//2
-            {glm::vec3(0.5f, -0.5f, -1.0f),       glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 0.f),       glm::vec3(1.0f, 0.0f, 0.0f)},//6
-
-            {glm::vec3(0.5f, 0.5f, 0.0f),         glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(0.0f, 1.f),      glm::vec3(1.0f, 0.0f, 0.0f)},//3
-            {glm::vec3(0.5f, -0.5f, -1.0f),       glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 0.f),       glm::vec3(1.0f, 0.0f, 0.0f)},//6
-            {glm::vec3(0.5f, 0.5f, -1.0f),        glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(1.0f, 0.0f, 0.0f)},//7
-
-            {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//0
-            {glm::vec3(-0.5f, -0.5f, -1.0f),      glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 0.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//5
-            {glm::vec3(-0.5f, -0.5f, 0.0f),       glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(1.f, 0.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//1
-
-            {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//0
-            {glm::vec3(-0.5f, 0.5f, -1.0f),       glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//4
-            {glm::vec3(-0.5f, -0.5f, -1.0f),      glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 0.f),       glm::vec3(-1.0f, 0.0f, 0.0f)},//5
-
-            {glm::vec3(-0.5f, -0.5f, 0.0f),       glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//1
-            {glm::vec3(-0.5f, -0.5f, -1.0f),      glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 0.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//5
-            {glm::vec3(0.5f, -0.5f, 0.0f),        glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//2
-
-            {glm::vec3(0.5f, -0.5f, 0.0f),        glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//2
-            {glm::vec3(-0.5f, -0.5f, -1.0f),      glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(0.f, 0.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//5
-            {glm::vec3(0.5f, -0.5f, -1.0f),       glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(1.f, 0.f),       glm::vec3(0.0f, -1.0f, 0.0f)},//6
-
-            {glm::vec3(-0.5f, 0.5f, -1.0f),       glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//4
-            {glm::vec3(0.5f, -0.5f, -1.0f),       glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(0.f, 0.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//6
-            {glm::vec3(-0.5f, -0.5f, -1.0f),      glm::vec3(0.0f, 1.0f, 0.0f),        glm::vec2(1.f, 0.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//5
-
-            {glm::vec3(-0.5f, 0.5f, -1.0f),       glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//4
-            {glm::vec3(0.5f, 0.5f, -1.0f),        glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//7
-            {glm::vec3(0.5f, -0.5f, -1.0f),       glm::vec3(0.0f, 0.5f, 1.0f),        glm::vec2(0.f, 0.f),       glm::vec3(0.0f, 0.0f, -1.0f)},//6
-
-            {glm::vec3(-0.5f, 0.5f, 0.0f),        glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.0f, 0.f),      glm::vec3(0.0f, 1.0f, 0.0f)},//0
-            {glm::vec3(0.5f, 0.5f, 0.0f),         glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(1.f, 0.f),       glm::vec3(0.0f, 1.0f, 0.0f)},//3
-            {glm::vec3(-0.5f, 0.5f, -1.0f),       glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(0.0f, 1.0f, 0.0f)},//4
-
-            {glm::vec3(-0.5f, 0.5f, -1.0f),       glm::vec3(1.0f, 0.0f, 0.0f),        glm::vec2(0.f, 1.f),       glm::vec3(0.0f, 1.0f, 0.0f)},//4
-            {glm::vec3(0.5f, 0.5f, 0.0f),         glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(1.f, 0.f),       glm::vec3(0.0f, 1.0f, 0.0f)},//3
-            {glm::vec3(0.5f, 0.5f, -1.0f),        glm::vec3(1.0f, 1.0f, 0.0f),        glm::vec2(1.f, 1.f),       glm::vec3(0.0f, 1.0f, 0.0f)},//7
-        };
-        unsigned nVertices = sizeof(vertices) / sizeof(Vertex);
-
-        GLuint indices[] = {};
-        unsigned nIndices = sizeof(indices) / sizeof(GLuint);
-
-        m = new Mesh(vertices, nVertices, indices, nIndices, "cube");
-
-        push(*m);
-    }
-    void initDefaultList(){
-        initCube();
-    }
 };
 
 class Shader{
@@ -847,9 +769,16 @@ private:
 class Texture{
 public:
     GLuint textureId;
-    string name; //same as path
+    string name;
+    string path; //same as path
 
     Texture(string name = "noname"){
+        this->path = "";
+        this->name = name;
+        glGenTextures(1, &textureId);
+    }
+    Texture(string path, string name = "noname"){
+        this->path = path;
         this->name = name;
         glGenTextures(1, &textureId);
     }
@@ -857,13 +786,9 @@ public:
     ~Texture(){
         glDeleteTextures(1, &textureId);
     }
-    void setPath(string path){
-        this->name = path;
-    }
     void pushToShader(Shader* shader, GLint n, string uniformName){
         shader->setUniform1i(uniformName, n);
 
-        //use texture
         glActiveTexture(GL_TEXTURE0 + n);
         bind();
     }
@@ -875,7 +800,7 @@ public:
         image_width = 0;
         image_height = 0;
 
-        image = SOIL_load_image(name.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
+        image = SOIL_load_image(path.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
         //init and active texture
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -923,22 +848,18 @@ struct TextureLayout{
 
 class TextureList : public List<Texture>{
 public:
-    void loadNew(string path){
-        Texture* t = new Texture(path);
+    void loadNew(string path, string name = "noname"){
+        Texture* t = new Texture(path, name);
         t->loadTexture();
         list.push_back(t);
         unbindTextures();
     }
-    void bindTextureByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
-        list.at(textureIndex)->pushToShader(shader, n, uniformName);
+    void pushTextureToShaderByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
+        at(textureIndex)->pushToShader(shader, n, uniformName);
     }
-//    void bindTextureByName(Shader* shader, GLenum GL_TEXTUREn, GLint n, string uniformName, string path){
-//        shader->setUniform1i(uniformName, n);
-
-//        //use texture
-//        glActiveTexture(GL_TEXTUREn);
-//        glBindTexture(GL_TEXTURE_2D, getByName(path)->textureId);
-//    }
+    void pushTextureToShaderByName(Shader* shader, GLint n, string textureName, string uniformName){
+        getByName(textureName)->pushToShader(shader, n, uniformName);
+    }
     void unbindTextures(){
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -952,16 +873,16 @@ public:
             texLayouts.push_back(TextureLayout());
         }
     }
-    void bindLayout(size_t layoutId, Shader* shader){
+    void pushLayoutToShader(size_t layoutId, Shader* shader){
         TextureLayout* currLayout = &texLayouts.at(layoutId);
         for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){
-            bindTextureByIndex(shader,
+            pushTextureToShaderByIndex(shader,
                                currLayout->ns.at(i),
                                currLayout->textureIndexes.at(i),
                                currLayout->uniformNames.at(i));
         }
     }
-    size_t texLayoutsAmount(){
+    size_t layoutsAmount(){
         return texLayouts.size();
     }
 private:
@@ -1076,10 +997,10 @@ public:
         viewMatrix = glm::lookAt(camera->position, camera->position + camera->front, camera->up);
     }
 
-    void pushToShader(Shader* s){
+    void pushToShader(Shader* s, string viewMatrixUniformName, string cameraPosUniformName){
         updateMatrices();
-        s->setUniformMatrix4fv("ViewMatrix", glm::value_ptr(viewMatrix));
-        s->setUniform3fv("cameraPos", glm::value_ptr(camera->position));
+        s->setUniformMatrix4fv(viewMatrixUniformName, glm::value_ptr(viewMatrix));
+        s->setUniform3fv(cameraPosUniformName, glm::value_ptr(camera->position));
     }
     void updateMatrices(){
         updateCameraPosition();
@@ -1149,9 +1070,9 @@ public:
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
 
-    void pushToShader(Shader* s){
+    void pushToShader(Shader* s, string uniformName){
         updateMatrices();
-        s->setUniformMatrix4fv("ProjectionMatrix", glm::value_ptr(projectionMatrix));
+        s->setUniformMatrix4fv(uniformName, glm::value_ptr(projectionMatrix));
     }
     void updateMatrices(){
         glfwGetFramebufferSize(window->window, &window->fbWidth, &window->fbHeight);
@@ -1171,10 +1092,6 @@ private:
 
 class Position{
 public:
-    glm::vec3 location;
-    glm::vec3 rotation;
-    glm::vec3 scale;
-
     Position(){
         location = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
@@ -1182,9 +1099,9 @@ public:
         modelMatrix = glm::mat4(1.f);
     }
 
-    void pushToShader(Shader* s){
+    void pushToShader(Shader* s, string uniformName){
         updateMatrices();
-        s->setUniformMatrix4fv("ModelMatrix", glm::value_ptr(modelMatrix));
+        s->setUniformMatrix4fv(uniformName, glm::value_ptr(modelMatrix));
     }
     void updateMatrices(){
         modelMatrix = glm::mat4(1.f);
@@ -1216,6 +1133,11 @@ public:
         rotation.y += y;
         rotation.z += z;
     }
+    void rotateTo(float x, float y, float z){
+        rotation.x = x;
+        rotation.y = y;
+        rotation.z = z;
+    }
     void scaleTo(float x, float y, float z){
         scale.x = x;
         scale.y = y;
@@ -1223,6 +1145,10 @@ public:
     }
 private:
     glm::mat4 modelMatrix;
+
+    glm::vec3 location;
+    glm::vec3 rotation;
+    glm::vec3 scale;
 };
 
 class LightSource{
@@ -1234,6 +1160,12 @@ public:
         this->name = name;
         lightPos = glm::vec3(0.f, 0.f, 2.f);
     }
+
+    void setPosition(float x, float y, float z){
+        lightPos.x += x;
+        lightPos.y += y;
+        lightPos.z += z;
+    }
 };
 
 class LightSourceList : public List<LightSource>{
@@ -1241,14 +1173,26 @@ public:
     void pushNew(string name = "noname"){
         push(*(new LightSource(name)));
     }
-    void pushToShader(Shader* s, int lightSourceNum, string uniformName){
-        LightSource* currentSource = list.at(lightSourceNum);
+    void pushToShaderByIndex(Shader* s, int lightSourceNum, string uniformName){
+        LightSource* currentSource = at(lightSourceNum);
+        s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
+    }
+    void pushToShaderByName(Shader* s, string name, string uniformName){
+        LightSource* currentSource = getByName(name);
         s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
     }
 };
 
 class Material{
 public:
+    glm::vec3 ambientColor = glm::vec3(1.f);
+    glm::vec3 diffuseColor = glm::vec3(1.f);
+    glm::vec3 specularColor = glm::vec3(1.f);
+
+    float specularHighlights = 1.f;
+    float opticalDensity = 1.f;
+    float dissolve = 1.f;
+
     void pushToShader(Shader* s, string uniformName){
         s->setUniform3fv(uniformName + ".ambientColor", glm::value_ptr(ambientColor));
         s->setUniform3fv(uniformName + ".diffuseColor", glm::value_ptr(diffuseColor));
@@ -1279,13 +1223,6 @@ public:
         this->dissolve = dissolve;
     }
 private:
-    glm::vec3 ambientColor = glm::vec3(1.f);
-    glm::vec3 diffuseColor = glm::vec3(1.f);
-    glm::vec3 specularColor = glm::vec3(1.f);
-
-    float specularHighlights = 1.f;
-    float opticalDensity = 1.f;
-    float dissolve = 1.f;
 
     //Texture* colorTexture;
 };
@@ -1296,10 +1233,7 @@ public:
     string name;
     vector<string> facePaths;
 
-    SkyboxTexture(){
-
-    }
-    SkyboxTexture(vector<string> facePaths,string name = "noname"){
+    SkyboxTexture(vector<string> facePaths, string name = "noname"){
         this->facePaths = facePaths;
         this->name = name;
 
@@ -1310,22 +1244,12 @@ public:
         glDeleteTextures(1, &textureId);
     }
 
-    void setName(string name){
-        this->name = name;
-    }
     void pushToShader(Shader* shader, GLint n, string uniformName){
         shader->setUniform1i(uniformName, n);
 
-        //use texture
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
     }
-private:
-    int image_width;
-    int image_height;
-
-    unsigned char* image;
-
     void loadSkybox(){
         //load image
         image_width = 0;
@@ -1353,6 +1277,11 @@ private:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
 };
 
 class SkyboxObject{
@@ -1386,10 +1315,9 @@ public:
         window->setDrawOrder(false);
         shader->bind();
 
-        //make positionm, perspective and view push like material push
-        position->pushToShader(shader);
-        perspective->pushToShader(shader);
-        view->pushToShader(shader);
+        position->pushToShader(shader, "ModelMatrix");
+        perspective->pushToShader(shader, "ProjectionMatrix");
+        view->pushToShader(shader, "ViewMatrix", "cameraPos");
         skyboxTexture->pushToShader(shader, 0, "skybox");
 
         position->setDefaultEvents(window);//remove this later
@@ -1405,9 +1333,6 @@ public:
         shader->unbind();
         window->setDrawOrder(true);
     }
-    void pushTextureToShader(Shader& s, GLint n, string uniformName){
-        skyboxTexture->pushToShader(&s, n, uniformName);
-    }
 
     void move(float x, float y, float z){
         position->move(x,y,z);
@@ -1417,6 +1342,9 @@ public:
     }
     void rotate(float x, float y, float z){
         position->rotate(x,y,z);
+    }
+    void rotateTo(float x, float y, float z){
+        position->rotateTo(x,y,z);
     }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
@@ -1470,10 +1398,9 @@ public:
     void draw(void (*drawObjectFunction)(Object&)){
         shader->bind();
 
-        //make positionm, perspective and view push like material push
-        position->pushToShader(shader);
-        perspective->pushToShader(shader);
-        view->pushToShader(shader);
+        position->pushToShader(shader, "ModelMatrix");
+        perspective->pushToShader(shader, "ProjectionMatrix");
+        view->pushToShader(shader, "ViewMatrix", "cameraPos");
         material->pushToShader(shader, "material");
 
         position->setDefaultEvents(window);
@@ -1491,10 +1418,10 @@ public:
             bool first = true;
             size_t textureI = 0;
             for(size_t i = 0; i < currMesh->partEndVertexIds.size(); ++i){
-                if(textureI == texList->texLayoutsAmount()){
+                if(textureI == texList->layoutsAmount()){
                     textureI = 0;
                 }
-                texList->bindLayout(textureI, shader);
+                texList->pushLayoutToShader(textureI, shader);
                 ++textureI;
 
                 if(first){
@@ -1528,6 +1455,9 @@ public:
     void rotate(float x, float y, float z){
         position->rotate(x,y,z);
     }
+    void rotateTo(float x, float y, float z){
+        position->rotateTo(x,y,z);
+    }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
     }
@@ -1545,7 +1475,6 @@ public:
 
     int width;
     int height;
-
 
     Framebuffer(int width, int height){
         this->width = width;
@@ -1581,9 +1510,9 @@ public:
     }
     void attachRenderBuffer(){
         glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             cout << "Framebuffer is not complete!" << endl;
@@ -1640,13 +1569,13 @@ public:
         framebuffers->push(fb);
     }
     Object* getObjectByIndex(unsigned int index){
-        return  objects->at(index);
+        return objects->at(index);
     }
     Object* getObjectByName(string name){
         return objects->getByName(name);
     }
     SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
-        return  skyboxes->at(index);
+        return skyboxes->at(index);
     }
     SkyboxObject* getSkyboxObjectByName(string name){
         return skyboxes->getByName(name);
@@ -1655,7 +1584,6 @@ public:
         doContinue = true;
         while (!glfwWindowShouldClose(window->window))
         {
-            //used to catch events
             glfwPollEvents();
 
             //get enter press event to fast close
@@ -1696,7 +1624,7 @@ private:
 };
 
 void drawObject(Object& o){
-    o.lightSources->pushToShader(o.shader, 0, "lightPos0");
+    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
 
     //add all get set methods to reduce this one callback size
     //also do it with every class
