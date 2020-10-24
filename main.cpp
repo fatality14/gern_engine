@@ -849,13 +849,9 @@ public:
     GLuint textureId;
     string name; //same as path
 
-    Texture(){
-
-    }
-    Texture(string path){
-        name = path;
-
-        loadTexture();
+    Texture(string name = "noname"){
+        this->name = name;
+        glGenTextures(1, &textureId);
     }
     Texture(Texture& t) = delete;
     ~Texture(){
@@ -869,14 +865,11 @@ public:
 
         //use texture
         glActiveTexture(GL_TEXTURE0 + n);
+        bind();
+    }
+    void bind(){
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
-private:
-    int image_width;
-    int image_height;
-
-    unsigned char* image;
-
     void loadTexture(){
         //load image
         image_width = 0;
@@ -885,7 +878,6 @@ private:
         image = SOIL_load_image(name.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
         //init and active texture
-        glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
 
         //setup texture
@@ -907,6 +899,12 @@ private:
         //free space
         SOIL_free_image_data(image);
     }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
+
 };
 
 struct TextureLayout{
@@ -925,8 +923,9 @@ struct TextureLayout{
 
 class TextureList : public List<Texture>{
 public:
-    void pushNew(string path){
+    void loadNew(string path){
         Texture* t = new Texture(path);
+        t->loadTexture();
         list.push_back(t);
         unbindTextures();
     }
@@ -1291,115 +1290,6 @@ private:
     //Texture* colorTexture;
 };
 
-class Object{
-public:
-    Window* window;
-    TextureList* texList;
-    Shader* shader;
-    Buffer* buffer;
-    Position* position;
-    View* view;
-    Perspective* perspective;
-    LightSourceList* lightSources;
-    Material* material;
-
-    string name;
-
-    Object(Window& w, TextureList& t,
-           Shader& s, Buffer& b,
-           Perspective& p, View& v,
-           LightSourceList& lsl, Material& m,
-           string name = "noname")
-    {
-        if (w.window != p.getWindowPtr().window || p.getWindowPtr().window != v.getWindowPtr().window){
-            cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
-            cout << "Object not created\n";
-            return;
-        }
-
-        window = &w;
-        texList = &t;
-        shader = &s;
-        buffer = &b;
-        perspective = &p;
-        view = &v;
-        lightSources = &lsl;
-        material = &m;
-        this->name = name;
-
-        position = new Position();
-    }
-
-    void draw(void (*drawObjectFunction)(Object&)){
-        shader->bind();
-
-        //make positionm, perspective and view push like material push
-        position->pushToShader(shader);
-        perspective->pushToShader(shader);
-        view->pushToShader(shader);
-        material->pushToShader(shader, "material");
-
-        position->setDefaultEvents(window);
-
-        buffer->bind();
-
-        drawObjectFunction(*this);
-
-        if (buffer->getMesh().nIndices != 0)
-            glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
-        else{
-            Mesh* currMesh = &buffer->getMesh();
-            //cout << "Draw mesh: " << currMesh->name << endl;
-            int startFrom = 0;
-            bool first = true;
-            size_t textureI = 0;
-            for(size_t i = 0; i < currMesh->partEndVertexIds.size(); ++i){
-                if(textureI == texList->texLayoutsAmount()){
-                    textureI = 0;
-                }
-                texList->bindLayout(textureI, shader);
-                ++textureI;
-
-                if(first){
-                    //cout << "Draw " << i << " part." << endl;
-                    first = false;
-                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i));
-                }
-                else{
-                    //cout << "Draw " << i << " part." << endl;
-                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
-                    startFrom = currMesh->partEndVertexIds.at(i);
-                }
-            }
-        }
-
-        buffer->unbind();
-        shader->unbind();
-        texList->unbindTextures();
-    }
-
-    //remove and make object name same as mesh name
-    const string& getDrawMeshName(){
-        return buffer->getMeshName();
-    }
-    void move(float x, float y, float z){
-        position->move(x,y,z);
-    }
-    void moveTo(float x, float y, float z){
-        position->moveTo(x,y,z);
-    }
-    void rotate(float x, float y, float z){
-        position->rotate(x,y,z);
-    }
-    void scaleTo(float x, float y, float z){
-        position->scaleTo(x,y,z);
-    }
-};
-
-class Objects : public List<Object>{
-
-};
-
 class SkyboxTexture{
 public:
     GLuint textureId;
@@ -1515,6 +1405,9 @@ public:
         shader->unbind();
         window->setDrawOrder(true);
     }
+    void pushTextureToShader(Shader& s, GLint n, string uniformName){
+        skyboxTexture->pushToShader(&s, n, uniformName);
+    }
 
     void move(float x, float y, float z){
         position->move(x,y,z);
@@ -1534,6 +1427,180 @@ class SkyboxList : public List<SkyboxObject>{
 
 };
 
+class Object{
+public:
+    Window* window;
+    TextureList* texList;
+    Shader* shader;//shader same as in buffer, delete this
+    Buffer* buffer;
+    Position* position;
+    View* view;
+    Perspective* perspective;
+    LightSourceList* lightSources;
+    Material* material;
+
+    string name;
+
+    //make arguments optional
+    Object(Window& w, TextureList& t,
+           Shader& s, Buffer& b,
+           Perspective& p, View& v,
+           LightSourceList& lsl, Material& m,
+           string name = "noname")
+    {
+        if (w.window != p.getWindowPtr().window || p.getWindowPtr().window != v.getWindowPtr().window){
+            cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
+            cout << "Object not created\n";
+            return;
+        }
+
+        window = &w;
+        texList = &t;
+        shader = &s;
+        buffer = &b;
+        perspective = &p;
+        view = &v;
+        lightSources = &lsl;
+        material = &m;
+        this->name = name;
+
+        position = new Position();
+    }
+
+    void draw(void (*drawObjectFunction)(Object&)){
+        shader->bind();
+
+        //make positionm, perspective and view push like material push
+        position->pushToShader(shader);
+        perspective->pushToShader(shader);
+        view->pushToShader(shader);
+        material->pushToShader(shader, "material");
+
+        position->setDefaultEvents(window);
+
+        buffer->bind();
+
+        drawObjectFunction(*this);
+
+        if (buffer->getMesh().nIndices != 0)
+            glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+        else{
+            Mesh* currMesh = &buffer->getMesh();
+            //cout << "Draw mesh: " << currMesh->name << endl;
+            int startFrom = 0;
+            bool first = true;
+            size_t textureI = 0;
+            for(size_t i = 0; i < currMesh->partEndVertexIds.size(); ++i){
+                if(textureI == texList->texLayoutsAmount()){
+                    textureI = 0;
+                }
+                texList->bindLayout(textureI, shader);
+                ++textureI;
+
+                if(first){
+                    //cout << "Draw " << i << " part." << endl;
+                    first = false;
+                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i));
+                }
+                else{
+                    //cout << "Draw " << i << " part." << endl;
+                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
+                    startFrom = currMesh->partEndVertexIds.at(i);
+                }
+            }
+        }
+
+        buffer->unbind();
+        shader->unbind();
+        texList->unbindTextures();
+    }
+
+    //remove and make object name same as mesh name
+    const string& getDrawMeshName(){
+        return buffer->getMeshName();
+    }
+    void move(float x, float y, float z){
+        position->move(x,y,z);
+    }
+    void moveTo(float x, float y, float z){
+        position->moveTo(x,y,z);
+    }
+    void rotate(float x, float y, float z){
+        position->rotate(x,y,z);
+    }
+    void scaleTo(float x, float y, float z){
+        position->scaleTo(x,y,z);
+    }
+};
+
+class Objects : public List<Object>{
+
+};
+
+class Framebuffer{
+public:
+    GLuint FBO;
+    GLuint RBO;
+    TextureList* textureColorBuffers;
+
+    int width;
+    int height;
+
+
+    Framebuffer(int width, int height){
+        this->width = width;
+        this->height = height;
+        this->textureColorBuffers = new TextureList;
+        textureColorBuffers->addLayouts(1);
+
+        glGenFramebuffers(1, &FBO);
+        glGenRenderbuffers(1, &RBO);
+    }
+
+    void genTextureColorBuffers(size_t amount){
+        for(size_t i = 0; i < amount; i++){
+            Texture* t = new Texture;
+            textureColorBuffers->push(*t);
+            textureColorBuffers->appendTextureToLayout(0, i, i, "textureColorBuffer"+to_string(i));
+        }
+    }
+    void genColorAttachmentFramebuffer(GLuint attachmentNum){
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+        textureColorBuffers->at(attachmentNum)->bind();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER,
+                               GL_COLOR_ATTACHMENT0 + attachmentNum,
+                               GL_TEXTURE_2D,
+                               textureColorBuffers->at(attachmentNum)->textureId,
+                               0);
+    }
+    void attachRenderBuffer(){
+        glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            cout << "Framebuffer is not complete!" << endl;
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    void bind(){
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    }
+    void unbind(){
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+};
+
+class FramebufferList : public List<Framebuffer>{
+
+};
+
 class Renderer{
 public:
     Window* window;
@@ -1542,6 +1609,7 @@ public:
     MouseListener* mouse;
     CameraList* camList;
     SkyboxList* skyboxes;
+    FramebufferList* framebuffers;
 
     float r, g, b, a;
 
@@ -1555,11 +1623,21 @@ public:
         view = new View(*window, *mouse, *camList->at(0));
         objects = new Objects;
         skyboxes = new SkyboxList;
+        framebuffers = new FramebufferList;
     }
 
+    //make arguments optional
     void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl, Material& m){
         Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl, m);
         objects->push(*o);
+    }
+    void addNewSkybox(Shader& s, vector<string> facePaths, Buffer& b, string name = "noname"){
+        SkyboxTexture* st = new SkyboxTexture(facePaths, name);
+        SkyboxObject* so = new SkyboxObject(*st, *window, s, b, *perspective, *view);
+        skyboxes->push(*so);
+    }
+    void addFramebuffer(Framebuffer& fb){
+        framebuffers->push(fb);
     }
     Object* getObjectByIndex(unsigned int index){
         return  objects->at(index);
@@ -1573,11 +1651,6 @@ public:
     SkyboxObject* getSkyboxObjectByName(string name){
         return skyboxes->getByName(name);
     }
-    void addNewSkybox(Shader& s, vector<string> facePaths, Buffer& b, string name = "noname"){
-        SkyboxTexture* st = new SkyboxTexture(facePaths, name);
-        SkyboxObject* so = new SkyboxObject(*st, *window, s, b, *perspective, *view);
-        skyboxes->push(*so);
-    }
     void render(void (*frameFunction)(Renderer&)){
         doContinue = true;
         while (!glfwWindowShouldClose(window->window))
@@ -1589,10 +1662,6 @@ public:
             if(glfwGetKey(window->window, GLFW_KEY_ENTER) == GLFW_PRESS){
                 doContinue = false;
             }
-
-            //set background colour of window
-            glClearColor(r, g, b, a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
             mouse->update();
             perspective->setDefaultEvents();
@@ -1615,15 +1684,18 @@ public:
         this->b = b;
         this->a = a;
     }
+    void bindBackgroundColor(){
+        glClearColor(r, g, b, a);
+    }
+    void clearBuffers(){
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
 private:
     Objects* objects;
     bool doContinue = false;
 };
 
 void drawObject(Object& o){
-    //TODO: #define bindTextureByIndex
-    //o.texList->bindLayout(1, o.shader);
-
     o.lightSources->pushToShader(o.shader, 0, "lightPos0");
 
     //add all get set methods to reduce this one callback size
@@ -1631,10 +1703,26 @@ void drawObject(Object& o){
     setEvent(o.window->window, F, o.lightSources->getByName("default")->lightPos = o.view->getCamera().position);
 }
 void drawFrame(Renderer& r){
-    Object* currObj = r.getObjectByIndex(0);
+    Object* currObj;
+
+    r.framebuffers->at(0)->bind();
+
+    r.bindBackgroundColor();
+    r.clearBuffers();
+
+    currObj = r.getObjectByIndex(0);
     currObj->draw(drawObject);
 
     currObj = r.getObjectByIndex(1);
+    currObj->draw(drawObject);
+
+    r.framebuffers->at(0)->unbind();
+
+
+    r.bindBackgroundColor();
+    r.clearBuffers();
+
+    currObj = r.getObjectByIndex(2);
     currObj->draw(drawObject);
 
     r.skyboxes->at(0)->draw();
@@ -1657,61 +1745,67 @@ void drawFrame(Renderer& r){
 }
 
 int main (){
-    bool test = false;
-    if(test){
+    Renderer renderer(700, 1040);
+    MeshLoader meshLoader;
+    MeshList meshList;
+    ShaderList shaders;
+    TextureList tex;
+    LightSourceList lightSources;
 
-    }
-    else{
-        Renderer renderer(700, 1040);
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\dragon.obj", "loaded"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
 
-        MeshLoader meshLoader;
+    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\vertex.vsh",
+                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\fragment.fsh", "default");
+    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skybox_vertex.vsh",
+                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skybox_fragment.fsh", "skybox");
+    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_vertex.vsh",
+                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
 
-        MeshList meshList;
-        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
-        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_skybox.obj", "skybox"));
+    tex.loadNew("C:/EngPathReq/might_beeeeeeeeeeee/pictures/box.png");//0
+    tex.loadNew("C:/EngPathReq/might_beeeeeeeeeeee/pictures/box1.png");//1
 
-        ShaderList shaders;
-        shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
-        shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox_vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox_fragment.fsh", "skybox");
+    tex.addLayouts(1);
+    tex.appendTextureToLayout(0, 0, 0, "texture0");
+    tex.appendTextureToLayout(0, 1, 1, "specularTex");
 
-        TextureList tex;
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
-        tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box1.png");//1
+    //TODO: do something with lightsources
+    lightSources.push(*new LightSource("default"));
 
-        tex.addLayouts(1);
-        tex.appendTextureToLayout(0, 0, 0, "texture0");
-        tex.appendTextureToLayout(0, 1, 1, "specularTex");
+    Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
+    Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
+    Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
 
-        //TODO: do something with lightsources
-        LightSourceList lightSources;
-        lightSources.push(*new LightSource("default"));
+    Material mat;
+    mat.setAmbientColor(0.01f,0.01f,0.01f);
+    mat.setSpecularHighlights(300);
 
-        Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
-        Buffer skyboxCube(*meshList.getByName("loaded"), *shaders.getByName("default"));
+    Framebuffer framebuffer(800,600);
+    framebuffer.genTextureColorBuffers(1);
+    framebuffer.genColorAttachmentFramebuffer(0);
+    framebuffer.attachRenderBuffer();
+    renderer.addFramebuffer(framebuffer);
 
-        Material mat;
-        mat.setAmbientColor(0.01f,0.01f,0.01f);
-        mat.setSpecularHighlights(300);
+    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
+    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
+    renderer.addNewObject(*framebuffer.textureColorBuffers, *shaders.getByName("screen"), quad, lightSources, mat);
+    renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
+    renderer.getObjectByIndex(1)->move(2.f,0,0);
+    renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
 
-        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
-        renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
-        renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
-        renderer.getObjectByIndex(1)->move(2.f,0,0);
-        renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+    vector<string> skyboxSides;
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\left.jpg");
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\top.jpg");
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\bottom.jpg");
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\front.jpg");
+    skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\back.jpg");
 
-        vector<string> skyboxSides;
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\left.jpg");
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\top.jpg");
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\bottom.jpg");
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\front.jpg");
-        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\back.jpg");
+    renderer.addNewSkybox(*shaders.getByName("skybox"), skyboxSides, skyboxCube);
+    renderer.getSkyboxObjectByIndex(0)->scaleTo(5,5,5);
 
-        renderer.addNewSkybox(*shaders.getByName("skybox"), skyboxSides, skyboxCube);
-        renderer.getSkyboxObjectByIndex(0)->scaleTo(5,5,5);
-
-        renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
-        renderer.render(drawFrame);
-    }
+    renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
+    renderer.render(drawFrame);
     return 0;
 }
