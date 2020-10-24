@@ -52,8 +52,8 @@ public:
     size_t size(){
         return list.size();
     }
-    void push(T& m){
-        list.push_back(&m);
+    void push(T& obj){
+        list.push_back(&obj);
     }
     void popByName(string name){
         for(int i = 0; i < list.size(); i++){
@@ -106,6 +106,14 @@ public:
 
     void setPolygonMode(GLenum face = GL_FRONT_AND_BACK, GLenum mode = GL_FILL){
         glPolygonMode(face, mode);
+    }
+    void setDrawOrder(bool isCounterclockwise){
+        if(isCounterclockwise){
+            glFrontFace(GL_CCW);
+        }
+        else{
+            glFrontFace(GL_CW);
+        }
     }
 private:
     void initGLFW(){
@@ -185,6 +193,14 @@ public:
 
     void pushVertex(Vertex v){
         vertices->push_back(v);
+    }
+    void pushPositionVertex(float x, float y, float z){
+        Vertex v;
+        v.color = glm::vec3(0.f);
+        v.normal = glm::vec3(0.f);
+        v.texcoord = glm::vec3(0.f);
+
+        v.position = glm::vec3(x,y,z);
     }
     void addPolyIndices(GLuint a, GLuint b, GLuint c){
         indices->push_back(a);
@@ -845,6 +861,21 @@ public:
     ~Texture(){
         glDeleteTextures(1, &textureId);
     }
+    void setPath(string path){
+        this->name = path;
+    }
+    void pushToShader(Shader* shader, GLint n, string uniformName){
+        shader->setUniform1i(uniformName, n);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE0 + n);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+    }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
 
     void loadTexture(){
         //load image
@@ -853,21 +884,6 @@ public:
 
         image = SOIL_load_image(name.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
-        initTexture();
-
-        //free space
-        SOIL_free_image_data(image);
-    }
-    void setPath(string path){
-        this->name = path;
-    }
-private:
-    int image_width;
-    int image_height;
-
-    unsigned char* image;
-
-    void initTexture(){
         //init and active texture
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -887,6 +903,9 @@ private:
         else{
             cout << "Texture loading failed" << endl;
         }
+
+        //free space
+        SOIL_free_image_data(image);
     }
 };
 
@@ -912,11 +931,7 @@ public:
         unbindTextures();
     }
     void bindTextureByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
-        shader->setUniform1i(uniformName, n);
-
-        //use texture
-        activeTexture(n);
-        glBindTexture(GL_TEXTURE_2D, list.at(textureIndex)->textureId);
+        list.at(textureIndex)->pushToShader(shader, n, uniformName);
     }
 //    void bindTextureByName(Shader* shader, GLenum GL_TEXTUREn, GLint n, string uniformName, string path){
 //        shader->setUniform1i(uniformName, n);
@@ -952,107 +967,6 @@ public:
     }
 private:
     vector<TextureLayout> texLayouts;
-
-    void activeTexture(GLint n){
-        switch (n) {
-        case 0:
-            glActiveTexture(GL_TEXTURE0);
-            break;
-        case 1:
-            glActiveTexture(GL_TEXTURE1);
-            break;
-        case 2:
-            glActiveTexture(GL_TEXTURE2);
-            break;
-        case 3:
-            glActiveTexture(GL_TEXTURE3);
-            break;
-        case 4:
-            glActiveTexture(GL_TEXTURE4);
-            break;
-        case 5:
-            glActiveTexture(GL_TEXTURE5);
-            break;
-        case 6:
-            glActiveTexture(GL_TEXTURE6);
-            break;
-        case 7:
-            glActiveTexture(GL_TEXTURE7);
-            break;
-        case 8:
-            glActiveTexture(GL_TEXTURE8);
-            break;
-        case 9:
-            glActiveTexture(GL_TEXTURE9);
-            break;
-        case 10:
-            glActiveTexture(GL_TEXTURE10);
-            break;
-        case 11:
-            glActiveTexture(GL_TEXTURE11);
-            break;
-        case 12:
-            glActiveTexture(GL_TEXTURE12);
-            break;
-        case 13:
-            glActiveTexture(GL_TEXTURE13);
-            break;
-        case 14:
-            glActiveTexture(GL_TEXTURE14);
-            break;
-        case 15:
-            glActiveTexture(GL_TEXTURE15);
-            break;
-        case 16:
-            glActiveTexture(GL_TEXTURE16);
-            break;
-        case 17:
-            glActiveTexture(GL_TEXTURE17);
-            break;
-        case 18:
-            glActiveTexture(GL_TEXTURE18);
-            break;
-        case 19:
-            glActiveTexture(GL_TEXTURE19);
-            break;
-        case 20:
-            glActiveTexture(GL_TEXTURE20);
-            break;
-        case 21:
-            glActiveTexture(GL_TEXTURE21);
-            break;
-        case 22:
-            glActiveTexture(GL_TEXTURE22);
-            break;
-        case 23:
-            glActiveTexture(GL_TEXTURE23);
-            break;
-        case 24:
-            glActiveTexture(GL_TEXTURE24);
-            break;
-        case 25:
-            glActiveTexture(GL_TEXTURE25);
-            break;
-        case 26:
-            glActiveTexture(GL_TEXTURE26);
-            break;
-        case 27:
-            glActiveTexture(GL_TEXTURE27);
-            break;
-        case 28:
-            glActiveTexture(GL_TEXTURE28);
-            break;
-        case 29:
-            glActiveTexture(GL_TEXTURE29);
-            break;
-        case 30:
-            glActiveTexture(GL_TEXTURE30);
-            break;
-        case 31:
-            glActiveTexture(GL_TEXTURE31);
-            break;
-        }
-    }
 };
 
 class MouseListener{
@@ -1463,6 +1377,8 @@ public:
         shader->unbind();
         texList->unbindTextures();
     }
+
+    //remove and make object name same as mesh name
     const string& getDrawMeshName(){
         return buffer->getMeshName();
     }
@@ -1484,6 +1400,140 @@ class Objects : public List<Object>{
 
 };
 
+class SkyboxTexture{
+public:
+    GLuint textureId;
+    string name;
+    vector<string> facePaths;
+
+    SkyboxTexture(){
+
+    }
+    SkyboxTexture(vector<string> facePaths,string name = "noname"){
+        this->facePaths = facePaths;
+        this->name = name;
+
+        loadSkybox();
+    }
+    SkyboxTexture(SkyboxTexture& st) = delete;
+    ~SkyboxTexture(){
+        glDeleteTextures(1, &textureId);
+    }
+
+    void setName(string name){
+        this->name = name;
+    }
+    void pushToShader(Shader* shader, GLint n, string uniformName){
+        shader->setUniform1i(uniformName, n);
+
+        //use texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    }
+private:
+    int image_width;
+    int image_height;
+
+    unsigned char* image;
+
+    void loadSkybox(){
+        //load image
+        image_width = 0;
+        image_height = 0;
+
+        //init and active texture
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+
+        for(size_t i = 0; i < facePaths.size(); i++){
+            image = SOIL_load_image(facePaths.at(i).data(), &image_width, &image_height, NULL, SOIL_LOAD_RGB);
+            if(image){
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+                SOIL_free_image_data(image);
+            }
+            else{
+                cout << "Texture loading failed" << endl;
+            }
+        }
+
+        //setup texture
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    }
+};
+
+class SkyboxObject{
+public:
+    SkyboxTexture* skyboxTexture;
+
+    Window* window;
+    Shader* shader;
+    View* view;
+    Perspective* perspective;
+    Buffer* buffer;
+    Position* position;
+
+    string name;
+
+    SkyboxObject(SkyboxTexture& st, Window& w, Shader& s, Buffer& b, Perspective& p, View& v){
+        skyboxTexture = &st;
+        window = &w;
+        shader = &s;
+        buffer = &b;
+        perspective = &p;
+        view = &v;
+
+        position = new Position();
+
+        name = skyboxTexture->name;
+    }
+    SkyboxObject(SkyboxObject& t) = delete;
+
+    void draw(){
+        window->setDrawOrder(false);
+        shader->bind();
+
+        //make positionm, perspective and view push like material push
+        position->pushToShader(shader);
+        perspective->pushToShader(shader);
+        view->pushToShader(shader);
+        skyboxTexture->pushToShader(shader, 0, "skybox");
+
+        position->setDefaultEvents(window);//remove this later
+
+        buffer->bind();
+
+        if (buffer->getMesh().nIndices != 0)
+            glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+        else
+            glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices);
+
+        buffer->unbind();
+        shader->unbind();
+        window->setDrawOrder(true);
+    }
+
+    void move(float x, float y, float z){
+        position->move(x,y,z);
+    }
+    void moveTo(float x, float y, float z){
+        position->moveTo(x,y,z);
+    }
+    void rotate(float x, float y, float z){
+        position->rotate(x,y,z);
+    }
+    void scaleTo(float x, float y, float z){
+        position->scaleTo(x,y,z);
+    }
+};
+
+class SkyboxList : public List<SkyboxObject>{
+
+};
+
 class Renderer{
 public:
     Window* window;
@@ -1491,6 +1541,7 @@ public:
     View* view;
     MouseListener* mouse;
     CameraList* camList;
+    SkyboxList* skyboxes;
 
     float r, g, b, a;
 
@@ -1503,6 +1554,7 @@ public:
         camList->push(*(new Camera("default")));
         view = new View(*window, *mouse, *camList->at(0));
         objects = new Objects;
+        skyboxes = new SkyboxList;
     }
 
     void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl, Material& m){
@@ -1514,6 +1566,17 @@ public:
     }
     Object* getObjectByName(string name){
         return objects->getByName(name);
+    }
+    SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
+        return  skyboxes->at(index);
+    }
+    SkyboxObject* getSkyboxObjectByName(string name){
+        return skyboxes->getByName(name);
+    }
+    void addNewSkybox(Shader& s, vector<string> facePaths, Buffer& b, string name = "noname"){
+        SkyboxTexture* st = new SkyboxTexture(facePaths, name);
+        SkyboxObject* so = new SkyboxObject(*st, *window, s, b, *perspective, *view);
+        skyboxes->push(*so);
     }
     void render(void (*frameFunction)(Renderer&)){
         doContinue = true;
@@ -1574,6 +1637,8 @@ void drawFrame(Renderer& r){
     currObj = r.getObjectByIndex(1);
     currObj->draw(drawObject);
 
+    r.skyboxes->at(0)->draw();
+
     static float defaultSpeed = r.view->getCamera().movementSpeed;
 
     bool isShiftPressed = false;
@@ -1594,12 +1659,7 @@ void drawFrame(Renderer& r){
 int main (){
     bool test = false;
     if(test){
-        MeshLoader meshLoader;
 
-        MeshList meshList;
-        //meshList.initDefaultList();
-        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_star.obj", "loaded"));
-        //meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_test.obj", "loaded1"));
     }
     else{
         Renderer renderer(700, 1040);
@@ -1608,10 +1668,11 @@ int main (){
 
         MeshList meshList;
         meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_dragon.obj", "loaded"));
-        //meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_phone.obj", "loaded1"));
+        meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\model_skybox.obj", "skybox"));
 
         ShaderList shaders;
         shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\fragment.fsh", "default");
+        shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox_vertex.vsh", "C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox_fragment.fsh", "skybox");
 
         TextureList tex;
         tex.pushNew("C:/EngPathReq/might_beeeeeeeeeeee/box.png");//0
@@ -1621,11 +1682,12 @@ int main (){
         tex.appendTextureToLayout(0, 0, 0, "texture0");
         tex.appendTextureToLayout(0, 1, 1, "specularTex");
 
-        //TODO: add events to light sources
+        //TODO: do something with lightsources
         LightSourceList lightSources;
         lightSources.push(*new LightSource("default"));
 
-        Buffer buffer(*meshList.at(0), *shaders.getByName("default"));
+        Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
+        Buffer skyboxCube(*meshList.getByName("loaded"), *shaders.getByName("default"));
 
         Material mat;
         mat.setAmbientColor(0.01f,0.01f,0.01f);
@@ -1636,6 +1698,17 @@ int main (){
         renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
         renderer.getObjectByIndex(1)->move(2.f,0,0);
         renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+
+        vector<string> skyboxSides;
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\left.jpg");
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\top.jpg");
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\bottom.jpg");
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\front.jpg");
+        skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\back.jpg");
+
+        renderer.addNewSkybox(*shaders.getByName("skybox"), skyboxSides, skyboxCube);
+        renderer.getSkyboxObjectByIndex(0)->scaleTo(5,5,5);
 
         renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
         renderer.render(drawFrame);
