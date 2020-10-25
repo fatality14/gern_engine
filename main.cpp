@@ -1489,10 +1489,21 @@ public:
     void genTextureColorBuffers(size_t amount){
         for(size_t i = 0; i < amount; i++){
             Texture* t = new Texture;
+
             textureColorBuffers->push(*t);
             textureColorBuffers->appendTextureToLayout(0, i, i, "textureColorBuffer"+to_string(i));
+
+            genColorAttachmentFramebuffer(i);
         }
+        attachRenderBuffer();
     }
+    void bind(){
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    }
+    void unbind(){
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+private:
     void genColorAttachmentFramebuffer(GLuint attachmentNum){
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -1518,12 +1529,6 @@ public:
             cout << "Framebuffer is not complete!" << endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    void bind(){
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    }
-    void unbind(){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
 };
 
 class FramebufferList : public List<Framebuffer>{
@@ -1539,6 +1544,7 @@ public:
     CameraList* camList;
     SkyboxList* skyboxes;
     FramebufferList* framebuffers;
+    LightSourceList* lightSources = nullptr;
 
     float r, g, b, a;
 
@@ -1557,6 +1563,7 @@ public:
 
     //make arguments optional
     void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl, Material& m){
+        lightSources = &lsl;
         Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl, m);
         objects->push(*o);
     }
@@ -1625,10 +1632,6 @@ private:
 
 void drawObject(Object& o){
     o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
-
-    //add all get set methods to reduce this one callback size
-    //also do it with every class
-    setEvent(o.window->window, F, o.lightSources->getByName("default")->lightPos = o.view->getCamera().position);
 }
 void drawFrame(Renderer& r){
     Object* currObj;
@@ -1670,10 +1673,17 @@ void drawFrame(Renderer& r){
     if(!isShiftPressed && !isCtrlPressed){
         r.view->getCamera().movementSpeed = defaultSpeed;
     }
+
+    //add all get set methods to reduce this one callback size
+    //also do it with every class
+    setEvent(r.window->window, F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().position);
 }
 
 int main (){
-    Renderer renderer(700, 1040);
+    int window_width = 700;
+    int window_height = 1040;
+
+    Renderer renderer(window_width, window_height);
     MeshLoader meshLoader;
     MeshList meshList;
     ShaderList shaders;
@@ -1709,10 +1719,8 @@ int main (){
     mat.setAmbientColor(0.01f,0.01f,0.01f);
     mat.setSpecularHighlights(300);
 
-    Framebuffer framebuffer(800,600);
+    Framebuffer framebuffer(window_width, window_height);
     framebuffer.genTextureColorBuffers(1);
-    framebuffer.genColorAttachmentFramebuffer(0);
-    framebuffer.attachRenderBuffer();
     renderer.addFramebuffer(framebuffer);
 
     renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
