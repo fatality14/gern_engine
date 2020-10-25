@@ -47,7 +47,12 @@ template<class T>
 class List{
 public:
     //add check for repeating names in list
-    vector<T*> list;
+
+    ~List(){
+        for(size_t i = 0; i < list.size(); i++){
+            delete list.at(i);
+        }
+    }
 
     size_t size(){
         return list.size();
@@ -56,11 +61,14 @@ public:
         list.push_back(&obj);
     }
     void popByName(string name){
-        for(int i = 0; i < list.size(); i++){
+        for(size_t i = 0; i < list.size(); i++){
             if(list.at(i)->name == name){
                 list.erase(list.begin() + i);
             }
         }
+    }
+    void popByIndex(size_t index){
+        list.erase(list.begin() + index);
     }
     T* getByName(string name){
         for(size_t i = 0; i < list.size(); i++){
@@ -73,12 +81,12 @@ public:
     T* at(unsigned int i){
         return list.at(i);
     }
+private:
+    vector<T*> list;
 };
 
 class Window{
 public:
-    GLFWwindow* window;
-
     int width;
     int height;
 
@@ -115,7 +123,12 @@ public:
             glFrontFace(GL_CW);
         }
     }
+    GLFWwindow* getWindowPtr(){
+        return window;
+    }
 private:
+    GLFWwindow* window;
+
     void initGLFW(){
         glfwInit();
 
@@ -165,6 +178,7 @@ private:
 
 class Mesh{
 public:
+    //add some methods to change polygons
     vector<Vertex>* vertices;
     vector<GLuint>* indices;
     vector<int> partEndVertexIds;
@@ -180,7 +194,6 @@ public:
         vertices = new vector<Vertex>();
         this->indices = new vector<GLuint>();
     }
-
     Mesh(const Vertex* vertices, unsigned int nVertices, GLuint* indices, unsigned int nIndices, string name = "noname"){
         this->vertices = new vector<Vertex>(vertices, vertices + nVertices);
         this->indices = new vector<GLuint>(indices, indices + nIndices);
@@ -190,11 +203,15 @@ public:
 
         this->name = name;
     }
+    ~Mesh(){
+        delete vertices;
+        delete indices;
+    }
 
     void pushVertex(Vertex v){
         vertices->push_back(v);
     }
-    void addPolyIndices(GLuint a, GLuint b, GLuint c){
+    void addPolyByIndices(GLuint a, GLuint b, GLuint c){
         indices->push_back(a);
         indices->push_back(b);
         indices->push_back(c);
@@ -266,11 +283,51 @@ public:
                 break;
             }
         }
-
         if(nextPart == true){
             lastPolyIds.push_back(lastPolyId);
         }
-        buildMesh();
+
+        dividePolygonsToTriangles();
+
+        int startFrom = 0;
+        for(size_t i = 0; i < lastPolyIds.size(); ++i){
+            if(mesh->partEndVertexIds.size() > 0)
+                mesh->partEndVertexIds.push_back(mesh->partEndVertexIds.at(i-1));
+            else
+                mesh->partEndVertexIds.push_back(0);
+            for(int j = startFrom; j < lastPolyIds.at(i)+1; ++j){
+                    mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
+            }
+            startFrom = lastPolyIds.at(i)+1;
+        }
+
+        for(auto& currPolyIndexes : *allPolyIndexes){
+            for(auto& indexVec : currPolyIndexes){
+                Vertex v;
+                v.position = poses.at(indexVec.x - 1);
+
+                if(texes.size() != 0)
+                    v.texcoord = texes.at(indexVec.y - 1);
+                else
+                    v.texcoord = glm::vec3(0.f);
+
+                if(norms.size() != 0)
+                    v.normal = norms.at(indexVec.z - 1);
+
+                v.color = glm::vec3(0.f);
+
+                mesh->vertices->push_back(v);
+                ++mesh->nVertices;
+            }
+        }
+
+        mesh->nIndices = 0;
+
+        if(norms.size() == 0){
+            calcNormals();
+        }
+
+        clean();
 
         return *mesh;
     }
@@ -478,49 +535,6 @@ private:
         delete allPolyIndexes;
         allPolyIndexes = newAllPolyIndexes;
     }
-    void buildMesh(){
-        dividePolygonsToTriangles();
-
-        int startFrom = 0;
-        for(size_t i = 0; i < lastPolyIds.size(); ++i){
-            if(mesh->partEndVertexIds.size() > 0)
-                mesh->partEndVertexIds.push_back(mesh->partEndVertexIds.at(i-1));
-            else
-                mesh->partEndVertexIds.push_back(0);
-            for(int j = startFrom; j < lastPolyIds.at(i)+1; ++j){
-                    mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
-            }
-            startFrom = lastPolyIds.at(i)+1;
-        }
-
-        for(auto& currPolyIndexes : *allPolyIndexes){
-            for(auto& indexVec : currPolyIndexes){
-                Vertex v;
-                v.position = poses.at(indexVec.x - 1);
-
-                if(texes.size() != 0)
-                    v.texcoord = texes.at(indexVec.y - 1);
-                else
-                    v.texcoord = glm::vec3(0.f);
-
-                if(norms.size() != 0)
-                    v.normal = norms.at(indexVec.z - 1);
-
-                v.color = glm::vec3(0.f);
-
-                mesh->vertices->push_back(v);
-                ++mesh->nVertices;
-            }
-        }
-
-        mesh->nIndices = 0;
-
-        if(norms.size() == 0){
-            calcNormals();
-        }
-
-        clean();
-    }
     void clean(){
         poses.clear();
         norms.clear();
@@ -559,7 +573,7 @@ public:
         glUseProgram(0);
     }
     void setVertexAttribPointer(string layoutName, int vecSize, size_t offset){
-        //we set the format of data reading below
+        //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
@@ -692,7 +706,8 @@ private:
 class ShaderList : public List<Shader>{
 public:
     void pushNew(string vertexPath, string fragmentPath, string name = "noname"){
-        list.push_back(new Shader(vertexPath, fragmentPath, name));
+        Shader* shader = new Shader(vertexPath, fragmentPath, name);
+        push(*shader);
     }
 };
 
@@ -732,34 +747,25 @@ private:
     Mesh* mesh;
     Shader* shader;
 
-    void initVAO(){
+    void genBuffers(){
         //init and use vao that works just like vbo and ebo buffers wrapper
         glCreateVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
-    }
-    void initVBO(){
+
         //vbo push all vertices array data to gpu and interpret it like some data array
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
-    }
-    void initEBO(){
+
         //ebo push all indices array data to gpu and interpret it like element array
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
-    }
-    void setLayouts(){
+
         shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
         shader->setVertexAttribPointer("vertex_color", 3, offsetof(Vertex, color));
         shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
         shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
-    }
-    void genBuffers(){
-        initVAO();
-        initVBO();
-        initEBO();
-        setLayouts();
 
         //current vao should be set in while window loop
         unbind();
@@ -770,7 +776,7 @@ class Texture{
 public:
     GLuint textureId;
     string name;
-    string path; //same as path
+    string path;
 
     Texture(string name = "noname"){
         this->path = "";
@@ -851,7 +857,7 @@ public:
     void loadNew(string path, string name = "noname"){
         Texture* t = new Texture(path, name);
         t->loadTexture();
-        list.push_back(t);
+        push(*t);
         unbindTextures();
     }
     void pushTextureToShaderByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
@@ -939,7 +945,7 @@ private:
         lastTime = currTime;
     }
     void updateInput(){
-        glfwGetCursorPos(window->window, &mouseX, &mouseY);
+        glfwGetCursorPos(window->getWindowPtr(), &mouseX, &mouseY);
 
         if(firstMouse){
             lastMouseX = mouseX;
@@ -1008,12 +1014,12 @@ public:
         viewMatrix = glm::lookAt(camera->position, camera->position + camera->front, camera->up);
     }
     void setDefaultEvents(){
-        setEvent(window->window, A, camera->position -= camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->window, D, camera->position += camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->window, Q, camera->position -= camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->window, E, camera->position += camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->window, S, camera->position -= camera->front * camera->movementSpeed * mouse->dt);
-        setEvent(window->window, W, camera->position += camera->front * camera->movementSpeed * mouse->dt)
+        setEvent(window->getWindowPtr(), A, camera->position -= camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), D, camera->position += camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), Q, camera->position -= camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), E, camera->position += camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), S, camera->position -= camera->front * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), W, camera->position += camera->front * camera->movementSpeed * mouse->dt)
     }
     void setCamera(Camera& c){
         camera = &c;
@@ -1021,8 +1027,8 @@ public:
     Camera& getCamera(){
         return *camera;
     }
-    const Window& getWindowPtr(){
-        return  *window;
+    const GLFWwindow* getWindowPtr(){
+        return  window->getWindowPtr();
     }
 private:
     Window* window;
@@ -1075,11 +1081,11 @@ public:
         s->setUniformMatrix4fv(uniformName, glm::value_ptr(projectionMatrix));
     }
     void updateMatrices(){
-        glfwGetFramebufferSize(window->window, &window->fbWidth, &window->fbHeight);
+        glfwGetFramebufferSize(window->getWindowPtr(), &window->fbWidth, &window->fbHeight);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
-    const Window& getWindowPtr(){
-        return  *window;
+    const GLFWwindow* getWindowPtr(){
+        return  window->getWindowPtr();
     }
 
     //TODO: fill with smth later
@@ -1113,10 +1119,10 @@ public:
     }
 
     void setDefaultEvents(Window* w){
-        setEvent(w->window, 2, scale -= 0.01f);
-        setEvent(w->window, 1, scale += 0.01f);
-        setEvent(w->window, Z, rotation.y -= 5.f);
-        setEvent(w->window, X, rotation.y += 5.f);
+        setEvent(w->getWindowPtr(), 2, scale -= 0.01f);
+        setEvent(w->getWindowPtr(), 1, scale += 0.01f);
+        setEvent(w->getWindowPtr(), Z, rotation.y -= 5.f);
+        setEvent(w->getWindowPtr(), X, rotation.y += 5.f);
     }
     void move(float x, float y, float z){
         location.x += x;
@@ -1161,6 +1167,9 @@ public:
         lightPos = glm::vec3(0.f, 0.f, 2.f);
     }
 
+    void pushToShader(Shader* s, string uniformName){
+        s->setUniform3fv(uniformName, glm::value_ptr(lightPos));
+    }
     void setPosition(float x, float y, float z){
         lightPos.x += x;
         lightPos.y += y;
@@ -1173,9 +1182,9 @@ public:
     void pushNew(string name = "noname"){
         push(*(new LightSource(name)));
     }
-    void pushToShaderByIndex(Shader* s, int lightSourceNum, string uniformName){
-        LightSource* currentSource = at(lightSourceNum);
-        s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
+    void pushToShaderByIndex(Shader* s, size_t index, string uniformName){
+        LightSource* currentSource = at(index);
+        currentSource->pushToShader(s, uniformName);
     }
     void pushToShaderByName(Shader* s, string name, string uniformName){
         LightSource* currentSource = getByName(name);
@@ -1185,14 +1194,6 @@ public:
 
 class Material{
 public:
-    glm::vec3 ambientColor = glm::vec3(1.f);
-    glm::vec3 diffuseColor = glm::vec3(1.f);
-    glm::vec3 specularColor = glm::vec3(1.f);
-
-    float specularHighlights = 1.f;
-    float opticalDensity = 1.f;
-    float dissolve = 1.f;
-
     void pushToShader(Shader* s, string uniformName){
         s->setUniform3fv(uniformName + ".ambientColor", glm::value_ptr(ambientColor));
         s->setUniform3fv(uniformName + ".diffuseColor", glm::value_ptr(diffuseColor));
@@ -1212,18 +1213,44 @@ public:
     void setSpecularColor(float r, float g, float b){
         specularColor = glm::vec3(r,g,b);
     }
+
     void setSpecularHighlights(float specularHighlights){
         this->specularHighlights = specularHighlights;
     }
-
     void setOticalDensity(float density){
         opticalDensity = density;
     }
     void setDissolve(float dissolve){
         this->dissolve = dissolve;
     }
-private:
 
+    glm::vec3 getAmbientColor(){
+        return ambientColor;
+    }
+    glm::vec3 getDiffuseColor(){
+        return diffuseColor;
+    }
+    glm::vec3 getSpecularColor(){
+        return specularColor;
+    }
+
+    float getSpecularHighlights(){
+        return specularHighlights;
+    }
+    float getOpticalDensity(){
+        return opticalDensity;
+    }
+    float getDissolve(){
+        return dissolve;
+    }
+private:
+    glm::vec3 ambientColor = glm::vec3(1.f);
+    glm::vec3 diffuseColor = glm::vec3(1.f);
+    glm::vec3 specularColor = glm::vec3(1.f);
+
+    float specularHighlights = 1.f;
+    float opticalDensity = 1.f;
+    float dissolve = 1.f;
     //Texture* colorTexture;
 };
 
@@ -1376,7 +1403,7 @@ public:
            LightSourceList& lsl, Material& m,
            string name = "noname")
     {
-        if (w.window != p.getWindowPtr().window || p.getWindowPtr().window != v.getWindowPtr().window){
+        if (w.getWindowPtr() != p.getWindowPtr() || p.getWindowPtr() != v.getWindowPtr()){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";
             return;
@@ -1473,17 +1500,26 @@ public:
     GLuint RBO;
     TextureList* textureColorBuffers;
 
+    string name;
+
     int width;
     int height;
 
-    Framebuffer(int width, int height){
+    Framebuffer(int width, int height, string name = "noname"){
         this->width = width;
         this->height = height;
         this->textureColorBuffers = new TextureList;
         textureColorBuffers->addLayouts(1);
 
+        this->name = name;
+
         glGenFramebuffers(1, &FBO);
         glGenRenderbuffers(1, &RBO);
+    }
+    ~Framebuffer(){
+        delete textureColorBuffers;
+        glDeleteBuffers(1, &FBO);
+        glDeleteBuffers(1, &RBO);
     }
 
     void genTextureColorBuffers(size_t amount){
@@ -1537,14 +1573,15 @@ class FramebufferList : public List<Framebuffer>{
 
 class Renderer{
 public:
+    //add remove object from list method
     Window* window;
     Perspective* perspective;
     View* view;
     MouseListener* mouse;
-    CameraList* camList;
+    CameraList* camList;//void addCamera
     SkyboxList* skyboxes;
     FramebufferList* framebuffers;
-    LightSourceList* lightSources = nullptr;
+    LightSourceList* lightSources;
 
     float r, g, b, a;
 
@@ -1559,12 +1596,26 @@ public:
         objects = new Objects;
         skyboxes = new SkyboxList;
         framebuffers = new FramebufferList;
+        lightSources = new LightSourceList;
+    }
+    ~Renderer(){
+        delete window;
+        delete perspective;
+        delete view;
+        delete mouse;
+        delete camList;
+        delete skyboxes;
+        delete objects;
     }
 
     //make arguments optional
-    void addNewObject(TextureList& tl, Shader& s, Buffer& b, LightSourceList& lsl, Material& m){
-        lightSources = &lsl;
-        Object* o = new Object(*window, tl, s, b, *perspective, *view, lsl, m);
+    void addNewLightSource(float x, float y, float z, string name = "noname"){
+        LightSource* ls = new LightSource(name);
+        ls->setPosition(x,y,z);
+        lightSources->push(*ls);
+    }
+    void addNewObject(TextureList& tl, Shader& s, Buffer& b, Material* m, string name = "noname"){
+        Object* o = new Object(*window, tl, s, b, *perspective, *view, *lightSources, *m, name);
         objects->push(*o);
     }
     void addNewSkybox(Shader& s, vector<string> facePaths, Buffer& b, string name = "noname"){
@@ -1575,26 +1626,40 @@ public:
     void addFramebuffer(Framebuffer& fb){
         framebuffers->push(fb);
     }
-    Object* getObjectByIndex(unsigned int index){
+    Object* getObjectByIndex(size_t index){
         return objects->at(index);
     }
     Object* getObjectByName(string name){
         return objects->getByName(name);
     }
+    void popObjectByIndex(size_t index){
+        objects->popByIndex(index);
+    }
+    void popObjectByName(string name){
+        objects->popByName(name);
+    }
+
     SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
         return skyboxes->at(index);
     }
     SkyboxObject* getSkyboxObjectByName(string name){
         return skyboxes->getByName(name);
     }
+    void popSkyboxObjectByIndex(size_t index){
+        objects->popByIndex(index);
+    }
+    void popSkyboxObjectByName(string name){
+        objects->popByName(name);
+    }
+
     void render(void (*frameFunction)(Renderer&)){
         doContinue = true;
-        while (!glfwWindowShouldClose(window->window))
+        while (!glfwWindowShouldClose(window->getWindowPtr()))
         {
             glfwPollEvents();
 
             //get enter press event to fast close
-            if(glfwGetKey(window->window, GLFW_KEY_ENTER) == GLFW_PRESS){
+            if(glfwGetKey(window->getWindowPtr(), GLFW_KEY_ENTER) == GLFW_PRESS){
                 doContinue = false;
             }
 
@@ -1604,11 +1669,11 @@ public:
 
             frameFunction(*this);
 
-            glfwSwapBuffers(window->window);
+            glfwSwapBuffers(window->getWindowPtr());
             glFlush();
 
             if(!doContinue){
-                glfwSetWindowShouldClose(window->window, GLFW_TRUE);
+                glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);
                 break;
             }
         }
@@ -1635,7 +1700,7 @@ void drawObject(Object& o){
 }
 void drawFrame(Renderer& r){
     Object* currObj;
-
+    ///////////////////////////////
     r.framebuffers->at(0)->bind();
 
     r.bindBackgroundColor();
@@ -1644,29 +1709,31 @@ void drawFrame(Renderer& r){
     currObj = r.getObjectByIndex(0);
     currObj->draw(drawObject);
 
+    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
+
     currObj = r.getObjectByIndex(1);
     currObj->draw(drawObject);
 
+    r.skyboxes->at(0)->draw();
+
     r.framebuffers->at(0)->unbind();
-
-
+    ///////////////////////////////
     r.bindBackgroundColor();
     r.clearBuffers();
 
     currObj = r.getObjectByIndex(2);
     currObj->draw(drawObject);
-
-    r.skyboxes->at(0)->draw();
+    ///////////////////////////////
 
     static float defaultSpeed = r.view->getCamera().movementSpeed;
 
     bool isShiftPressed = false;
-    setEvent(r.window->window, LEFT_SHIFT, isShiftPressed = true);
+    setEvent(r.window->getWindowPtr(), LEFT_SHIFT, isShiftPressed = true);
     if(isShiftPressed){
         r.view->getCamera().movementSpeed = defaultSpeed * 2;
     }
     bool isCtrlPressed = false;
-    setEvent(r.window->window, LEFT_CONTROL, isCtrlPressed = true);
+    setEvent(r.window->getWindowPtr(), LEFT_CONTROL, isCtrlPressed = true);
     if(isCtrlPressed){
         r.view->getCamera().movementSpeed = defaultSpeed / 3;
     }
@@ -1676,7 +1743,7 @@ void drawFrame(Renderer& r){
 
     //add all get set methods to reduce this one callback size
     //also do it with every class
-    setEvent(r.window->window, F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().position);
+    setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().position);
 }
 
 int main (){
@@ -1688,7 +1755,6 @@ int main (){
     MeshList meshList;
     ShaderList shaders;
     TextureList tex;
-    LightSourceList lightSources;
 
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\dragon.obj", "loaded"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
@@ -1708,9 +1774,6 @@ int main (){
     tex.appendTextureToLayout(0, 0, 0, "texture0");
     tex.appendTextureToLayout(0, 1, 1, "specularTex");
 
-    //TODO: do something with lightsources
-    lightSources.push(*new LightSource("default"));
-
     Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
@@ -1723,12 +1786,16 @@ int main (){
     framebuffer.genTextureColorBuffers(1);
     renderer.addFramebuffer(framebuffer);
 
-    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
-    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, lightSources, mat);
-    renderer.addNewObject(*framebuffer.textureColorBuffers, *shaders.getByName("screen"), quad, lightSources, mat);
+    renderer.addNewLightSource(0,0,2,"default");
+
+    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, &mat);
+    renderer.addNewObject(tex, *shaders.getByName("default"), buffer, &mat);
+    renderer.addNewObject(*framebuffer.textureColorBuffers, *shaders.getByName("screen"), quad, &mat);
     renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
     renderer.getObjectByIndex(1)->move(2.f,0,0);
     renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+    renderer.getObjectByIndex(2)->move(0.f,0,0);
+    renderer.getObjectByIndex(2)->rotate(0,180,0);
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
@@ -1739,7 +1806,7 @@ int main (){
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\back.jpg");
 
     renderer.addNewSkybox(*shaders.getByName("skybox"), skyboxSides, skyboxCube);
-    renderer.getSkyboxObjectByIndex(0)->scaleTo(5,5,5);
+    renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
     renderer.render(drawFrame);
