@@ -28,6 +28,9 @@ uniform Material material;
 void main()
 {
     vec4 tex = texture(textureColorBuffer0, vs_texcoord);
+//    tex.r = 1 - tex.r;
+//    tex.g = 1 - tex.g;
+//    tex.b = 1 - tex.b;
 
     fs_color = tex;
 }
