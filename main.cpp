@@ -25,7 +25,9 @@ using namespace std;
 //TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes are just data containers, rename classes or smth else
 //TODO: add shaderlist to renderer, let renderer choose which shader should be applied to object
-//TODO: user should be able to pass objects and skyboxes to shader from drawFunction
+//      user should be able to pass objects and skyboxes to shader from drawFunction
+//      might make variable to check current active shader to check if its uniforms are already up-to-date
+//      or make class ShaderUpdater to dinamically push data to shader
 //TODO: make methods to access the objects of built-in classes
 struct Vertex{
     glm::vec3 position;
@@ -1323,19 +1325,19 @@ public:
     SkyboxTexture* skyboxTexture;
 
     Window* window;
-    Shader* shader;
     View* view;
     Perspective* perspective;
     Buffer* buffer;
+    Shader* shader;//same as in buffer
     Position* position;
 
     string name;
 
-    SkyboxObject(SkyboxTexture& st, Window& w, Shader& s, Buffer& b, Perspective& p, View& v){
+    SkyboxObject(SkyboxTexture& st, Window& w, Buffer& b, Perspective& p, View& v){
         skyboxTexture = &st;
         window = &w;
-        shader = &s;
         buffer = &b;
+        shader = buffer->shader;
         perspective = &p;
         view = &v;
 
@@ -1403,6 +1405,8 @@ public:
 
     string name;
 
+    static GLuint currShaderId;
+
     //make arguments optional
     Object(Window& w, TextureList& t,
            Buffer& b, Perspective& p,
@@ -1429,19 +1433,24 @@ public:
         position = new Position();
     }
 
-    void draw(void (*drawObjectFunction)(Object&)){
+    void draw(void (*shaderPassFunction)(Object&), bool isSameShaderPassFunctionAsPrevCall = false){
         shader->bind();
 
         position->pushToShader(shader, "modelMatrix");
-        perspective->pushToShader(shader, "projectionMatrix");
-        view->pushToShader(shader, "viewMatrix", "cameraPos");
-        materials->at(0)->pushToShader(shader, "material");
-
         position->setDefaultEvents(window);
+
+        if(currShaderId != shader->program){
+            currShaderId = shader->program;
+
+            perspective->pushToShader(shader, "projectionMatrix");
+            view->pushToShader(shader, "viewMatrix", "cameraPos");
+        }
+        if(!isSameShaderPassFunctionAsPrevCall){
+            shaderPassFunction(*this);
+        }
 
         buffer->bind();
 
-        drawObjectFunction(*this);
 
         if (buffer->getMesh().nIndices != 0)
             glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -1503,6 +1512,8 @@ public:
         position->scaleTo(x,y,z);
     }
 };
+
+GLuint Object::currShaderId = -1;
 
 class Objects : public List<Object>{
 
@@ -1632,9 +1643,9 @@ public:
         Object* o = new Object(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
         objects->push(*o);
     }
-    void addNewSkybox(Shader& s, vector<string> facePaths, Buffer& b, string name = "noname"){
+    void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths, name);
-        SkyboxObject* so = new SkyboxObject(*st, *window, s, b, *perspective, *view);
+        SkyboxObject* so = new SkyboxObject(*st, *window, b, *perspective, *view);
         skyboxes->push(*so);
     }
     void addFramebuffer(Framebuffer& fb){
@@ -1722,6 +1733,8 @@ private:
     bool doContinue = false;
 };
 
+int amount = 2;
+
 void drawObject(Object& o){
     o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
 }
@@ -1733,17 +1746,22 @@ void drawFrame(Renderer& r){
     currObj = r.getObjectByIndex(0);
     currObj->draw(drawObject);
 
+    for(int i = 1; i < amount; i++){
+        currObj = r.getObjectByIndex(i);
+        currObj->draw(drawObject);
+    }
+
     r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
 
-    currObj = r.getObjectByIndex(1);
-    currObj->draw(drawObject);
+//    currObj = r.getObjectByIndex(1);
+//    currObj->draw(drawObject);
 
     r.skyboxes->at(0)->draw();
 
     r.bindDefaultFramebuffer();
     ///////////////////////////////
 
-    currObj = r.getObjectByIndex(2);
+    currObj = r.getObjectByName("screen");
     currObj->draw(drawObject);
     ///////////////////////////////
 
@@ -1782,8 +1800,8 @@ int main (){
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
 
-    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\vertex.vsh",
-                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\fragment.fsh", "default");
+    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_vertex.vsh",
+                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_fragment.fsh", "default");
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skybox_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skybox_fragment.fsh", "skybox");
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_vertex.vsh",
@@ -1813,15 +1831,22 @@ int main (){
 
     renderer.addNewLightSource(0,0,2,"default");
 
-    renderer.addNewObject(tex, buffer, &materials);
-    renderer.addNewObject(tex, buffer, &materials);
-    renderer.addNewObject(*framebuffer.textureColorBuffers, quad, &materials);
+    int x = 0;
+    for(int i = 0; i < amount; i++){
+        renderer.addNewObject(tex, buffer, &materials);
+        renderer.getObjectByIndex(i)->moveTo(x,0,0);
+        renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
+        x+= 2;
+    }
 
-    renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
-    renderer.getObjectByIndex(1)->move(2.f,0,0);
-    renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
-    renderer.getObjectByIndex(2)->move(0.f,0,0);
-    renderer.getObjectByIndex(2)->rotate(0,180,0);
+//    renderer.addNewObject(tex, buffer, &materials);
+//    renderer.addNewObject(tex, buffer, &materials);
+    renderer.addNewObject(*framebuffer.textureColorBuffers, quad, &materials, "screen");
+
+//    renderer.getObjectByIndex(0)->scaleTo(0.01f, 0.01f, 0.01f);
+//    renderer.getObjectByIndex(1)->move(2.f,0,0);
+//    renderer.getObjectByIndex(1)->scaleTo(0.01f, 0.01f, 0.01f);
+    renderer.getObjectByName("screen")->rotate(0,180,0);
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
@@ -1831,7 +1856,7 @@ int main (){
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\front.jpg");
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\back.jpg");
 
-    renderer.addNewSkybox(*shaders.getByName("skybox"), skyboxSides, skyboxCube);
+    renderer.addNewSkybox(skyboxSides, skyboxCube);
     renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
