@@ -15,7 +15,7 @@ void drawFrame(Renderer& r){
     currObj = r.getObjectByIndex(0);
     currObj->draw(shaderObjectFunc);
 
-    for(int i = 1; i < amount; i++){
+    for(int i = 0; i < amount; i++){
         currObj = r.getObjectByIndex(i);
         currObj->draw(shaderObjectFunc);
     }
@@ -48,6 +48,8 @@ void drawFrame(Renderer& r){
     }
 
     setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().position);
+    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 < 14) someCounter += 1.f/10.f; cout << someCounter << endl;);
+    setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 > 0) someCounter -= 1.f/10.f; cout << someCounter << endl;);
 }
 
 int main (){
@@ -58,11 +60,11 @@ int main (){
     MeshLoader meshLoader;
     MeshList meshList;
     ShaderList shaders;
-    TextureList tex, tex1, tex2;
+    TextureList tex;
     MaterialList materials;
 
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\neptune\\neptune.obj", "loaded"));
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa1.obj", "loaded1"));
+//    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\neptune\\neptune.obj", "loaded"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded1"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
 
@@ -73,33 +75,36 @@ int main (){
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
 
-    tex.loadNew("C:/EngPathReq/might_beeeeeeeeeeee/pictures/box.png");
-    tex.loadNew("C:/EngPathReq/might_beeeeeeeeeeee/pictures/box1.png");
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//1e1868e0.png");//0
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku1.png");//1
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku2.png");//2
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku3.png");//3
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku4.png");//4
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku6.png");//5
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//M1.png");//6
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a1.png");//7
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a3.png");//8
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a4.png");//9
+    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a9.png");//10
 
-    tex.addLayouts(1);
-    tex.appendTextureToLayout(0, 0, 0, "texture0");
-    tex.appendTextureToLayout(0, 1, 1, "specularTex");
+    tex.addLayouts(13);
+    tex.appendTextureToLayout(0, 0, 0, "texture0");//body
+    tex.appendTextureToLayout(1, 0, 6, "texture0");//legs
+    tex.appendTextureToLayout(2, 0, 4, "texture0");//обводка
 
-    tex1.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//neptune//Texf_mouse.png");
-    tex1.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//neptune//Tex002f_body01.png");
-    tex1.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//neptune//Tex002f_body02.png");
-    tex1.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//neptune//Texf_body02.png");
-    tex1.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//neptune//Tex001f_eye.png");
+    tex.appendTextureToLayout(3, 0, 1, "texture0");//лицо
+    tex.appendTextureToLayout(4, 0, 1, "texture0");//белок
+    tex.appendTextureToLayout(5, 0, 1, "texture0");//зрачки
+    tex.appendTextureToLayout(6, 0, 1, "texture0");//блёстки
+    tex.appendTextureToLayout(7, 0, 2, "texture0");//волосы передние
+    tex.appendTextureToLayout(8, 0, 2, "texture0");//волосы передние снизу
+    tex.appendTextureToLayout(9, 0, 2, "texture0");//?
+    tex.appendTextureToLayout(10, 0, 3, "texture0");//наушники
+    tex.appendTextureToLayout(11, 0, 3, "texture0");//наушники - обводка
 
-    tex1.addLayouts(4);
-    tex1.appendTextureToLayout(0, 0, 0, "texture0"); //mouse
-    tex1.appendTextureToLayout(0, 1, 0, "specularTex"); //mouse
-    tex1.appendTextureToLayout(1, 0, 1, "texture0"); //body
-    tex1.appendTextureToLayout(1, 1, 2, "specularTex"); //body
-    tex1.appendTextureToLayout(2, 0, 3, "texture0"); //body02
-    tex1.appendTextureToLayout(2, 1, 3, "specularTex"); //body02
-    tex1.appendTextureToLayout(3, 0, 4, "texture0"); //eye
-    tex1.appendTextureToLayout(3, 1, 4, "specularTex"); //eye
+    tex.appendTextureToLayout(12, 0, 2, "texture0");//tails
 
-//    tex2.addLayouts(3);
-//    tex2.appendTextureToLayout(0, )
-
-    Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
+//    Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
     Buffer buffer1(*meshList.getByName("loaded1"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
@@ -118,7 +123,7 @@ int main (){
 
     int x = 0;
     for(int i = 0; i < amount; i++){
-        renderer.addNewObject(tex1, buffer1, &materials);
+        renderer.addNewObject(tex, buffer1, &materials);
         renderer.getObjectByIndex(i)->moveTo(x,0,0);
         renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
         x+= 2.2f;
