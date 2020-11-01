@@ -19,6 +19,8 @@
 
 using namespace std;
 
+typedef unsigned int uint;
+
 #define setEvent(GLuint_window, Button, Code)\
     if(glfwGetKey(GLuint_window, GLFW_KEY_##Button) == GLFW_PRESS){\
         Code;\
@@ -38,16 +40,16 @@ struct Vertex{
     glm::vec3 normal;
 };
 
-struct intvec3{
-    intvec3(int x, int y, int z){
+struct uintvec3{
+    uintvec3(uint x, uint y, uint z){
         this->x = x;
         this->y = y;
         this->z = z;
     }
 
-    int x;
-    int y;
-    int z;
+    uint x;
+    uint y;
+    uint z;
 };
 
 template<class T>

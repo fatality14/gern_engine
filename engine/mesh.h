@@ -6,11 +6,11 @@ class Mesh{
 public:
     //add some methods to change polygons
     vector<Vertex>* vertices;
-    vector<GLuint>* indices;
-    vector<int> partEndVertexIds;
+    vector<uint>* indices;
+    vector<uint> partEndVertexIds;
 
-    unsigned int nVertices = 0;
-    unsigned int nIndices = 0;
+    uint nVertices = 0;
+    uint nIndices = 0;
 
     string name;
 
@@ -18,11 +18,11 @@ public:
         this->name = name;
 
         vertices = new vector<Vertex>();
-        this->indices = new vector<GLuint>();
+        this->indices = new vector<uint>();
     }
-    Mesh(const Vertex* vertices, unsigned int nVertices, GLuint* indices, unsigned int nIndices, string name = "noname"){
+    Mesh(const Vertex* vertices, uint nVertices, uint* indices, uint nIndices, string name = "noname"){
         this->vertices = new vector<Vertex>(vertices, vertices + nVertices);
-        this->indices = new vector<GLuint>(indices, indices + nIndices);
+        this->indices = new vector<uint>(indices, indices + nIndices);
 
         this->nVertices = nVertices;
         this->nIndices = nIndices;
@@ -37,7 +37,7 @@ public:
     void pushVertex(Vertex v){
         vertices->push_back(v);
     }
-    void addPolyByIndices(GLuint a, GLuint b, GLuint c){
+    void addPolyByIndices(uint a, uint b, uint c){
         indices->push_back(a);
         indices->push_back(b);
         indices->push_back(c);

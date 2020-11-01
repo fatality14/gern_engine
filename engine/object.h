@@ -25,6 +25,7 @@ public:
 
     string name;
 
+    static GLuint drawmode;
     static GLuint currShaderId;
 
     //make arguments optional
@@ -53,6 +54,9 @@ public:
         position = new Position();
     }
 
+    static void setDrawMode(GLuint GL_drawmode){
+        drawmode = GL_drawmode;
+    }
     void draw(void (*shaderPassFunction)(Object&), bool isSameShaderPassFunctionAsPrevCall = false){
         shader->bind();
 
@@ -73,11 +77,11 @@ public:
 
 
         if (buffer->getMesh().nIndices != 0)
-            glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+            glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT64_ARB, (void*)0);
         else{
             Mesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
-            int startFrom = 0;
+            uint startFrom = 0;
             bool first = true;
             size_t textureI = 0;
             size_t materialI = 0;
@@ -96,12 +100,15 @@ public:
 
                 if(first){
                     //cout << "Draw " << i << " part." << endl;
+                    //cout << startFrom << " " << currMesh->partEndVertexIds.at(i) << endl;
                     first = false;
-                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i));
+                    glDrawArrays(drawmode, startFrom, currMesh->partEndVertexIds.at(i));
+                    startFrom = currMesh->partEndVertexIds.at(i);
                 }
                 else{
                     //cout << "Draw " << i << " part." << endl;
-                    glDrawArrays(GL_TRIANGLES, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
+                    //cout << startFrom << " " << currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1) << endl;
+                    glDrawArrays(drawmode, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
                     startFrom = currMesh->partEndVertexIds.at(i);
                 }
             }
@@ -138,6 +145,7 @@ public:
     }
 };
 GLuint Object::currShaderId = -1;
+GLuint Object::drawmode = GL_TRIANGLES;
 
 class Objects : public List<Object>{
 

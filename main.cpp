@@ -58,10 +58,11 @@ int main (){
     MeshLoader meshLoader;
     MeshList meshList;
     ShaderList shaders;
-    TextureList tex, tex1;
+    TextureList tex, tex1, tex2;
     MaterialList materials;
 
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\neptune\\neptune.obj", "loaded"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa1.obj", "loaded1"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
 
@@ -95,7 +96,11 @@ int main (){
     tex1.appendTextureToLayout(3, 0, 4, "texture0"); //eye
     tex1.appendTextureToLayout(3, 1, 4, "specularTex"); //eye
 
+//    tex2.addLayouts(3);
+//    tex2.appendTextureToLayout(0, )
+
     Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
+    Buffer buffer1(*meshList.getByName("loaded1"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
 
@@ -113,7 +118,7 @@ int main (){
 
     int x = 0;
     for(int i = 0; i < amount; i++){
-        renderer.addNewObject(tex1, buffer, &materials);
+        renderer.addNewObject(tex1, buffer1, &materials);
         renderer.getObjectByIndex(i)->moveTo(x,0,0);
         renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
         x+= 2.2f;

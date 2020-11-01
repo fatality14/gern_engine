@@ -133,6 +133,8 @@ public:
                 glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);
                 break;
             }
+
+            Object::currShaderId = -1;
         }
     }
     void setBackgroundColor(float r, float g, float b, float a){

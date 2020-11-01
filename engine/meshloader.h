@@ -6,7 +6,7 @@
 class MeshLoader{
 public:
     MeshLoader(){
-        allPolyIndexes = new vector<vector<intvec3>>;
+        allPolyIndexes = new vector<vector<uintvec3>>;
     }
 
     Mesh& load(string path, string meshName = "noname"){
@@ -21,7 +21,7 @@ public:
         bool end;
 
         bool nextPart = false;
-        int lastPolyId = -1;
+        uint lastPolyId = -1;
 
         while(!f.eof()){
             switchCase = -1;
@@ -50,21 +50,27 @@ public:
                 switchCase = 3;
                 nextPart = true;
             }
+            if(token == "#"){
+                switchCase = 4;
+            }
 
             switch (switchCase) {
             case -1:
                 break;
             case 0:
-                poses.push_back(parsePos(line));
+                poses.push_back(parseVec3(line));
                 break;
             case 1:
-                norms.push_back(parseNorm(line));
+                norms.push_back(parseVec3(line));
                 break;
             case 2:
-                texes.push_back(parseNorm(line));
+                texes.push_back(parseVec2(line));
                 break;
             case 3:
                 allPolyIndexes->push_back(parseIndexes(line, calcNumArgsDividedBy(" ", line)));
+                break;
+            case 4:
+                cout << line << endl;
                 break;
             }
         }
@@ -74,14 +80,14 @@ public:
 
         dividePolygonsToTriangles();
 
-        int startFrom = 0;
-        for(size_t i = 0; i < lastPolyIds.size(); ++i){
+        uint startFrom = 0;
+        for(uint i = 0; i < lastPolyIds.size(); ++i){
             if(mesh->partEndVertexIds.size() > 0)
                 mesh->partEndVertexIds.push_back(mesh->partEndVertexIds.at(i-1));
             else
                 mesh->partEndVertexIds.push_back(0);
-            for(int j = startFrom; j < lastPolyIds.at(i)+1; ++j){
-                    mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
+            for(uint j = startFrom; j < lastPolyIds.at(i)+1; ++j){
+                mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
             }
             startFrom = lastPolyIds.at(i)+1;
         }
@@ -125,10 +131,10 @@ private:
     vector<glm::vec3> norms;
     vector<glm::vec2> texes;
 
-    vector<intvec3> indexes;
-    vector<vector<intvec3>>* allPolyIndexes;
+    vector<uintvec3> indexes;
+    vector<vector<uintvec3>>* allPolyIndexes;
 
-    vector<int> lastPolyIds;
+    vector<uint> lastPolyIds;
 
     void removeBadSpaces(string& line){
         size_t i = -1;
@@ -174,22 +180,7 @@ private:
         }
         return *token;
     }
-    glm::vec3& parsePos(string& line){
-        float pos[3];
-        int i = -1;
-        bool end;
-
-        while (true){
-            ++i;
-            token = bite(" ", line, end);
-            if(i < 3)
-                pos[i] = stof(token);
-            if(end)
-                break;
-        }
-        return *new glm::vec3(pos[0], pos[1], pos[2]);
-    }
-    glm::vec3& parseNorm(string& line){
+    glm::vec3& parseVec3(string& line){
         float norm[3];
         int i = -1;
         bool end;
@@ -204,7 +195,7 @@ private:
         }
         return *new glm::vec3(norm[0], norm[1], norm[2]);
     }
-    glm::vec2& parseTex(string& line){
+    glm::vec2& parseVec2(string& line){
         float norm[2];
         int i = -1;
         bool end;
@@ -219,50 +210,50 @@ private:
         }
         return *new glm::vec2(norm[0], norm[1]);
     }
-    vector<intvec3>& parseIndexes(string& line, int numArgsF){
-        int ind[3];
+    vector<uintvec3>& parseIndexes(string& line, int numArgsF){
+        uint ind[3];
         string copyLine = line;
         bool end;
         int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
 
-        vector<intvec3>* indexes = new vector<intvec3>;
+        vector<uintvec3>* indexes = new vector<uintvec3>;
 
         //cout << token << " ";
         while (true){
             if(numInd == 1){
                 token = bite(" ", line, end);
-                ind[0] = stoi(token);
+                ind[0] = stoull(token);
                 ind[1] = ind[2] = 1;//very important to set 1
             }
             if(numInd == 2){
                 token = bite("/", line, end);
-                ind[0] = stoi(token);
+                ind[0] = stoull(token);
                 token = bite(" ", line, end);
                 if(token != "")
-                    ind[1] = stoi(token);
+                    ind[1] = stoull(token);
                 else
                     ind[1] = 1;
                 ind[2] = 1;
             }
             if(numInd == 3){
                 token = bite("/", line, end);
-                ind[0] = stoi(token);
+                ind[0] = stoull(token);
 
                 token = bite("/", line, end);
                 if(token != "")
-                    ind[1] = stoi(token);
+                    ind[1] = stoull(token);
                 else
                     ind[1] = 1;
 
                 token = bite(" ", line, end);
                 if(token != "")
-                    ind[2] = stoi(token);
+                    ind[2] = stoull(token);
                 else
                     ind[2] = 1;
             }
 
             --numArgsF;
-            indexes->push_back(intvec3(ind[0], ind[1], ind[2]));
+            indexes->push_back(uintvec3(ind[0], ind[1], ind[2]));
 
             if(numArgsF == 0){
                 break;
@@ -297,9 +288,10 @@ private:
         }
     }
     void dividePolygonsToTriangles(){
-        vector<intvec3> newPolyIndexes;
-        vector<vector<intvec3>>* newAllPolyIndexes = new vector<vector<intvec3>>;
-        int i;
+        vector<uintvec3> newPolyIndexes;
+        vector<vector<uintvec3>>* newAllPolyIndexes = new vector<vector<uintvec3>>;
+        uint i;
+        uint count = 0;
         for(auto& currPolyIndexes : *allPolyIndexes){
             newPolyIndexes.clear();
             if(currPolyIndexes.size() > 3){
@@ -309,11 +301,13 @@ private:
                     newPolyIndexes.push_back(currPolyIndexes.at(i));
                     newPolyIndexes.push_back(currPolyIndexes.at(i+1));
                     ++i;
+                    ++count;
                 }
                 newAllPolyIndexes->push_back(newPolyIndexes);
             }
             else{
                 newAllPolyIndexes->push_back(currPolyIndexes);
+                ++count;
             }
         }
 
