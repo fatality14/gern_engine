@@ -70,7 +70,7 @@ public:
                 allPolyIndexes->push_back(parseIndexes(line, calcNumArgsDividedBy(" ", line)));
                 break;
             case 4:
-                cout << line << endl;
+                //cout << line << endl;
                 break;
             }
         }
@@ -222,32 +222,32 @@ private:
         while (true){
             if(numInd == 1){
                 token = bite(" ", line, end);
-                ind[0] = stoull(token);
+                ind[0] = stoul(token);
                 ind[1] = ind[2] = 1;//very important to set 1
             }
             if(numInd == 2){
                 token = bite("/", line, end);
-                ind[0] = stoull(token);
+                ind[0] = stoul(token);
                 token = bite(" ", line, end);
                 if(token != "")
-                    ind[1] = stoull(token);
+                    ind[1] = stoul(token);
                 else
                     ind[1] = 1;
                 ind[2] = 1;
             }
             if(numInd == 3){
                 token = bite("/", line, end);
-                ind[0] = stoull(token);
+                ind[0] = stoul(token);
 
                 token = bite("/", line, end);
                 if(token != "")
-                    ind[1] = stoull(token);
+                    ind[1] = stoul(token);
                 else
                     ind[1] = 1;
 
                 token = bite(" ", line, end);
                 if(token != "")
-                    ind[2] = stoull(token);
+                    ind[2] = stoul(token);
                 else
                     ind[2] = 1;
             }
