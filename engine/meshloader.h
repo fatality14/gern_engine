@@ -21,6 +21,7 @@ public:
         bool end;
 
         bool nextPart = false;
+        bool nextMtl = false;
         uint lastPolyId = -1;
 
         while(!f.eof()){
@@ -46,12 +47,21 @@ public:
                 switchCase = 2;
             }
             if(token == "f"){
+                if(nextMtl){
+                    if(lastPolyId != (uint)-1)
+                        lastMtlIds.push_back(lastPolyId);
+                    nextMtl = false;
+                }
                 ++lastPolyId;
                 switchCase = 3;
                 nextPart = true;
             }
-            if(token == "#"){
+            if(token == "usemtl"){
                 switchCase = 4;
+                nextMtl = true;
+            }
+            if(token == "#"){
+                switchCase = 5;
             }
 
             switch (switchCase) {
@@ -76,6 +86,7 @@ public:
         }
         if(nextPart == true){
             lastPolyIds.push_back(lastPolyId);
+            lastMtlIds.push_back(lastPolyId);
         }
 
         dividePolygonsToTriangles();
@@ -90,6 +101,18 @@ public:
                 mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
             }
             startFrom = lastPolyIds.at(i)+1;
+        }
+
+        startFrom = 0;
+        for(uint i = 0; i < lastMtlIds.size(); ++i){
+            if(mesh->partEndMtlIds.size() > 0)
+                mesh->partEndMtlIds.push_back(mesh->partEndMtlIds.at(i-1));
+            else
+                mesh->partEndMtlIds.push_back(0);
+            for(uint j = startFrom; j < lastMtlIds.at(i)+1; ++j){
+                mesh->partEndMtlIds.at(i) += allPolyIndexes->at(j).size();
+            }
+            startFrom = lastMtlIds.at(i)+1;
         }
 
         for(auto& currPolyIndexes : *allPolyIndexes){
@@ -135,6 +158,7 @@ private:
     vector<vector<uintvec3>>* allPolyIndexes;
 
     vector<uint> lastPolyIds;
+    vector<uint> lastMtlIds;
 
     void removeBadSpaces(string& line){
         size_t i = -1;
@@ -321,5 +345,6 @@ private:
         indexes.clear();
         allPolyIndexes->clear();
         lastPolyIds.clear();
+        lastMtlIds.clear();
     }
 };

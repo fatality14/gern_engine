@@ -8,6 +8,7 @@ public:
     vector<Vertex>* vertices;
     vector<uint>* indices;
     vector<uint> partEndVertexIds;
+    vector<uint> partEndMtlIds;
 
     uint nVertices = 0;
     uint nIndices = 0;

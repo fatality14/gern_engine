@@ -21,7 +21,7 @@ public:
     View* view;
     Perspective* perspective;
     LightSourceList* lightSources;
-    MaterialList* materials;
+    MaterialList* materials;//move to mesh
 
     string name;
 
@@ -82,10 +82,10 @@ public:
             Mesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
             uint startFrom = 0;
-            bool first = true;
             size_t textureI = 0;
             size_t materialI = 0;
-            for(size_t i = 0; i < currMesh->partEndVertexIds.size(); ++i){
+
+            for(size_t j = 0; j < currMesh->partEndMtlIds.size() - someCounter; ++j){
                 if(textureI == texList->layoutsAmount()){
                     textureI = 0;
                 }
@@ -98,18 +98,13 @@ public:
                 materials->at(materialI)->pushToShader(shader, "material");
                 ++materialI;
 
-                if(first){
-                    //cout << "Draw " << i << " part." << endl;
-                    //cout << startFrom << " " << currMesh->partEndVertexIds.at(i) << endl;
-                    first = false;
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndVertexIds.at(i));
-                    startFrom = currMesh->partEndVertexIds.at(i);
+                if(j == 0){
+                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j));
+                    startFrom = currMesh->partEndMtlIds.at(j);
                 }
                 else{
-                    //cout << "Draw " << i << " part." << endl;
-                    //cout << startFrom << " " << currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1) << endl;
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndVertexIds.at(i) - currMesh->partEndVertexIds.at(i-1));
-                    startFrom = currMesh->partEndVertexIds.at(i);
+                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j) - currMesh->partEndMtlIds.at(j-1));
+                    startFrom = currMesh->partEndMtlIds.at(j);
                 }
             }
         }

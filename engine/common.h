@@ -26,6 +26,8 @@ typedef unsigned int uint;
         Code;\
     }\
 
+float someCounter = 0;
+
 //TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes are just data containers, rename classes or smth else
 //TODO: add shaderlist to renderer, let renderer choose which shader should be applied to object
