@@ -10,12 +10,13 @@
 #include <engine/texture.h>
 #include <engine/lightsource.h>
 #include <engine/material.h>
+#include <engine/skeletonbuffer.h>
 
-class Object{
+class SkeletonObject{
 public:
     Window* window;
     TextureList* texList;
-    Buffer* buffer;
+    SkeletonBuffer* buffer;
     Shader* shader;//shader same as in buffer
     Position* position;
     View* view;
@@ -23,14 +24,16 @@ public:
     LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
 
+//    vector<glm::mat4> transitions;//add Joint class hierarchy and remove transitions from here
+
     string name;
 
     static GLuint drawmode;
     static GLuint currShaderId;
 
     //make arguments optional
-    Object(Window& w, TextureList& t,
-           Buffer& b, Perspective& p,
+    SkeletonObject(Window& w, TextureList& t,
+           SkeletonBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
            MaterialList& ml, string name = "noname")
     {
@@ -57,7 +60,7 @@ public:
     static void setDrawMode(GLuint GL_drawmode){
         drawmode = GL_drawmode;
     }
-    void draw(void (*shaderPassFunction)(Object&), bool isSameShaderPassFunctionAsPrevCall = false){
+    void draw(void (*shaderPassFunction)(SkeletonObject&), bool isSameShaderPassFunctionAsPrevCall = false){
         shader->bind();
 
         position->pushToShader(shader, "modelMatrix");
@@ -66,6 +69,7 @@ public:
         if(currShaderId != shader->program){
             currShaderId = shader->program;
 
+//            shader->setUniformMatrix4fv("jointTransforms", transitions.data(), 50);
             perspective->pushToShader(shader, "projectionMatrix");
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
@@ -79,7 +83,7 @@ public:
         if (buffer->getMesh().nIndices != 0)
             glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT64_ARB, (void*)0);
         else{
-            Mesh* currMesh = &buffer->getMesh();
+            SkeletonMesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
             uint startFrom = 0;
             size_t textureI = 0;
@@ -154,9 +158,9 @@ public:
         position->scaleTo(scale);
     }
 };
-GLuint Object::currShaderId = -1;
-GLuint Object::drawmode = GL_TRIANGLES;
+GLuint SkeletonObject::currShaderId = -1;
+GLuint SkeletonObject::drawmode = GL_TRIANGLES;
 
-class Objects : public List<Object>{
+class SkeletonObjects : public List<SkeletonObject>{
 
 };

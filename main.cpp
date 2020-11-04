@@ -1,27 +1,40 @@
 #include <engine/common.h>
 #include <engine/renderer.h>
 #include <engine/meshloader.h>
+#include <engine/skeletonobject.h>
+#include <engine/skeletizer.h>
 
-int amount = 2;
+int amount = 1;
 
 void shaderObjectFunc(Object& o){
     o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
 }
+void shaderSklObjectFunc(SkeletonObject& o){
+    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
+}
 void drawFrame(Renderer& r){
-    Object* currObj;
+    static Object* currObj;
+    static SkeletonObject* currSklObj;
     ///////////////////////////////
     r.bindFramebufferByIndex(0);
+
+//    currSklObj = r.getSkeletonObjectByIndex(0);
+//    currSklObj->draw(shaderSklObjectFunc);
 
     currObj = r.getObjectByIndex(0);
     currObj->draw(shaderObjectFunc);
 
-    for(int i = 0; i < amount; i++){
-        currObj = r.getObjectByIndex(i);
-        currObj->draw(shaderObjectFunc);
-    }
+//    for(int i = 0; i < amount; i++){
+//        currObj = r.getObjectByIndex(i);
+//        currObj->draw(shaderObjectFunc);
+//    }
+
+    r.getObjectByName("sphere")->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
+    r.getObjectByName("sphere")->draw(shaderObjectFunc);
+
+    r.getObjectByName("skeleton")->draw(shaderObjectFunc);
 
     r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
-
     r.skyboxes->at(0)->draw();
 
     r.bindDefaultFramebuffer();
@@ -47,9 +60,13 @@ void drawFrame(Renderer& r){
         r.view->getCamera().movementSpeed = defaultSpeed;
     }
 
-    setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().position);
+    setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().location);
+
     setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 < 14) someCounter += 1.f/10.f; cout << someCounter << endl;);
     setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 > 0) someCounter -= 1.f/10.f; cout << someCounter << endl;);
+
+    glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
+    setEvent(r.window->getWindowPtr(), P, cout << sphereLoc.x << " " << sphereLoc.y << " " << sphereLoc.z << endl);
 }
 
 int main (){
@@ -59,14 +76,20 @@ int main (){
     Renderer renderer(window_width, window_height);
     MeshLoader meshLoader;
     MeshList meshList;
+    SkeletonMeshList skeletonList;
+    Skeletizer skeletizer;
     ShaderList shaders;
     TextureList tex;
     MaterialList materials;
 
 //    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\neptune\\neptune.obj", "loaded"));
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded1"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\skeleton.obj", "skeleton"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\sphere.obj", "sphere"));
+
+    skeletonList.push(skeletizer.skeletize(*meshList.getByName("loaded"), *meshList.getByName("skeleton")));
 
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_fragment.fsh", "default");
@@ -74,6 +97,8 @@ int main (){
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skybox_fragment.fsh", "skybox");
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
+    shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_vertex.vsh",
+                    "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
 
     tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//1e1868e0.png");//0
     tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku1.png");//1
@@ -104,10 +129,13 @@ int main (){
 
     tex.appendTextureToLayout(12, 0, 2, "texture0");//tails
 
-//    Buffer buffer(*meshList.getByName("loaded"), *shaders.getByName("default"));
-    Buffer buffer1(*meshList.getByName("loaded1"), *shaders.getByName("default"));
+    Buffer buffer1(*meshList.getByName("loaded"), *shaders.getByName("default"));
+    Buffer skeleton(*meshList.getByName("skeleton"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
+    Buffer sphere(*meshList.getByName("sphere"), *shaders.getByName("default"));
+
+    SkeletonBuffer model(*skeletonList.getByName("loaded"), *shaders.getByName("default"));
 
     Material* mat = new Material;
     mat->setAmbientColor(0.01f,0.01f,0.01f);
@@ -125,12 +153,19 @@ int main (){
     for(int i = 0; i < amount; i++){
         renderer.addNewObject(tex, buffer1, &materials);
         renderer.getObjectByIndex(i)->moveTo(x,0,0);
-        renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
+        //renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
         x+= 2.2f;
     }
 
     renderer.addNewObject(*framebuffer.textureColorBuffers, quad, &materials, "screen");
     renderer.getObjectByName("screen")->rotate(0,180,0);
+
+    renderer.addNewObject(tex, sphere, &materials, "sphere");
+    renderer.getObjectByName("sphere")->scaleTo(0.01,0.01,0.01);
+
+    renderer.addNewObject(tex, skeleton, &materials, "skeleton");
+
+    renderer.addNewSkeletonObject(tex, model, &materials, "model");
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");

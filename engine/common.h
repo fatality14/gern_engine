@@ -37,9 +37,15 @@ float someCounter = 0;
 //TODO: make methods to access the objects of built-in classes
 struct Vertex{
     glm::vec3 position;
-    glm::vec3 color;
     glm::vec2 texcoord;
     glm::vec3 normal;
+};
+struct SkeletonVertex{
+    glm::vec3 position;
+    glm::vec2 texcoord;
+    glm::vec3 normal;
+    glm::vec3 joints;
+    glm::vec3 weights;
 };
 
 struct uintvec3{

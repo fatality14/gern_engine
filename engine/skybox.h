@@ -68,17 +68,32 @@ public:
     void move(float x, float y, float z){
         position->move(x,y,z);
     }
+    void move(glm::vec3 location){
+        position->move(location);
+    }
     void moveTo(float x, float y, float z){
         position->moveTo(x,y,z);
+    }
+    void moveTo(glm::vec3 location){
+        position->moveTo(location);
     }
     void rotate(float x, float y, float z){
         position->rotate(x,y,z);
     }
+    void rotate(glm::vec3 rotation){
+        position->rotate(rotation);
+    }
     void rotateTo(float x, float y, float z){
         position->rotateTo(x,y,z);
     }
+    void rotateTo(glm::vec3 rotation){
+        position->rotateTo(rotation);
+    }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
+    }
+    void scaleTo(glm::vec3 scale){
+        position->scaleTo(scale);
     }
 };
 

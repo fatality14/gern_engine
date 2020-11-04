@@ -39,25 +39,49 @@ public:
         location.y += y;
         location.z += z;
     }
+    void move(glm::vec3 location){
+        this->location += location;
+    }
     void moveTo(float x, float y, float z){
         location.x = x;
         location.y = y;
         location.z = z;
+    }
+    void moveTo(glm::vec3 location){
+        this->location = location;
     }
     void rotate(float x, float y, float z){
         rotation.x += x;
         rotation.y += y;
         rotation.z += z;
     }
+    void rotate(glm::vec3 rotation){
+        this->rotation += rotation;
+    }
     void rotateTo(float x, float y, float z){
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
     }
+    void rotateTo(glm::vec3 rotation){
+        this->rotation = rotation;
+    }
     void scaleTo(float x, float y, float z){
         scale.x = x;
         scale.y = y;
         scale.z = z;
+    }
+    void scaleTo(glm::vec3 scale){
+        this->scale = scale;
+    }
+    glm::vec3 getLocation(){
+        return location;
+    }
+    glm::vec3 getRotation(){
+        return rotation;
+    }
+    glm::vec3 getScale(){
+        return scale;
     }
 private:
     glm::mat4 modelMatrix;

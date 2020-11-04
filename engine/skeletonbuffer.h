@@ -3,18 +3,19 @@
 #include <engine/common.h>
 #include <engine/mesh.h>
 #include <engine/shader.h>
+#include <engine/skeletonmesh.h>
 
 //maybe add BufferList
-class Buffer{
+class SkeletonBuffer{
 public:
-    Buffer(Mesh& m, Shader& s){
+    SkeletonBuffer(SkeletonMesh& m, Shader& s){
         mesh = &m;
         shader= &s;
 
         genBuffers();
     }
-    Buffer(Buffer& b) = delete;
-    ~Buffer(){
+    SkeletonBuffer(SkeletonBuffer& b) = delete;
+    ~SkeletonBuffer(){
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
         glDeleteVertexArrays(1, &VAO);
@@ -28,7 +29,7 @@ public:
     const string& getMeshName(){
         return mesh->name;
     }
-    Mesh& getMesh(){
+    SkeletonMesh& getMesh(){
         return *mesh;
     }
     Shader& getShaderPtr(){
@@ -41,9 +42,11 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
+        shader->setVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
+        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
+        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
+        shader->setVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         unbind();
     }
@@ -55,7 +58,7 @@ private:
     GLuint VBO;
     GLuint EBO;
 
-    Mesh* mesh;
+    SkeletonMesh* mesh;
 
     void genBuffers(){
         //init and use vao that works just like vbo and ebo buffers wrapper
@@ -72,9 +75,11 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
+        shader->setVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
+        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
+        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
+        shader->setVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         //current vao should be set in while window loop
         unbind();

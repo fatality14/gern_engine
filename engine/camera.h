@@ -6,7 +6,7 @@ class Camera{
 public:
     string name;
 
-    glm::vec3 position;
+    glm::vec3 location;
     glm::vec3 up;
     glm::vec3 front;
     glm::vec3 right;
@@ -21,7 +21,7 @@ public:
     Camera(string name = "noname"){
         this->name = name;
 
-        position = glm::vec3(0.f, 0.f, 1.f);
+        location = glm::vec3(0.f, 0.f, 1.f);
         up = glm::vec3(0.f, 1.f, 0.f);
         front = glm::vec3(0.f, 0.f, -1.f);
         right = glm::vec3(0.f);

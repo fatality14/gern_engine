@@ -31,8 +31,14 @@ public:
         glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
-    void setUniformMatrix4fv(string uniformName, const GLfloat* value){
-        glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), 1, GL_FALSE, value);
+    void setVertexIntAttribPointer(string layoutName, int vecSize, size_t offset){
+        //set the format of data reading
+        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
+        glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
+        glEnableVertexAttribArray(attribLoc);
+    }
+    void setUniformMatrix4fv(string uniformName, const GLfloat* value, size_t size = 1){
+        glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);
     }
     void setUniform3fv(string uniformName, const GLfloat* value){
         glUniform3fv(glGetUniformLocation(program, uniformName.data()), 1, value);

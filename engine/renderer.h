@@ -13,6 +13,7 @@
 #include <engine/skybox.h>
 #include <engine/framebuffer.h>
 #include <engine/object.h>
+#include <engine/skeletonobject.h>
 
 class Renderer{
 public:
@@ -37,6 +38,7 @@ public:
         camList->push(*(new Camera("default")));
         view = new View(*window, *mouse, *camList->at(0));
         objects = new Objects;
+        skeletonObjects = new SkeletonObjects;
         skyboxes = new SkyboxList;
         framebuffers = new FramebufferList;
         lightSources = new LightSourceList;
@@ -49,6 +51,7 @@ public:
         delete camList;
         delete skyboxes;
         delete objects;
+        delete skeletonObjects;
     }
 
     //make arguments optional
@@ -60,6 +63,10 @@ public:
     void addNewObject(TextureList& tl, Buffer& b, MaterialList* ml, string name = "noname"){
         Object* o = new Object(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
         objects->push(*o);
+    }
+    void addNewSkeletonObject(TextureList& tl, SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
+        SkeletonObject* o = new SkeletonObject(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
+        skeletonObjects->push(*o);
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths, name);
@@ -83,6 +90,19 @@ public:
         objects->popByName(name);
     }
 
+    SkeletonObject* getSkeletonObjectByIndex(size_t index){
+        return skeletonObjects->at(index);
+    }
+    SkeletonObject* getSkeletonObjectByName(string name){
+        return skeletonObjects->getByName(name);
+    }
+    void popSkeletonObjectByIndex(size_t index){
+        skeletonObjects->popByIndex(index);
+    }
+    void popSkeletonObjectByName(string name){
+        skeletonObjects->popByName(name);
+    }
+
     SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
         return skyboxes->at(index);
     }
@@ -90,10 +110,10 @@ public:
         return skyboxes->getByName(name);
     }
     void popSkyboxObjectByIndex(size_t index){
-        objects->popByIndex(index);
+        skyboxes->popByIndex(index);
     }
     void popSkyboxObjectByName(string name){
-        objects->popByName(name);
+        skyboxes->popByName(name);
     }
 
     void bindFramebufferByIndex(size_t index){
@@ -150,5 +170,6 @@ public:
     }
 private:
     Objects* objects;
+    SkeletonObjects* skeletonObjects;
     bool doContinue = false;
 };

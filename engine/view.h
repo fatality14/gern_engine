@@ -15,26 +15,26 @@ public:
 
         worldUp = glm::vec3(0.f, 1.f, 0.f);
 
-        viewMatrix = glm::lookAt(camera->position, camera->position + camera->front, camera->up);
+        viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
 
     void pushToShader(Shader* s, string viewMatrixUniformName, string cameraPosUniformName){
         updateMatrices();
         s->setUniformMatrix4fv(viewMatrixUniformName, glm::value_ptr(viewMatrix));
-        s->setUniform3fv(cameraPosUniformName, glm::value_ptr(camera->position));
+        s->setUniform3fv(cameraPosUniformName, glm::value_ptr(camera->location));
     }
     void updateMatrices(){
         updateCameraPosition();
         //camera->position + camera->front is camera direction vector
-        viewMatrix = glm::lookAt(camera->position, camera->position + camera->front, camera->up);
+        viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
     void setDefaultEvents(){
-        setEvent(window->getWindowPtr(), A, camera->position -= camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), D, camera->position += camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), Q, camera->position -= camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), E, camera->position += camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), S, camera->position -= camera->front * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), W, camera->position += camera->front * camera->movementSpeed * mouse->dt)
+        setEvent(window->getWindowPtr(), A, camera->location -= camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), D, camera->location += camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), Q, camera->location -= camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), E, camera->location += camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), S, camera->location -= camera->front * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), W, camera->location += camera->front * camera->movementSpeed * mouse->dt)
     }
     void setCamera(Camera& c){
         camera = &c;

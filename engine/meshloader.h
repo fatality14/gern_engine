@@ -128,8 +128,6 @@ public:
                 if(norms.size() != 0)
                     v.normal = norms.at(indexVec.z - 1);
 
-                v.color = glm::vec3(0.f);
-
                 mesh->vertices->push_back(v);
                 ++mesh->nVertices;
             }
