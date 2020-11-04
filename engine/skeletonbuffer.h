@@ -42,11 +42,11 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
-        shader->setVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
-        shader->setVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
+        shader->setSkeletonVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
+        shader->setSkeletonVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
+        shader->setSkeletonVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
+        shader->setSkeletonVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setSkeletonVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         unbind();
     }
@@ -68,18 +68,18 @@ private:
         //vbo push all vertices array data to gpu and interpret it like some data array
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(SkeletonVertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
 
         //ebo push all indices array data to gpu and interpret it like element array
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
-        shader->setVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
-        shader->setVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
+        shader->setSkeletonVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
+        shader->setSkeletonVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
+        shader->setSkeletonVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
+        shader->setSkeletonVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setSkeletonVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         //current vao should be set in while window loop
         unbind();

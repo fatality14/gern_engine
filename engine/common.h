@@ -44,7 +44,7 @@ struct SkeletonVertex{
     glm::vec3 position;
     glm::vec2 texcoord;
     glm::vec3 normal;
-    glm::vec3 joints;
+    glm::ivec3 joints;
     glm::vec3 weights;
 };
 
@@ -97,6 +97,12 @@ public:
     }
     T* at(unsigned int i){
         return list.at(i);
+    }
+    void wipe(){
+        for(size_t i = 0; i < list.size(); i++){
+            delete list.at(i);
+        }
+        list.clear();
     }
 private:
     vector<T*> list;

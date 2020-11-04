@@ -45,6 +45,9 @@ public:
     const GLFWwindow* getWindowPtr(){
         return  window->getWindowPtr();
     }
+    glm::mat4& getViewMatrix(){
+        return viewMatrix;
+    }
 private:
     Window* window;
     MouseListener* mouse;

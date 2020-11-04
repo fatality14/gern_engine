@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/common.h>
-#include <engine/mesh.h>
+#include <engine/joint.h>
 
 class SkeletonMesh{
 public:
@@ -10,6 +10,9 @@ public:
     vector<uint>* indices;
     vector<uint> partEndVertexIds;
     vector<uint> partEndMtlIds;
+
+    Joint rootJoint;
+    JointList joints;
 
     uint nVertices = 0;
     uint nIndices = 0;
@@ -43,6 +46,9 @@ public:
         indices->push_back(a);
         indices->push_back(b);
         indices->push_back(c);
+    }
+    void genJointsFromRoot(){
+        joints.appendFromRootJoint(rootJoint);
     }
 };
 

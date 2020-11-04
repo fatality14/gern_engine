@@ -16,7 +16,6 @@ public:
     }
 
     void pushToShader(Shader* s, string uniformName){
-        updateMatrices();
         s->setUniformMatrix4fv(uniformName, glm::value_ptr(modelMatrix));
     }
     void updateMatrices(){
@@ -33,55 +32,72 @@ public:
         setEvent(w->getWindowPtr(), 1, scale += 0.01f);
         setEvent(w->getWindowPtr(), Z, rotation.y -= 5.f);
         setEvent(w->getWindowPtr(), X, rotation.y += 5.f);
+        updateMatrices();
+    }
+    glm::mat4& getModelMatrix(){
+        return modelMatrix;
     }
     void move(float x, float y, float z){
         location.x += x;
         location.y += y;
         location.z += z;
+        updateMatrices();
     }
     void move(glm::vec3 location){
         this->location += location;
+        updateMatrices();
     }
     void moveTo(float x, float y, float z){
         location.x = x;
         location.y = y;
         location.z = z;
+        updateMatrices();
     }
     void moveTo(glm::vec3 location){
         this->location = location;
+        updateMatrices();
     }
     void rotate(float x, float y, float z){
         rotation.x += x;
         rotation.y += y;
         rotation.z += z;
+        updateMatrices();
     }
     void rotate(glm::vec3 rotation){
         this->rotation += rotation;
+        updateMatrices();
     }
     void rotateTo(float x, float y, float z){
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
+        updateMatrices();
     }
     void rotateTo(glm::vec3 rotation){
         this->rotation = rotation;
+        updateMatrices();
     }
     void scaleTo(float x, float y, float z){
         scale.x = x;
         scale.y = y;
         scale.z = z;
+        updateMatrices();
     }
     void scaleTo(glm::vec3 scale){
         this->scale = scale;
+        updateMatrices();
     }
     glm::vec3 getLocation(){
         return location;
+        updateMatrices();
     }
     glm::vec3 getRotation(){
         return rotation;
+        updateMatrices();
     }
     glm::vec3 getScale(){
         return scale;
+        updateMatrices();
     }
 private:
     glm::mat4 modelMatrix;

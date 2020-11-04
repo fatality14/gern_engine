@@ -29,6 +29,9 @@ public:
     const GLFWwindow* getWindowPtr(){
         return  window->getWindowPtr();
     }
+    glm::mat4& getProjectionMatrix(){
+        return projectionMatrix;
+    }
 
     //TODO: fill with smth later
     void setDefaultEvents(){}

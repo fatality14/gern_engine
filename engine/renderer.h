@@ -155,6 +155,7 @@ public:
             }
 
             Object::currShaderId = -1;
+            SkeletonObject::currShaderId = -1;
         }
     }
     void setBackgroundColor(float r, float g, float b, float a){

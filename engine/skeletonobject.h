@@ -61,10 +61,13 @@ public:
         drawmode = GL_drawmode;
     }
     void draw(void (*shaderPassFunction)(SkeletonObject&), bool isSameShaderPassFunctionAsPrevCall = false){
+        SkeletonMesh* currMesh = &buffer->getMesh();
+
         shader->bind();
 
         position->pushToShader(shader, "modelMatrix");
         position->setDefaultEvents(window);
+        currMesh->joints.pushToShader(shader);
 
         if(currShaderId != shader->program){
             currShaderId = shader->program;
@@ -83,7 +86,6 @@ public:
         if (buffer->getMesh().nIndices != 0)
             glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT64_ARB, (void*)0);
         else{
-            SkeletonMesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
             uint startFrom = 0;
             size_t textureI = 0;
