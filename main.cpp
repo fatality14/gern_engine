@@ -18,11 +18,8 @@ void drawFrame(Renderer& r){
     ///////////////////////////////
     r.bindFramebufferByIndex(0);
 
-//    currSklObj = r.getSkeletonObjectByIndex(0);
-//    currSklObj->draw(shaderSklObjectFunc);
-
-    currObj = r.getObjectByIndex(0);
-    currObj->draw(shaderObjectFunc);
+    currSklObj = r.getSkeletonObjectByIndex(0);
+    currSklObj->draw(shaderSklObjectFunc);
 
 //    for(int i = 0; i < amount; i++){
 //        currObj = r.getObjectByIndex(i);
@@ -34,7 +31,7 @@ void drawFrame(Renderer& r){
 
     r.getObjectByName("skeleton")->draw(shaderObjectFunc);
 
-    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
+//    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
     r.skyboxes->at(0)->draw();
 
     r.bindDefaultFramebuffer();
@@ -82,14 +79,15 @@ int main (){
     TextureList tex;
     MaterialList materials;
 
-//    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\neptune\\neptune.obj", "loaded"));
+//    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "loaded"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\skeleton.obj", "skeleton"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\sphere.obj", "sphere"));
 
-    skeletonList.push(skeletizer.skeletize(*meshList.getByName("loaded"), *meshList.getByName("skeleton")));
+    skeletonList.push(skeletizer.skeletize(*meshList.getByName("loaded"),
+                                           "C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\skeleton.skl"));
 
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_fragment.fsh", "default");
@@ -135,7 +133,7 @@ int main (){
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
     Buffer sphere(*meshList.getByName("sphere"), *shaders.getByName("default"));
 
-    SkeletonBuffer model(*skeletonList.getByName("loaded"), *shaders.getByName("default"));
+    SkeletonBuffer model(*skeletonList.getByName("loaded"), *shaders.getByName("skeleton"));
 
     Material* mat = new Material;
     mat->setAmbientColor(0.01f,0.01f,0.01f);
