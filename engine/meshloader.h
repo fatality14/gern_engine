@@ -3,7 +3,7 @@
 #include <engine/common.h>
 #include <engine/mesh.h>
 
-class MeshLoader{
+class MeshLoader : private Loader{
 public:
     MeshLoader(){
         allPolyIndexes = new vector<vector<uintvec3>>;
@@ -146,8 +146,6 @@ public:
 private:
     Mesh* mesh;
 
-    string token;
-
     vector<glm::vec3> poses;
     vector<glm::vec3> norms;
     vector<glm::vec2> texes;
@@ -158,80 +156,6 @@ private:
     vector<uint> lastPolyIds;
     vector<uint> lastMtlIds;
 
-    void removeBadSpaces(string& line){
-        size_t i = -1;
-        while(true){
-            ++i;
-            if(i >= line.size() - 1 || line.size() < 2)
-                break;
-            if(line.at(i) == line.at(i+1) && line.at(i) == ' '){
-                line.erase(line.begin()+i);
-                --i;
-            }
-        }
-        if(line.size() == 0)
-            return;
-
-        while(true){
-            if(line.at(line.size()-1) == ' ')
-                line.erase(line.begin() + line.size()-1);
-            else
-                break;
-        }
-        while(true){
-            if(line.at(0) == ' ')
-                line.erase(line.begin());
-            else
-                break;
-        }
-    }
-    string& bite(const string& delimiter, string& line, bool& end){
-        size_t pos = 0;
-        string* token = new string;
-
-        pos = line.find(delimiter);
-        end = false;
-
-        if(pos != string::npos){
-            *token = line.substr(0, pos);
-            line.erase(0, pos + delimiter.length());
-        }
-        else{
-            end = true;
-            token = &line;
-        }
-        return *token;
-    }
-    glm::vec3& parseVec3(string& line){
-        float norm[3];
-        int i = -1;
-        bool end;
-
-        while (true){
-            ++i;
-            token = bite(" ", line, end);
-            if(i < 3)
-                norm[i] = stof(token);
-            if(end)
-                break;
-        }
-        return *new glm::vec3(norm[0], norm[1], norm[2]);
-    }
-    glm::vec2& parseVec2(string& line){
-        float norm[2];
-        int i = -1;
-        bool end;
-
-        while (true){
-            ++i;
-            token = bite(" ", line, end);
-            if(i < 2)
-                norm[i] = stof(token);
-            if(end)
-                break;
-        }
-        return *new glm::vec2(norm[0], norm[1]);
-    }
     vector<uintvec3>& parseIndexes(string& line, int numArgsF){
         uint ind[3];
         string copyLine = line;
@@ -282,19 +206,6 @@ private:
             }
         }
         return *indexes;
-    }
-    int calcNumArgsDividedBy(string delimiter, string line){
-        int numArgs = 0;
-        string token;
-        bool end;
-
-        while(true){
-            token = bite(delimiter, line, end);
-            ++numArgs;
-            if(end)
-                break;
-        }
-        return numArgs;
     }
     void calcNormals(){
         for(size_t i = 0; i < mesh->vertices->size(); i += 3){

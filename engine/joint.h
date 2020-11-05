@@ -5,10 +5,13 @@
 
 class Joint{
 public:
-    vector<Joint> childs;
+    vector<Joint*> childs;
     Position* position;
     uint id;
     string name;
+
+    glm::vec3 firstPos;
+    glm::vec3 secondPos;
 
     Joint(string name = "noname"){
         this->name = name;
@@ -72,7 +75,14 @@ public:
         wipe();
         push(j);
         for(size_t i = 0; i < j.childs.size(); ++i){
-            appendFromRootJoint(j.childs.at(i));
+            appendFromRootJoint(*j.childs.at(i));
+        }
+    }
+
+    Joint& getById(uint id){
+        for(size_t i = 0; i < size(); ++i){
+            if(at(i)->id == id)
+                return *at(i);
         }
     }
 private:
