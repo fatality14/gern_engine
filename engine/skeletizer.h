@@ -3,6 +3,7 @@
 #include <engine/common.h>
 #include <engine/mesh.h>
 #include <engine/skeletonmesh.h>
+#include <algorithm>
 
 class Skeletizer : private Loader{
 public:
@@ -17,18 +18,62 @@ public:
 //        skeletonMesh->joints.appendEmptyJoints(50);
 //        skeletonMesh->joints.at(0)->rotate(30,0,0);
 
+        parseSkeleton(skeletonPath);
+
         for(size_t i = 0; i < mesh.nVertices; i++){
             SkeletonVertex v;
             v.position = mesh.vertices->at(i).position;
             v.normal = mesh.vertices->at(i).normal;
             v.texcoord = mesh.vertices->at(i).texcoord;
             v.joints = glm::ivec3(0);
-            v.weights = glm::vec3(1,0,0);
+            v.weights = glm::vec3(1.f/3.f,1.f/3.f,1.f/3.f);
+
+            vector<float> ds;
+            for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
+                glm::vec3 closest = glm::closestPointOnLine(v.position, skeletonMesh->joints.at(i)->firstPos, skeletonMesh->joints.at(i)->secondPos);
+                ds.push_back(glm::length(v.position - closest));
+            }
+
+            vector<float> sorted = ds;
+            sort(sorted.begin(), sorted.end());
+
+            for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
+                if(ds.at(i) == sorted.at(0)){
+                    v.joints[0] = i;
+                    break;
+                }
+            }
+            for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
+                if(ds.at(i) == sorted.at(1)){
+                    v.joints[1] = i;
+                    break;
+                }
+            }
+            for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
+                if(ds.at(i) == sorted.at(2)){
+                    v.joints[2] = i;
+                    break;
+                }
+            }
+
+//            float d1 = sorted.at(0);
+//            float d2 = sorted.at(1);
+//            float d3 = sorted.at(2);
+//            float k;
+
+//            float limit = 0;
+//            v.weights.x = 1;
+//            k = d1/d2;
+//            if(k > limit)
+//                v.weights.y = k;
+//            k = d1/d3;
+//            if(k > limit)
+//                v.weights.z = k;
 
             skeletonMesh->pushVertex(v);
         }
 
-        parseSkeleton(skeletonPath);
+        //skeletonMesh->joints.at(0)->move(1,1,1);
 
         return *skeletonMesh;
     }

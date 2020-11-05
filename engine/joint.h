@@ -63,6 +63,11 @@ public:
                 jointPoses.push_back(mat[j]);
             }
         }
+        for(size_t i = 0; i < 50 - size(); ++i){
+            for(int j = 0; j < 16; ++j){
+                jointPoses.push_back(0);
+            }
+        }
         s->setUniformMatrix4fv("jointTransforms", jointPoses.data(), size());
     }
     void appendEmptyJoints(size_t amount){
