@@ -25,12 +25,14 @@ public:
             v.position = mesh.vertices->at(i).position;
             v.normal = mesh.vertices->at(i).normal;
             v.texcoord = mesh.vertices->at(i).texcoord;
-            v.joints = glm::ivec3(0);
-            v.weights = glm::vec3(1.f/3.f,1.f/3.f,1.f/3.f);
+            v.joints = glm::vec3(0);
+            v.weights = glm::vec3(0);
 
             vector<float> ds;
             for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
-                glm::vec3 closest = glm::closestPointOnLine(v.position, skeletonMesh->joints.at(i)->firstPos, skeletonMesh->joints.at(i)->secondPos);
+                glm::vec3 closest = glm::closestPointOnLine(v.position,
+                                                            skeletonMesh->joints.at(i)->position->firstPos,
+                                                            skeletonMesh->joints.at(i)->position->secondPos);
                 ds.push_back(glm::length(v.position - closest));
             }
 
@@ -56,24 +58,17 @@ public:
                 }
             }
 
-//            float d1 = sorted.at(0);
-//            float d2 = sorted.at(1);
-//            float d3 = sorted.at(2);
-//            float k;
+            float d1 = sorted.at(0);
+            float d2 = sorted.at(1);
+            float d3 = sorted.at(2);
+            float l = pow(1/d1,4)+pow(1/d2,4)+pow(1/d3,4);
 
-//            float limit = 0;
-//            v.weights.x = 1;
-//            k = d1/d2;
-//            if(k > limit)
-//                v.weights.y = k;
-//            k = d1/d3;
-//            if(k > limit)
-//                v.weights.z = k;
+            v.weights.x = pow(1/d1,4)/l;
+            v.weights.y = pow(1/d2,4)/l;
+            v.weights.z = pow(1/d3,4)/l;
 
             skeletonMesh->pushVertex(v);
         }
-
-        //skeletonMesh->joints.at(0)->move(1,1,1);
 
         return *skeletonMesh;
     }
@@ -135,10 +130,10 @@ private:
                 break;
             }
             case 1:
-                skeletonMesh->joints.at(jAmount)->firstPos = parseVec3(line);
+                skeletonMesh->joints.at(jAmount)->position->firstPos = parseVec3(line);
                 break;
             case 2:
-                skeletonMesh->joints.at(jAmount)->secondPos = parseVec3(line);
+                skeletonMesh->joints.at(jAmount)->position->secondPos = parseVec3(line);
                 break;
             }
         }

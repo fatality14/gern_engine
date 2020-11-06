@@ -45,7 +45,7 @@ public:
         shader->setSkeletonVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
         shader->setSkeletonVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
         shader->setSkeletonVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
-        shader->setSkeletonVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setSkeletonVertexAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
         shader->setSkeletonVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         unbind();
@@ -78,7 +78,7 @@ private:
         shader->setSkeletonVertexAttribPointer("vertex_position", 3, offsetof(SkeletonVertex, position));
         shader->setSkeletonVertexAttribPointer("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
         shader->setSkeletonVertexAttribPointer("vertex_normal", 3, offsetof(SkeletonVertex, normal));
-        shader->setSkeletonVertexIntAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
+        shader->setSkeletonVertexAttribPointer("vertex_joints", 3, offsetof(SkeletonVertex, joints));
         shader->setSkeletonVertexAttribPointer("vertex_weights", 3, offsetof(SkeletonVertex, weights));
 
         //current vao should be set in while window loop

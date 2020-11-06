@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/closest_point.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <SOIL2/SOIL2.h>
 #include <vector>
 
@@ -45,7 +46,7 @@ struct SkeletonVertex{
     glm::vec3 position;
     glm::vec2 texcoord;
     glm::vec3 normal;
-    glm::ivec3 joints;
+    glm::vec3 joints;
     glm::vec3 weights;
 };
 

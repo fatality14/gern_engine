@@ -64,6 +64,9 @@ void drawFrame(Renderer& r){
 
     glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
     setEvent(r.window->getWindowPtr(), P, cout << sphereLoc.x << " " << sphereLoc.y << " " << sphereLoc.z << endl);
+
+    setEvent(r.window->getWindowPtr(), 3, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(0).rotate(0,0,1));
+    setEvent(r.window->getWindowPtr(), 4, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(0).rotate(0,0,-1));
 }
 
 int main (){

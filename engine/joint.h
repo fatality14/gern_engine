@@ -1,52 +1,73 @@
 #pragma once
 
 #include <engine/common.h>
-#include <engine/position.h>
+#include <engine/jointposition.h>
+#include <engine/shader.h>
 
 class Joint{
 public:
     vector<Joint*> childs;
-    Position* position;
+    JointPosition* position;
     uint id;
     string name;
 
-    glm::vec3 firstPos;
-    glm::vec3 secondPos;
-
     Joint(string name = "noname"){
         this->name = name;
-        position = new Position;
+        position = new JointPosition;
     }
 
     void move(float x, float y, float z){
         position->move(x,y,z);
+        setChildTransforms(position);
     }
     void move(glm::vec3 location){
         position->move(location);
+        setChildTransforms(position);
     }
     void moveTo(float x, float y, float z){
         position->moveTo(x,y,z);
+        setChildTransforms(position);
     }
     void moveTo(glm::vec3 location){
         position->moveTo(location);
+        setChildTransforms(position);
     }
     void rotate(float x, float y, float z){
         position->rotate(x,y,z);
+        setChildTransforms(position);
     }
     void rotate(glm::vec3 rotation){
         position->rotate(rotation);
+        setChildTransforms(position);
     }
     void rotateTo(float x, float y, float z){
         position->rotateTo(x,y,z);
+        setChildTransforms(position);
     }
     void rotateTo(glm::vec3 rotation){
         position->rotateTo(rotation);
+        setChildTransforms(position);
     }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
+        setChildTransforms(position);
     }
     void scaleTo(glm::vec3 scale){
         position->scaleTo(scale);
+        setChildTransforms(position);
+    }
+
+    void setChildTransforms(JointPosition* pos){
+//        position->modelMatrix = glm::translate(position->modelMatrix, pos->secondPos);
+//        pos->modelMatrix = glm::translate(pos->modelMatrix, pos->secondPos);
+
+//        position->modelMatrix = position->modelMatrix * pos->modelMatrix;
+
+//        pos->modelMatrix = glm::translate(pos->modelMatrix, -pos->secondPos);
+//        position->modelMatrix = glm::translate(position->modelMatrix, -pos->secondPos);
+//        for(size_t i = 0; i < childs.size(); i++){
+//            childs.at(i)->setChildTransforms(pos);
+//        }
     }
 };
 
