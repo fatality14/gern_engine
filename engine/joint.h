@@ -18,56 +18,52 @@ public:
 
     void move(float x, float y, float z){
         position->move(x,y,z);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void move(glm::vec3 location){
         position->move(location);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void moveTo(float x, float y, float z){
         position->moveTo(x,y,z);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void moveTo(glm::vec3 location){
         position->moveTo(location);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void rotate(float x, float y, float z){
         position->rotate(x,y,z);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void rotate(glm::vec3 rotation){
         position->rotate(rotation);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void rotateTo(float x, float y, float z){
         position->rotateTo(x,y,z);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void rotateTo(glm::vec3 rotation){
         position->rotateTo(rotation);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
-        setChildTransforms(position);
+        setChildTransforms();
     }
     void scaleTo(glm::vec3 scale){
         position->scaleTo(scale);
-        setChildTransforms(position);
+        setChildTransforms();
     }
 
-    void setChildTransforms(JointPosition* pos){
-//        position->modelMatrix = glm::translate(position->modelMatrix, pos->secondPos);
-//        pos->modelMatrix = glm::translate(pos->modelMatrix, pos->secondPos);
-
-//        position->modelMatrix = position->modelMatrix * pos->modelMatrix;
-
-//        pos->modelMatrix = glm::translate(pos->modelMatrix, -pos->secondPos);
-//        position->modelMatrix = glm::translate(position->modelMatrix, -pos->secondPos);
-//        for(size_t i = 0; i < childs.size(); i++){
-//            childs.at(i)->setChildTransforms(pos);
-//        }
+    void setChildTransforms(){
+        glm::mat4 parentTransform = position->getModelMatrix();
+        for(size_t i = 0; i < childs.size(); i++){
+            childs.at(i)->position->parentTransform = parentTransform;
+            childs.at(i)->position->updateMatrices();
+            childs.at(i)->setChildTransforms();
+        }
     }
 };
 

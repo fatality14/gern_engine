@@ -8,40 +8,33 @@ public:
     glm::vec3 secondPos;
 
     glm::mat4 modelMatrix;
+    glm::mat4 parentTransform;
 
     glm::vec3 location;
     glm::vec3 rotation;
     glm::vec3 scale;
-
-    glm::mat4 addTransform;
 
     JointPosition(){
         location = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
         scale = glm::vec3(1.f);
         modelMatrix = glm::mat4(1.f);
-        addTransform = glm::mat4(1.f);
+        parentTransform = glm::mat4(1.f);
     }
 
     void updateMatrices(){
         modelMatrix = glm::mat4(1.f);
+        modelMatrix *= parentTransform;
         modelMatrix = glm::translate(modelMatrix, location);
 
         glm::quat q(glm::radians(rotation));
         modelMatrix = glm::translate(modelMatrix, secondPos);
         modelMatrix = modelMatrix * glm::toMat4(q);
         modelMatrix = glm::translate(modelMatrix, -secondPos);
-        modelMatrix = modelMatrix * addTransform;
 
         modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     }
 
-    glm::mat4 getModelMatrix(){
-        return modelMatrix;
-    }
-    glm::mat4 getBoneModelMatrix(){
-        return glm::translate(modelMatrix, secondPos);
-    }
     void move(float x, float y, float z){
         location.x += x;
         location.y += y;
@@ -91,6 +84,13 @@ public:
     void scaleTo(glm::vec3 scale){
         this->scale = scale;
         updateMatrices();
+    }
+
+    glm::mat4 getModelMatrix(){
+        return modelMatrix;
+    }
+    glm::mat4 getBoneModelMatrix(){
+        return glm::translate(modelMatrix, secondPos);
     }
     glm::vec3 getLocation(){
         return location;
