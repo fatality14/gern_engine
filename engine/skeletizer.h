@@ -31,8 +31,8 @@ public:
             vector<float> ds;
             for(size_t i = 0; i < skeletonMesh->joints.size(); ++i){
                 glm::vec3 closest = glm::closestPointOnLine(v.position,
-                                                            skeletonMesh->joints.at(i)->position->firstPos,
-                                                            skeletonMesh->joints.at(i)->position->secondPos);
+                                                            skeletonMesh->joints.at(i)->position->tip,
+                                                            skeletonMesh->joints.at(i)->position->origin);
                 ds.push_back(glm::length(v.position - closest));
             }
 
@@ -97,10 +97,10 @@ private:
             if(token == "j"){
                 switchCase = 0;
             }
-            if(token == "v1"){
+            if(token == "vt"){
                 switchCase = 1;
             }
-            if(token == "v2"){
+            if(token == "vo"){
                 switchCase = 2;
             }
 
@@ -130,10 +130,10 @@ private:
                 break;
             }
             case 1:
-                skeletonMesh->joints.at(jAmount)->position->firstPos = parseVec3(line);
+                skeletonMesh->joints.at(jAmount)->position->tip = parseVec3(line);
                 break;
             case 2:
-                skeletonMesh->joints.at(jAmount)->position->secondPos = parseVec3(line);
+                skeletonMesh->joints.at(jAmount)->position->origin = parseVec3(line);
                 break;
             }
         }

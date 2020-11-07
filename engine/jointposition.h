@@ -4,8 +4,8 @@
 
 class JointPosition{
 public:
-    glm::vec3 firstPos;
-    glm::vec3 secondPos;
+    glm::vec3 tip;
+    glm::vec3 origin;
 
     glm::mat4 modelMatrix;
     glm::mat4 parentTransform;
@@ -28,9 +28,9 @@ public:
         modelMatrix = glm::translate(modelMatrix, location);
 
         glm::quat q(glm::radians(rotation));
-        modelMatrix = glm::translate(modelMatrix, secondPos);
+        modelMatrix = glm::translate(modelMatrix, origin);
         modelMatrix = modelMatrix * glm::toMat4(q);
-        modelMatrix = glm::translate(modelMatrix, -secondPos);
+        modelMatrix = glm::translate(modelMatrix, -origin);
 
         modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     }
@@ -90,7 +90,7 @@ public:
         return modelMatrix;
     }
     glm::mat4 getBoneModelMatrix(){
-        return glm::translate(modelMatrix, secondPos);
+        return glm::translate(modelMatrix, origin);
     }
     glm::vec3 getLocation(){
         return location;

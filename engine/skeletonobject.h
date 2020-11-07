@@ -91,7 +91,7 @@ public:
             size_t textureI = 0;
             size_t materialI = 0;
 
-            for(size_t j = 0; j < currMesh->partEndMtlIds.size() - someCounter; ++j){
+            for(size_t j = 0; j < currMesh->partEndMtlIds.size(); ++j){
                 if(textureI == texList->layoutsAmount()){
                     textureI = 0;
                 }

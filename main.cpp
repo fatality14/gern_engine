@@ -59,14 +59,14 @@ void drawFrame(Renderer& r){
 
     setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().location);
 
-    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 < 14) someCounter += 1.f/10.f; cout << someCounter << endl;);
-    setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 > 0) someCounter -= 1.f/10.f; cout << someCounter << endl;);
+    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 17) someCounter += 1.f/10.f; cout << someCounter << endl);
+    setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 >= 0) someCounter -= 1.f/10.f; cout << someCounter << endl);
 
     glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
     setEvent(r.window->getWindowPtr(), P, cout << sphereLoc.x << " " << sphereLoc.y << " " << sphereLoc.z << endl);
 
-    setEvent(r.window->getWindowPtr(), 3, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(0).rotate(0,0,1));
-    setEvent(r.window->getWindowPtr(), 4, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(0).rotate(0,0,-1));
+    setEvent(r.window->getWindowPtr(), 3, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,1));
+    setEvent(r.window->getWindowPtr(), 4, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,-1));
 }
 
 int main (){
