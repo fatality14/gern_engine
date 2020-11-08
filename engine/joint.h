@@ -48,6 +48,14 @@ public:
         position->rotateTo(rotation);
         setChildTransforms();
     }
+    void scaleBy(float x, float y, float z){
+        position->scaleBy(x,y,z);
+        setChildTransforms();
+    }
+    void scaleBy(glm::vec3 scale){
+        position->scaleBy(scale);
+        setChildTransforms();
+    }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
         setChildTransforms();
@@ -60,7 +68,7 @@ public:
     void setChildTransforms(){
         glm::mat4 parentTransform = position->getModelMatrix();
         for(size_t i = 0; i < childs.size(); i++){
-            childs.at(i)->position->parentTransform = parentTransform;
+            childs.at(i)->position->setParentTransform(parentTransform);
             childs.at(i)->position->updateMatrices();
             childs.at(i)->setChildTransforms();
         }
@@ -80,18 +88,7 @@ public:
                 jointPoses.push_back(mat[j]);
             }
         }
-        for(size_t i = 0; i < 50 - size(); ++i){
-            for(int j = 0; j < 16; ++j){
-                jointPoses.push_back(0);
-            }
-        }
         s->setUniformMatrix4fv("jointTransforms", jointPoses.data(), size());
-    }
-    void appendEmptyJoints(size_t amount){
-        for(size_t i = 0; i < amount; ++i){
-            Joint* j = new Joint;
-            push(*j);
-        }
     }
     void appendFromRootJoint(Joint& j){
         wipe();
@@ -100,12 +97,35 @@ public:
             appendFromRootJoint(*j.childs.at(i));
         }
     }
-
     Joint& getById(uint id){
         for(size_t i = 0; i < size(); ++i){
             if(at(i)->id == id)
                 return *at(i);
         }
+    }
+    string genPoseInfo(){
+        string res = "p ";
+        for(size_t i = 0; i < size(); ++i){
+            res += to_string(at(i)->id) + ' ';
+        }
+        res += '\n';
+        for(size_t i = 0; i < size(); ++i){
+            res += "l ";
+            res += to_string(at(i)->position->getLocation().x) + ' ' +
+                   to_string(at(i)->position->getLocation().y) + ' ' +
+                   to_string(at(i)->position->getLocation().z) + '\n';
+
+            res += "r ";
+            res += to_string(at(i)->position->getRotation().x) + ' ' +
+                   to_string(at(i)->position->getRotation().y) + ' ' +
+                   to_string(at(i)->position->getRotation().z) + '\n';
+
+            res += "s ";
+            res += to_string(at(i)->position->getScale().x) + ' ' +
+                   to_string(at(i)->position->getScale().y) + ' ' +
+                   to_string(at(i)->position->getScale().z) + '\n';
+        }
+        return res;
     }
 private:
     vector<float> jointPoses;

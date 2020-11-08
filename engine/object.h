@@ -147,6 +147,12 @@ public:
     void rotateTo(glm::vec3 rotation){
         position->rotateTo(rotation);
     }
+    void scaleBy(float x, float y, float z){
+        position->scaleBy(x,y,z);
+    }
+    void scaleBy(glm::vec3 scale){
+        position->scaleBy(scale);
+    }
     void scaleTo(float x, float y, float z){
         position->scaleTo(x,y,z);
     }

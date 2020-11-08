@@ -67,6 +67,8 @@ void drawFrame(Renderer& r){
 
     setEvent(r.window->getWindowPtr(), 3, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,1));
     setEvent(r.window->getWindowPtr(), 4, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,-1));
+
+    setEvent(r.window->getWindowPtr(), I, cout << r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.genPoseInfo() << endl);
 }
 
 int main (){
@@ -167,6 +169,7 @@ int main (){
     renderer.addNewObject(tex, skeleton, &materials, "skeleton");
 
     renderer.addNewSkeletonObject(tex, model, &materials, "model");
+    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\animation.anm", 10);
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");

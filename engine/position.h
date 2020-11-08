@@ -77,6 +77,16 @@ public:
         this->rotation = rotation;
         updateMatrices();
     }
+    void scaleBy(float x, float y, float z){
+        scale.x += x;
+        scale.y += y;
+        scale.z += z;
+        updateMatrices();
+    }
+    void scaleBy(glm::vec3 scale){
+        this->scale += scale;
+        updateMatrices();
+    }
     void scaleTo(float x, float y, float z){
         scale.x = x;
         scale.y = y;

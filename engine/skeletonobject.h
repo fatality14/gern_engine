@@ -11,6 +11,7 @@
 #include <engine/lightsource.h>
 #include <engine/material.h>
 #include <engine/skeletonbuffer.h>
+#include <engine/animation.h>
 
 class SkeletonObject{
 public:
@@ -22,11 +23,13 @@ public:
     View* view;
     Perspective* perspective;
     LightSourceList* lightSources;
+    Animation* animation;
     MaterialList* materials;//move to mesh
 
 //    vector<glm::mat4> transitions;//add Joint class hierarchy and remove transitions from here
 
     string name;
+    bool doAnimation = false;
 
     static GLuint drawmode;
     static GLuint currShaderId;
@@ -50,6 +53,7 @@ public:
         perspective = &p;
         view = &v;
         lightSources = &lsl;
+        animation = new Animation(buffer->getMesh().joints);
         materials = &ml;
 
         this->name = name;
@@ -59,6 +63,11 @@ public:
 
     static void setDrawMode(GLuint GL_drawmode){
         drawmode = GL_drawmode;
+    }
+    void setAnimation(string animationFilePath, float animationTime){
+        animation->parseKeyPoses(animationFilePath);
+        animation->animationTime = animationTime;
+        doAnimation = true;
     }
     void draw(void (*shaderPassFunction)(SkeletonObject&), bool isSameShaderPassFunctionAsPrevCall = false){
         SkeletonMesh* currMesh = &buffer->getMesh();
@@ -78,6 +87,9 @@ public:
         }
         if(!isSameShaderPassFunctionAsPrevCall){
             shaderPassFunction(*this);
+        }
+        if(doAnimation){
+            animation->applyCurrPose();
         }
 
         buffer->bind();

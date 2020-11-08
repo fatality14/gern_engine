@@ -7,9 +7,6 @@ public:
     glm::vec3 tip;
     glm::vec3 origin;
 
-    glm::mat4 modelMatrix;
-    glm::mat4 parentTransform;
-
     glm::vec3 location;
     glm::vec3 rotation;
     glm::vec3 scale;
@@ -18,21 +15,20 @@ public:
         location = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
         scale = glm::vec3(1.f);
-        modelMatrix = glm::mat4(1.f);
+        transform = glm::mat4(1.f);
         parentTransform = glm::mat4(1.f);
     }
 
     void updateMatrices(){
-        modelMatrix = glm::mat4(1.f);
-        modelMatrix *= parentTransform;
-        modelMatrix = glm::translate(modelMatrix, location);
+        transform = parentTransform;
+        transform = glm::translate(transform, location);
 
         glm::quat q(glm::radians(rotation));
-        modelMatrix = glm::translate(modelMatrix, origin);
-        modelMatrix = modelMatrix * glm::toMat4(q);
-        modelMatrix = glm::translate(modelMatrix, -origin);
+        transform = glm::translate(transform, origin);
+        transform = transform * glm::toMat4(q);
+        transform = glm::translate(transform, -origin);
 
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
+        transform = glm::scale(transform, glm::vec3(scale));
     }
 
     void move(float x, float y, float z){
@@ -75,6 +71,16 @@ public:
         this->rotation = rotation;
         updateMatrices();
     }
+    void scaleBy(float x, float y, float z){
+        scale.x += x;
+        scale.y += y;
+        scale.z += z;
+        updateMatrices();
+    }
+    void scaleBy(glm::vec3 scale){
+        this->scale += scale;
+        updateMatrices();
+    }
     void scaleTo(float x, float y, float z){
         scale.x = x;
         scale.y = y;
@@ -87,10 +93,7 @@ public:
     }
 
     glm::mat4 getModelMatrix(){
-        return modelMatrix;
-    }
-    glm::mat4 getBoneModelMatrix(){
-        return glm::translate(modelMatrix, origin);
+        return transform;
     }
     glm::vec3 getLocation(){
         return location;
@@ -101,4 +104,10 @@ public:
     glm::vec3 getScale(){
         return scale;
     }
+    void setParentTransform(glm::mat4 transform){
+        parentTransform = transform;
+    }
+private:
+    glm::mat4 transform;
+    glm::mat4 parentTransform;
 };
