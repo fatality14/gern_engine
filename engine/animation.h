@@ -106,14 +106,12 @@ private:
 
     void calcCurrPose(){
         calcCurrAnimationTime();
-        interpolationCoef = currAnimationTime/animationTime;
-        keyPoseTime = animationTime/(keyPoses.size());
+        keyPoseTime = animationTime/(keyPoses.size()-1);
         uint keyPoseIndex = currAnimationTime/keyPoseTime;
-        cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
+        interpolationCoef = currAnimationTime/keyPoseTime - keyPoseIndex;
+//        cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
         if(keyPoseIndex + 1 < keyPoses.size())
             currPose = interpolatePoses(keyPoses[keyPoseIndex], keyPoses[keyPoseIndex+1], interpolationCoef);
-        else
-            currPose = interpolatePoses(keyPoses[keyPoses.size()-2], keyPoses[keyPoses.size()-1], interpolationCoef);;
     }
     void applyPose(AnimationPose& p){
         for(size_t i = 0; i < p.getPositionsAmount(); ++i){
