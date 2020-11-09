@@ -77,9 +77,6 @@ public:
 
 class JointList : public List<Joint>{
 public:
-    JointList(){
-
-    }
     void pushToShader(Shader* s){
         jointPoses.clear();
         for(size_t i = 0; i < size(); ++i){
@@ -91,7 +88,6 @@ public:
         s->setUniformMatrix4fv("jointTransforms", jointPoses.data(), size());
     }
     void appendFromRootJoint(Joint& j){
-        wipe();
         push(j);
         for(size_t i = 0; i < j.childs.size(); ++i){
             appendFromRootJoint(*j.childs.at(i));
@@ -126,6 +122,13 @@ public:
                    to_string(at(i)->position->getScale().z) + '\n';
         }
         return res;
+    }
+    void setDafaultPose(){
+        for(size_t i = 0; i < size(); ++i){
+            at(i)->moveTo(0,0,0);
+            at(i)->scaleTo(1,1,1);
+            at(i)->rotateTo(0,0,0);
+        }
     }
 private:
     vector<float> jointPoses;

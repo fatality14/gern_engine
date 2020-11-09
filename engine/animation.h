@@ -11,6 +11,12 @@ public:
     vector<glm::vec3> scales;
     vector<uint> ids;
 
+    void appendPosition(glm::vec3 location, glm::vec3 rotation, glm::vec3 scale, uint id){
+        locations.push_back(location);
+        rotations.push_back(rotation);
+        scales.push_back(scale);
+        ids.push_back(id);
+    }
     size_t getPositionsAmount(){
         return ids.size();
     }

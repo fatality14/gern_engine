@@ -67,6 +67,11 @@ public:
     void setAnimation(string animationFilePath, float animationTime){
         animation->parseKeyPoses(animationFilePath);
         animation->animationTime = animationTime;
+    }
+    void stopAnimation(){
+        doAnimation = false;
+    }
+    void startAnimation(){
         doAnimation = true;
     }
     void draw(void (*shaderPassFunction)(SkeletonObject&), bool isSameShaderPassFunctionAsPrevCall = false){

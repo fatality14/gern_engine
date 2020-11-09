@@ -28,11 +28,11 @@ public:
     }
 
     void setDefaultEvents(Window* w){
-        setEvent(w->getWindowPtr(), 2, scale -= 0.01f);
-        setEvent(w->getWindowPtr(), 1, scale += 0.01f);
-        setEvent(w->getWindowPtr(), Z, rotation.y -= 5.f);
-        setEvent(w->getWindowPtr(), X, rotation.y += 5.f);
-        updateMatrices();
+//        setEvent(w->getWindowPtr(), 2, scale -= 0.01f);
+//        setEvent(w->getWindowPtr(), 1, scale += 0.01f);
+//        setEvent(w->getWindowPtr(), Z, rotation.y -= 5.f);
+//        setEvent(w->getWindowPtr(), X, rotation.y += 5.f);
+//        updateMatrices();
     }
     glm::mat4& getModelMatrix(){
         return modelMatrix;

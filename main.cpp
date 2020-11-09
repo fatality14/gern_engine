@@ -21,26 +21,17 @@ void drawFrame(Renderer& r){
     currSklObj = r.getSkeletonObjectByIndex(0);
     currSklObj->draw(shaderSklObjectFunc);
 
-//    for(int i = 0; i < amount; i++){
-//        currObj = r.getObjectByIndex(i);
-//        currObj->draw(shaderObjectFunc);
-//    }
-
     r.getObjectByName("sphere")->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
     r.getObjectByName("sphere")->draw(shaderObjectFunc);
 
-    r.getObjectByName("skeleton")->draw(shaderObjectFunc);
-
 //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
     r.skyboxes->at(0)->draw();
-
-    r.bindDefaultFramebuffer();
     ///////////////////////////////
+    r.bindDefaultFramebuffer();
 
     currObj = r.getObjectByName("screen");
     currObj->draw(shaderObjectFunc);
     ///////////////////////////////
-
     static float defaultSpeed = r.view->getCamera().movementSpeed;
 
     bool isShiftPressed = false;
@@ -65,10 +56,15 @@ void drawFrame(Renderer& r){
     glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
     setEvent(r.window->getWindowPtr(), P, cout << sphereLoc.x << " " << sphereLoc.y << " " << sphereLoc.z << endl);
 
-    setEvent(r.window->getWindowPtr(), 3, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,1));
-    setEvent(r.window->getWindowPtr(), 4, r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.getById(someCounter).rotate(0,0,-1));
+    setEvent(r.window->getWindowPtr(), 1, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,-1,0));
+    setEvent(r.window->getWindowPtr(), 2, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,1,0));
+    setEvent(r.window->getWindowPtr(), 3, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,0,-1));
+    setEvent(r.window->getWindowPtr(), 4, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,0,1));
+    setEvent(r.window->getWindowPtr(), 5, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(-1,0,0));
+    setEvent(r.window->getWindowPtr(), 6, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(1,0,0));
 
-    setEvent(r.window->getWindowPtr(), I, cout << r.getSkeletonObjectByIndex(0)->buffer->getMesh().joints.genPoseInfo() << endl);
+    setEvent(r.window->getWindowPtr(), I, cout << currSklObj->buffer->getMesh().joints.genPoseInfo() << endl);
+    setEvent(r.window->getWindowPtr(), U, currSklObj->buffer->getMesh().joints.setDafaultPose());
 }
 
 int main (){
@@ -84,9 +80,7 @@ int main (){
     TextureList tex;
     MaterialList materials;
 
-////    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "loaded"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded"));
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\skeleton.obj", "skeleton"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\sphere.obj", "sphere"));
@@ -133,7 +127,6 @@ int main (){
     tex.appendTextureToLayout(12, 0, 2, "texture0");//tails
 
     Buffer buffer1(*meshList.getByName("loaded"), *shaders.getByName("default"));
-    Buffer skeleton(*meshList.getByName("skeleton"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
     Buffer sphere(*meshList.getByName("sphere"), *shaders.getByName("default"));
@@ -152,24 +145,15 @@ int main (){
 
     renderer.addNewLightSource(0,0,2,"default");
 
-    int x = 0;
-    for(int i = 0; i < amount; i++){
-        renderer.addNewObject(tex, buffer1, &materials);
-        renderer.getObjectByIndex(i)->moveTo(x,0,0);
-        //renderer.getObjectByIndex(i)->scaleTo(0.01,0.01,0.01);
-        x+= 2.2f;
-    }
-
     renderer.addNewObject(*framebuffer.textureColorBuffers, quad, &materials, "screen");
     renderer.getObjectByName("screen")->rotate(0,180,0);
 
     renderer.addNewObject(tex, sphere, &materials, "sphere");
     renderer.getObjectByName("sphere")->scaleTo(0.01,0.01,0.01);
 
-    renderer.addNewObject(tex, skeleton, &materials, "skeleton");
-
     renderer.addNewSkeletonObject(tex, model, &materials, "model");
-    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\animation.anm", 10);
+    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\animation.anm", 3);
+    renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");
