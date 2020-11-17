@@ -48,6 +48,9 @@ public:
     void unbind(){
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+    void bindTextureColorBuffer(size_t attachmentNum){
+        glDrawBuffer(GL_COLOR_ATTACHMENT0 + attachmentNum);
+    }
 private:
     void genColorAttachmentFramebuffer(GLuint attachmentNum){
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);

@@ -116,12 +116,14 @@ public:
         skyboxes->popByName(name);
     }
 
-    void bindFramebufferByIndex(size_t index){
+    void bindFramebufferByIndex(size_t index, GLint attachmentNum = 0){
         framebuffers->at(index)->bind();
+        framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
     }
-    void bindFramebufferByName(string name){
+    void bindFramebufferByName(string name, GLint attachmentNum = 0){
         framebuffers->getByName(name)->bind();
+        framebuffers->getByName(name)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
     }
     void bindDefaultFramebuffer(){

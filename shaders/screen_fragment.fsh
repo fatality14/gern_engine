@@ -8,6 +8,7 @@ in vec3 vs_normal;
 uniform vec3 cameraPos;
 
 uniform sampler2D textureColorBuffer0;
+uniform sampler2D textureColorBuffer1;
 
 uniform vec3 lightPos0;
 
@@ -29,7 +30,7 @@ const float offset = 1.0 / 300.0;
 
 void main()
 {
-    vec4 tex = texture(textureColorBuffer0, vs_texcoord);
+    vec4 tex = texture(textureColorBuffer1, vs_texcoord);
     fs_color = tex;
 
 //    vec2 offsets[9] = vec2[](

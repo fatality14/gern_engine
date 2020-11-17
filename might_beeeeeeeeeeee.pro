@@ -47,10 +47,13 @@ HEADERS += \
     SOIL2/stbi_pvr.h \
     SOIL2/stbi_pvr_c.h \
     SOIL2/wfETC.h \
+    engine/animation.h \
     engine/buffer.h \
     engine/camera.h \
     engine/common.h \
     engine/framebuffer.h \
+    engine/joint.h \
+    engine/jointposition.h \
     engine/lightsource.h \
     engine/material.h \
     engine/mesh.h \
@@ -68,6 +71,7 @@ HEADERS += \
     engine/skybox.h \
     engine/skyboxtexture.h \
     engine/texture.h \
+    engine/timer.h \
     engine/view.h \
     engine/window.h \
     glm/common.hpp \

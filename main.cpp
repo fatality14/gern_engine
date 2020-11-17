@@ -16,7 +16,7 @@ void drawFrame(Renderer& r){
     static Object* currObj;
     static SkeletonObject* currSklObj;
     ///////////////////////////////
-    r.bindFramebufferByIndex(0);
+    r.bindFramebufferByIndex(0, 1);
 
     currSklObj = r.getSkeletonObjectByIndex(0);
     currSklObj->draw(shaderSklObjectFunc);
@@ -140,7 +140,7 @@ int main (){
     materials.push(*mat);
 
     Framebuffer framebuffer(window_width, window_height);
-    framebuffer.genTextureColorBuffers(1);
+    framebuffer.genTextureColorBuffers(2);
     renderer.addFramebuffer(framebuffer);
 
     renderer.addNewLightSource(0,0,2,"default");
