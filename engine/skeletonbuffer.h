@@ -65,12 +65,10 @@ private:
         glCreateVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
-        //vbo push all vertices array data to gpu and interpret it like some data array
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(SkeletonVertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
 
-        //ebo push all indices array data to gpu and interpret it like element array
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);

@@ -73,6 +73,11 @@ public:
             childs.at(i)->setChildTransforms();
         }
     }
+    void setDefaultPose(){
+        moveTo(0,0,0);
+        scaleTo(1,1,1);
+        rotateTo(0,0,0);
+    }
 };
 
 class JointList : public List<Joint>{

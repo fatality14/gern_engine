@@ -50,7 +50,7 @@ void drawFrame(Renderer& r){
 
     setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().location);
 
-    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 17) someCounter += 1.f/10.f; cout << someCounter << endl);
+    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 20) someCounter += 1.f/10.f; cout << someCounter << endl);
     setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 >= 0) someCounter -= 1.f/10.f; cout << someCounter << endl);
 
     glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
@@ -65,6 +65,7 @@ void drawFrame(Renderer& r){
 
     setEvent(r.window->getWindowPtr(), I, cout << currSklObj->buffer->getMesh().joints.genPoseInfo() << endl);
     setEvent(r.window->getWindowPtr(), U, currSklObj->buffer->getMesh().joints.setDafaultPose());
+    setEvent(r.window->getWindowPtr(), Y, currSklObj->buffer->getMesh().joints.at(someCounter)->setDefaultPose());
 }
 
 int main (){
@@ -153,7 +154,7 @@ int main (){
 
     renderer.addNewSkeletonObject(tex, model, &materials, "model");
     renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\animation.anm", 3);
-    renderer.getSkeletonObjectByIndex(0)->startAnimation();
+//    renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");

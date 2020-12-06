@@ -77,7 +77,7 @@ public:
 
 
         if (buffer->getMesh().nIndices != 0)
-            glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT64_ARB, (void*)0);
+            glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
         else{
             Mesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
