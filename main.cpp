@@ -18,11 +18,12 @@ void drawFrame(Renderer& r){
     ///////////////////////////////
     r.bindFramebufferByIndex(0, 1);
 
-    currSklObj = r.getSkeletonObjectByIndex(0);
+    currSklObj = r.getSkeletonObjectByName("paimon");
     currSklObj->draw(shaderSklObjectFunc);
 
-    r.getObjectByName("sphere")->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
-    r.getObjectByName("sphere")->draw(shaderObjectFunc);
+    currObj = r.getObjectByIndex(1);
+    currObj->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
+    currObj->draw(shaderObjectFunc);
 
 //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
     r.skyboxes->at(0)->draw();
@@ -50,7 +51,7 @@ void drawFrame(Renderer& r){
 
     setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().location);
 
-    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 20) someCounter += 1.f/10.f; cout << someCounter << endl);
+    setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 19) someCounter += 1.f/10.f; cout << someCounter << endl);
     setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 >= 0) someCounter -= 1.f/10.f; cout << someCounter << endl);
 
     glm::vec3 sphereLoc = r.getObjectByName("sphere")->position->getLocation();
@@ -81,13 +82,13 @@ int main (){
     TextureList tex;
     MaterialList materials;
 
-    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\aaa.obj", "loaded"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
     meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\sphere.obj", "sphere"));
+    meshList.push(meshLoader.load("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.obj", "paimon"));
 
-    skeletonList.push(skeletizer.skeletize(*meshList.getByName("loaded"),
-                                           "C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\skeleton.skl"));
+    skeletonList.push(skeletizer.skeletize(*meshList.getByName("paimon"),
+                                           "C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.skl"));
 
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\obj_fragment.fsh", "default");
@@ -98,41 +99,27 @@ int main (){
     shaders.pushNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_vertex.vsh",
                     "C:\\EngPathReq\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
 
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//1e1868e0.png");//0
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku1.png");//1
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku2.png");//2
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku3.png");//3
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku4.png");//4
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//Amiku6.png");//5
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//M1.png");//6
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a1.png");//7
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a3.png");//8
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a4.png");//9
-    tex.loadNew("C://EngPathReq//might_beeeeeeeeeeee//models//Character_A1016A457//a9.png");//10
+    tex.loadNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
+    tex.loadNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
+    tex.loadNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg");//2
+    tex.loadNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png");//3
+    tex.loadNew("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg");//4
 
-    tex.addLayouts(13);
-    tex.appendTextureToLayout(0, 0, 0, "texture0");//body
-    tex.appendTextureToLayout(1, 0, 6, "texture0");//legs
-    tex.appendTextureToLayout(2, 0, 4, "texture0");//обводка
+    tex.addLayouts(8);
+    tex.appendTextureToLayout(0, 0, 1, "texture0");//eyes back
+    tex.appendTextureToLayout(1, 0, 2, "texture0");//eyes front
+    tex.appendTextureToLayout(2, 0, 1, "texture0");//face
+    tex.appendTextureToLayout(3, 0, 0, "texture0");//перчатки чулки
+    tex.appendTextureToLayout(4, 0, 0, "texture0");//тело
+    tex.appendTextureToLayout(5, 0, 2, "texture0");//hair
+    tex.appendTextureToLayout(6, 0, 4, "texture0");//плащ
+    tex.appendTextureToLayout(7, 0, 0, "texture0");//?
 
-    tex.appendTextureToLayout(3, 0, 1, "texture0");//лицо
-    tex.appendTextureToLayout(4, 0, 1, "texture0");//белок
-    tex.appendTextureToLayout(5, 0, 1, "texture0");//зрачки
-    tex.appendTextureToLayout(6, 0, 1, "texture0");//блёстки
-    tex.appendTextureToLayout(7, 0, 2, "texture0");//волосы передние
-    tex.appendTextureToLayout(8, 0, 2, "texture0");//волосы передние снизу
-    tex.appendTextureToLayout(9, 0, 2, "texture0");//?
-    tex.appendTextureToLayout(10, 0, 3, "texture0");//наушники
-    tex.appendTextureToLayout(11, 0, 3, "texture0");//наушники - обводка
-
-    tex.appendTextureToLayout(12, 0, 2, "texture0");//tails
-
-    Buffer buffer1(*meshList.getByName("loaded"), *shaders.getByName("default"));
     Buffer skyboxCube(*meshList.getByName("skybox"), *shaders.getByName("skybox"));
     Buffer quad(*meshList.getByName("quad"), *shaders.getByName("screen"));
     Buffer sphere(*meshList.getByName("sphere"), *shaders.getByName("default"));
 
-    SkeletonBuffer model(*skeletonList.getByName("loaded"), *shaders.getByName("skeleton"));
+    SkeletonBuffer paimonskl(*skeletonList.getByName("paimon"), *shaders.getByName("skeleton"));
 
     Material* mat = new Material;
     mat->setAmbientColor(0.01f,0.01f,0.01f);
@@ -152,8 +139,8 @@ int main (){
     renderer.addNewObject(tex, sphere, &materials, "sphere");
     renderer.getObjectByName("sphere")->scaleTo(0.01,0.01,0.01);
 
-    renderer.addNewSkeletonObject(tex, model, &materials, "model");
-    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\Character_A1016A457\\animation.anm", 3);
+    renderer.addNewSkeletonObject(tex, paimonskl, &materials, "paimon");
+    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
 //    renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<string> skyboxSides;
