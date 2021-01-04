@@ -141,7 +141,7 @@ int main (){
 
     renderer.addNewSkeletonObject(tex, paimonskl, &materials, "paimon");
     renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\EngPathReq\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
-//    renderer.getSkeletonObjectByIndex(0)->startAnimation();
+    renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<string> skyboxSides;
     skyboxSides.push_back("C:\\EngPathReq\\might_beeeeeeeeeeee\\skybox\\right.jpg");

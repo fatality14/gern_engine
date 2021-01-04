@@ -1,0 +1,16 @@
+I
+1
+class containing arraylist of mat4, vec4 etc and method to pass them in shader
+an object of the class should be situated in "*Object", "View", "Perspective" etc classes to pass everything to shader
+
+2
+instanced rendering
+use class from (1) to create "InstancedObject" class similar to "Object" class
+the class should contain method that runs ptr function with user logic
+
+3
+use "InstancedObject" to create custom particle system class
+
+II
+1
+shader constructor to parse custom shader code into glsl

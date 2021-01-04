@@ -71,7 +71,6 @@ HEADERS += \
     engine/skybox.h \
     engine/skyboxtexture.h \
     engine/texture.h \
-    engine/timer.h \
     engine/view.h \
     engine/window.h \
     glm/common.hpp \
