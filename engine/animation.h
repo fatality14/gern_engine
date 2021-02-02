@@ -10,6 +10,7 @@ public:
     vector<glm::vec3> rotations;
     vector<glm::vec3> scales;
     vector<uint> ids;
+    float(*timingFunction)(float) = [](float a) -> float {return a;};
 
     void appendPosition(glm::vec3 location, glm::vec3 rotation, glm::vec3 scale, uint id){
         locations.push_back(location);
@@ -69,6 +70,9 @@ public:
             if(token == "s"){
                 switchCase = 3;
             }
+            if(token == "t"){
+                switchCase = 4;
+            }
 
             switch (switchCase) {
             case -1:
@@ -94,6 +98,15 @@ public:
             case 3:
                 keyPoses.at(pAmount).scales.push_back(parseVec3(line));
                 break;
+            case 4:
+                //this is an example of how this should work, need to add more dependences
+                if(line == "default"){
+                    //keyPoses.at(pAmount).timingFunction = [](float a) -> float {return a;};
+                }
+                if(line == "exp"){
+                    keyPoses.at(pAmount).timingFunction = [](float a) -> float {return glm::exp(-a*5);};
+                }
+                break;
             }
         }
     }
@@ -115,6 +128,8 @@ private:
         keyPoseTime = animationTime/(keyPoses.size()-1);
         uint keyPoseIndex = currAnimationTime/keyPoseTime;
         interpolationCoef = currAnimationTime/keyPoseTime - keyPoseIndex;
+        //keyPoses[keyPoseIndex].timingFunction = [](float a) -> float {return glm::exp(-a*9);};
+        interpolationCoef = keyPoses[keyPoseIndex].timingFunction(interpolationCoef);
 //        cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
         if(keyPoseIndex + 1 < keyPoses.size())
             currPose = interpolatePoses(keyPoses[keyPoseIndex], keyPoses[keyPoseIndex+1], interpolationCoef);
