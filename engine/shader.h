@@ -25,36 +25,27 @@ public:
     void unbind(){
         glUseProgram(0);
     }
-    void setVertexAttribPointer(string layoutName, int vecSize, size_t offset){
+
+    template<class T>
+    void setFloatAttribPointer(string layoutName, int vecSize, size_t offset){
         //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
+        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
-    void setVertexIntAttribPointer(string layoutName, int vecSize, size_t offset){
+    template<class T>
+    void setIntAttribPointer(string layoutName, int vecSize, size_t offset){
         //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(Vertex), (GLvoid*)offset);
-        glEnableVertexAttribArray(attribLoc);
-    }
-    void setSkeletonVertexAttribPointer(string layoutName, int vecSize, size_t offset){
-        //set the format of data reading
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(SkeletonVertex), (GLvoid*)offset);
-        glEnableVertexAttribArray(attribLoc);
-    }
-    void setSkeletonVertexIntAttribPointer(string layoutName, int vecSize, size_t offset){
-        //set the format of data reading
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(SkeletonVertex), (GLvoid*)offset);
+        glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
 
     void setUniformMatrix4fv(string uniformName, const GLfloat* value, size_t size = 1){
         glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);
     }
-    void setUniform3fv(string uniformName, const GLfloat* value){
-        glUniform3fv(glGetUniformLocation(program, uniformName.data()), 1, value);
+    void setUniform3fv(string uniformName, const GLfloat* value, size_t size = 1){
+        glUniform3fv(glGetUniformLocation(program, uniformName.data()), size, value);
     }
     void setUniform1i(string uniformName, GLint value){
         glUniform1i(glGetUniformLocation(program, uniformName.data()), value);

@@ -41,9 +41,9 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
+        shader->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
+        shader->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        shader->setFloatAttribPointer<Vertex>("vertex_normal", 3, offsetof(Vertex, normal));
 
         unbind();
     }
@@ -70,9 +70,9 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
 
-        shader->setVertexAttribPointer("vertex_position", 3, offsetof(Vertex, position));
-        shader->setVertexAttribPointer("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setVertexAttribPointer("vertex_normal", 3, offsetof(Vertex, normal));
+        shader->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
+        shader->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        shader->setFloatAttribPointer<Vertex>("vertex_normal", 3, offsetof(Vertex, normal));
 
         //current vao should be set in while window loop
         unbind();

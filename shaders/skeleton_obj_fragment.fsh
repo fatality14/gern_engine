@@ -67,7 +67,7 @@ void main()
     vec3 lightning = calcFullLight(lightPos0, material, 50, specularTex);
     vec4 tex = texture(texture0, vs_texcoord);
 
-    //vec3 posToCamVec = normalize(vs_position - cameraPos);
+//    vec3 posToCamVec = normalize(vs_position - cameraPos);
 
 //    vec3 reflection = reflect(posToCamVec, normalize(vs_normal));
 //    vec4 tex = texture(skybox, reflection);

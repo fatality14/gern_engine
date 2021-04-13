@@ -14,3 +14,7 @@ use "InstancedObject" to create custom particle system class
 II
 1
 shader constructor to parse custom shader code into glsl
+
+III
+1
+make universal *Buffer class with a template not to copypaste code

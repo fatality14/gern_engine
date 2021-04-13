@@ -52,6 +52,7 @@ HEADERS += \
     engine/camera.h \
     engine/common.h \
     engine/framebuffer.h \
+    engine/instancedobject.h \
     engine/joint.h \
     engine/jointposition.h \
     engine/lightsource.h \
@@ -64,6 +65,7 @@ HEADERS += \
     engine/position.h \
     engine/renderer.h \
     engine/shader.h \
+    engine/shaderuniform.h \
     engine/skeletizer.h \
     engine/skeletonbuffer.h \
     engine/skeletonmesh.h \
