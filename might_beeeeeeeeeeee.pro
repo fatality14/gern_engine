@@ -52,6 +52,8 @@ HEADERS += \
     engine/camera.h \
     engine/common.h \
     engine/framebuffer.h \
+    engine/instancedbuffer.h \
+    engine/instancedmesh.h \
     engine/instancedobject.h \
     engine/joint.h \
     engine/jointposition.h \
@@ -502,6 +504,8 @@ INCLUDEPATH += $$PWD/libs
 DEPENDPATH += $$PWD/libs
 
 DISTFILES += \
+    shaders/instanced_obj_fragment.fsh \
+    shaders/instanced_obj_vertex.vsh \
     shaders/obj_fragment.fsh \
     shaders/screen_fragment.fsh \
     shaders/screen_vertex.vsh \

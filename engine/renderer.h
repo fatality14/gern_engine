@@ -14,6 +14,7 @@
 #include <engine/framebuffer.h>
 #include <engine/object.h>
 #include <engine/skeletonobject.h>
+#include <engine/instancedobject.h>
 
 class Renderer{
 public:
@@ -39,6 +40,7 @@ public:
         view = new View(*window, *mouse, *camList->at(0));
         objects = new Objects;
         skeletonObjects = new SkeletonObjects;
+        instancedObjects = new InstancedObjects;
         skyboxes = new SkyboxList;
         framebuffers = new FramebufferList;
         lightSources = new LightSourceList;
@@ -52,6 +54,7 @@ public:
         delete skyboxes;
         delete objects;
         delete skeletonObjects;
+        delete instancedObjects;
     }
 
     //make arguments optional
@@ -67,6 +70,10 @@ public:
     void addNewSkeletonObject(TextureList& tl, SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
         SkeletonObject* o = new SkeletonObject(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
         skeletonObjects->push(*o);
+    }
+    void addNewInstancedObject(TextureList& tl, InstancedBuffer& b, MaterialList* ml, vector<Position>& mm, string name = "noname"){
+        InstancedObject* o = new InstancedObject(*window, tl, b, *perspective, *view, *lightSources, *ml, mm, name);
+        instancedObjects->push(*o);
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths, name);
@@ -101,6 +108,19 @@ public:
     }
     void popSkeletonObjectByName(string name){
         skeletonObjects->popByName(name);
+    }
+
+    InstancedObject* getInstancedObjectByIndex(size_t index){
+        return instancedObjects->at(index);
+    }
+    InstancedObject* getInstancedObjectByName(string name){
+        return instancedObjects->getByName(name);
+    }
+    void popInstancedObjectByIndex(size_t index){
+        instancedObjects->popByIndex(index);
+    }
+    void popInstancedObjectByName(string name){
+        instancedObjects->popByName(name);
     }
 
     SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
@@ -158,6 +178,7 @@ public:
 
             Object::currShaderId = -1;
             SkeletonObject::currShaderId = -1;
+            InstancedObject::currShaderId = -1;
         }
     }
     void setBackgroundColor(float r, float g, float b, float a){
@@ -174,5 +195,6 @@ public:
 private:
     Objects* objects;
     SkeletonObjects* skeletonObjects;
+    InstancedObjects* instancedObjects;
     bool doContinue = false;
 };

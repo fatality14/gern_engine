@@ -4,7 +4,7 @@
 #include <engine/window.h>
 #include <engine/view.h>
 #include <engine/perspective.h>
-#include <engine/buffer.h>
+#include <engine/instancedbuffer.h>
 #include <engine/shader.h>
 #include <engine/position.h>
 #include <engine/texture.h>
@@ -15,9 +15,9 @@ class InstancedObject{
 public:
     Window* window;
     TextureList* texList;
-    Buffer* buffer;
+    InstancedBuffer* buffer;
     Shader* shader;//shader same as in buffer
-    Position* position;
+    vector<Position> modelMatrices;
     View* view;
     Perspective* perspective;
     LightSourceList* lightSources;
@@ -30,9 +30,9 @@ public:
 
     //make arguments optional
     InstancedObject(Window& w, TextureList& t,
-           Buffer& b, Perspective& p,
+           InstancedBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           MaterialList& ml, string name = "noname")
+           MaterialList& ml, vector<Position> modelMatrices, string name = "noname")
     {
         if(w.getWindowPtr() != p.getWindowPtr() || p.getWindowPtr() != v.getWindowPtr()){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
@@ -49,9 +49,15 @@ public:
         lightSources = &lsl;
         materials = &ml;
 
-        this->name = name;
+        this->modelMatrices = modelMatrices;
+        //TODO: need to move to updateBufferModelMats function
+        vector<glm::mat4> modelMatricesRaw;
+        for(size_t i = 0; i < this->modelMatrices.size(); ++i){
+            modelMatricesRaw.push_back(this->modelMatrices[i].getModelMatrix());
+        }
+        buffer->setModelMatrices(modelMatricesRaw);
 
-        position = new Position();
+        this->name = name;
     }
 
     static void setDrawMode(GLuint GL_drawmode){
@@ -59,9 +65,6 @@ public:
     }
     void draw(void (*shaderPassFunction)(InstancedObject&), bool isSameShaderPassFunctionAsPrevCall = false){
         shader->bind();
-
-        position->pushToShader(shader, "modelMatrix");
-        position->setDefaultEvents(window);
 
         if(currShaderId != shader->program){
             currShaderId = shader->program;
@@ -98,11 +101,13 @@ public:
                 ++materialI;
 
                 if(j == 0){
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j));
+                    glDrawArraysInstanced(drawmode, startFrom, currMesh->partEndMtlIds.at(j), modelMatrices.size());
                     startFrom = currMesh->partEndMtlIds.at(j);
                 }
                 else{
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j) - currMesh->partEndMtlIds.at(j-1));
+                    glDrawArraysInstanced(drawmode, startFrom,
+                                          currMesh->partEndMtlIds.at(j) - currMesh->partEndMtlIds.at(j-1),
+                                          modelMatrices.size());
                     startFrom = currMesh->partEndMtlIds.at(j);
                 }
             }
@@ -122,41 +127,53 @@ public:
     const string& getDrawMeshName(){
         return buffer->getMeshName();
     }
-    void move(float x, float y, float z){
-        position->move(x,y,z);
+    void move(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].move(x,y,z);
     }
-    void move(glm::vec3 location){
-        position->move(location);
+    void move(size_t index, glm::vec3 location){
+        if(index < modelMatrices.size())
+            modelMatrices[index].move(location);
     }
-    void moveTo(float x, float y, float z){
-        position->moveTo(x,y,z);
+    void moveTo(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].moveTo(x,y,z);
     }
-    void moveTo(glm::vec3 location){
-        position->moveTo(location);
+    void moveTo(size_t index, glm::vec3 location){
+        if(index < modelMatrices.size())
+            modelMatrices[index].moveTo(location);
     }
-    void rotate(float x, float y, float z){
-        position->rotate(x,y,z);
+    void rotate(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].rotate(x,y,z);
     }
-    void rotate(glm::vec3 rotation){
-        position->rotate(rotation);
+    void rotate(size_t index, glm::vec3 rotation){
+        if(index < modelMatrices.size())
+            modelMatrices[index].rotate(rotation);
     }
-    void rotateTo(float x, float y, float z){
-        position->rotateTo(x,y,z);
+    void rotateTo(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].rotateTo(x,y,z);
     }
-    void rotateTo(glm::vec3 rotation){
-        position->rotateTo(rotation);
+    void rotateTo(size_t index, glm::vec3 rotation){
+        if(index < modelMatrices.size())
+            modelMatrices[index].rotateTo(rotation);
     }
-    void scaleBy(float x, float y, float z){
-        position->scaleBy(x,y,z);
+    void scaleBy(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].scaleBy(x,y,z);
     }
-    void scaleBy(glm::vec3 scale){
-        position->scaleBy(scale);
+    void scaleBy(size_t index, glm::vec3 scale){
+        if(index < modelMatrices.size())
+            modelMatrices[index].scaleBy(scale);
     }
-    void scaleTo(float x, float y, float z){
-        position->scaleTo(x,y,z);
+    void scaleTo(size_t index, float x, float y, float z){
+        if(index < modelMatrices.size())
+            modelMatrices[index].scaleTo(x,y,z);
     }
-    void scaleTo(glm::vec3 scale){
-        position->scaleTo(scale);
+    void scaleTo(size_t index, glm::vec3 scale){
+        if(index < modelMatrices.size())
+            modelMatrices[index].scaleTo(scale);
     }
 };
 GLuint InstancedObject::currShaderId = -1;

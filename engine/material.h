@@ -2,7 +2,6 @@
 
 #include <engine/common.h>
 #include <engine/shader.h>
-#include <engine/shaderuniform.h>
 
 class Material{
 public:

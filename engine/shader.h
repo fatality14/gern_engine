@@ -40,6 +40,27 @@ public:
         glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
+    template<class T>
+    void setMatAttribPointer(string layoutName, int matSize, size_t offset, size_t divisor = 0){
+        //set the format of data reading
+        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
+        for(int i = 0; i < matSize; ++i){
+            glVertexAttribPointer(attribLoc + i,
+                                  matSize,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  sizeof(T),
+                                  (GLvoid*)(offset + sizeof(float) * matSize * i));
+            glEnableVertexAttribArray(attribLoc + i);
+        }
+
+        //the divisor by default is set by 0 by ogl
+        if(divisor != 0){
+            for(int i = 0; i < matSize; ++i){
+                glVertexAttribDivisor(attribLoc, divisor);
+            }
+        }
+    }
 
     void setUniformMatrix4fv(string uniformName, const GLfloat* value, size_t size = 1){
         glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);

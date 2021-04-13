@@ -4,6 +4,7 @@
 #include <engine/skeletonobject.h>
 #include <engine/skeletizer.h>
 #include <engine/shaderuniform.h>
+#include <engine/instancedobject.h>
 
 int amount = 1;
 
@@ -13,14 +14,21 @@ void shaderObjectFunc(Object& o){
 void shaderSklObjectFunc(SkeletonObject& o){
     o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
 }
+void shaderInstObjectFunc(InstancedObject& o){
+    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
+}
 void drawFrame(Renderer& r){
     static Object* currObj;
     static SkeletonObject* currSklObj;
+    //static InstancedObject* currInstObj;
     ///////////////////////////////
     r.bindFramebufferByIndex(0, 1);
 
+    //currInstObj = r.getInstancedObjectByName("paimon");
+    //currInstObj->draw(shaderInstObjectFunc);
+
     currSklObj = r.getSkeletonObjectByName("paimon");
-    currSklObj->draw(shaderSklObjectFunc);
+    //currSklObj->draw(shaderSklObjectFunc);
 
     currObj = r.getObjectByIndex(1);
     currObj->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
@@ -99,6 +107,8 @@ int main (){
                     "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
     shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_vertex.vsh",
                     "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
+    //shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_vertex.vsh",
+    //                "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_fragment.fsh", "instanced");
 
     tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
     tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
@@ -122,8 +132,10 @@ int main (){
 
     SkeletonBuffer paimonskl(*skeletonList.getByName("paimon"), *shaders.getByName("skeleton"));
 
+    //InstancedBuffer paimoninst(*meshList.getByName("paimon"), *shaders.getByName("instanced"));
+
     Material* mat = new Material;
-    mat->setAmbientColor(0.51f,0.51f,0.51f);
+    mat->setAmbientColor(0.01f,0.01f,0.01f);
     mat->setSpecularHighlights(20);
 
     materials.push(*mat);
@@ -143,6 +155,15 @@ int main (){
     renderer.addNewSkeletonObject(tex, paimonskl, &materials, "paimon");
     renderer.getSkeletonObjectByIndex(0)->setAnimation("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
     renderer.getSkeletonObjectByIndex(0)->startAnimation();
+
+    vector<Position> poses;
+    Position pos;
+    pos.moveTo(1,1,1);
+    poses.push_back(pos);
+    pos.moveTo(-1,-1,-1);
+    poses.push_back(pos);
+
+    //renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
 
     vector<string> skyboxSides;
     skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\right.jpg");
