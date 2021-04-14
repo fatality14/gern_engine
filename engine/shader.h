@@ -50,14 +50,14 @@ public:
                                   GL_FLOAT,
                                   GL_FALSE,
                                   sizeof(T),
-                                  (GLvoid*)(offset + sizeof(float) * matSize * i));
+                                  (GLvoid*)(offset + sizeof(GLfloat) * matSize * i));
             glEnableVertexAttribArray(attribLoc + i);
         }
 
         //the divisor by default is set by 0 by ogl
         if(divisor != 0){
             for(int i = 0; i < matSize; ++i){
-                glVertexAttribDivisor(attribLoc, divisor);
+                glVertexAttribDivisor(attribLoc + i, divisor);
             }
         }
     }

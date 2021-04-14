@@ -40,9 +40,8 @@ public:
         this->modelMatrices = modelMatrices;
 
         glBindVertexArray(VAO);
-        glGenBuffers(1, &VBO1);
         glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * modelMatrices.size(), modelMatrices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * modelMatrices.size(), this->modelMatrices.data(), GL_STATIC_DRAW);
 
         shader->setMatAttribPointer<glm::mat4>("model", 4, 0, 1);
     }
@@ -87,6 +86,8 @@ private:
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
+
+        glGenBuffers(1, &VBO1);
 
         shader->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
         shader->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));

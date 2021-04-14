@@ -20,12 +20,12 @@ void shaderInstObjectFunc(InstancedObject& o){
 void drawFrame(Renderer& r){
     static Object* currObj;
     static SkeletonObject* currSklObj;
-    //static InstancedObject* currInstObj;
+    static InstancedObject* currInstObj;
     ///////////////////////////////
     r.bindFramebufferByIndex(0, 1);
 
-    //currInstObj = r.getInstancedObjectByName("paimon");
-    //currInstObj->draw(shaderInstObjectFunc);
+    currInstObj = r.getInstancedObjectByName("paimon");
+    currInstObj->draw(shaderInstObjectFunc);
 
     currSklObj = r.getSkeletonObjectByName("paimon");
     //currSklObj->draw(shaderSklObjectFunc);
@@ -107,8 +107,8 @@ int main (){
                     "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
     shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_vertex.vsh",
                     "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
-    //shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_vertex.vsh",
-    //                "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_fragment.fsh", "instanced");
+    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_vertex.vsh",
+                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_fragment.fsh", "instanced");
 
     tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
     tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
@@ -132,7 +132,7 @@ int main (){
 
     SkeletonBuffer paimonskl(*skeletonList.getByName("paimon"), *shaders.getByName("skeleton"));
 
-    //InstancedBuffer paimoninst(*meshList.getByName("paimon"), *shaders.getByName("instanced"));
+    InstancedBuffer paimoninst(*meshList.getByName("paimon"), *shaders.getByName("instanced"));
 
     Material* mat = new Material;
     mat->setAmbientColor(0.01f,0.01f,0.01f);
@@ -159,11 +159,14 @@ int main (){
     vector<Position> poses;
     Position pos;
     pos.moveTo(1,1,1);
+    pos.scaleTo(0.01,0.01,0.01);
     poses.push_back(pos);
-    pos.moveTo(-1,-1,-1);
-    poses.push_back(pos);
+    Position pos1;
+    pos1.moveTo(-1,-1,-1);
+    pos1.scaleTo(0.01,0.01,0.01);
+    poses.push_back(pos1);
 
-    //renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
+    renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
 
     vector<string> skyboxSides;
     skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\right.jpg");
