@@ -53,7 +53,6 @@ HEADERS += \
     engine/common.h \
     engine/framebuffer.h \
     engine/instancedbuffer.h \
-    engine/instancedmesh.h \
     engine/instancedobject.h \
     engine/joint.h \
     engine/jointposition.h \

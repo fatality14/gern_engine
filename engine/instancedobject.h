@@ -50,12 +50,7 @@ public:
         materials = &ml;
 
         this->modelMatrices = modelMatrices;
-        //TODO: need to move to updateBufferModelMats function
-        vector<glm::mat4> modelMatricesRaw;
-        for(size_t i = 0; i < this->modelMatrices.size(); ++i){
-            modelMatricesRaw.push_back(this->modelMatrices[i].getModelMatrix());
-        }
-        buffer->setModelMatrices(modelMatricesRaw);
+        updateBufferModelMats();
 
         this->name = name;
     }
@@ -63,7 +58,10 @@ public:
     static void setDrawMode(GLuint GL_drawmode){
         drawmode = GL_drawmode;
     }
-    void draw(void (*shaderPassFunction)(InstancedObject&), bool isSameShaderPassFunctionAsPrevCall = false){
+    void updateBufferModelMats(){
+        buffer->setModelMatrices(modelMatrices);
+    }
+    void draw(void (*shaderPassFunction)(InstancedObject&), bool isSameShaderPassFunctionAsPrevCall = false, bool isStaticObject = true){
         shader->bind();
 
         if(currShaderId != shader->program){
@@ -77,6 +75,10 @@ public:
         }
 
         buffer->bind();
+
+        if(!isStaticObject){
+            updateBufferModelMats();
+        }
 
         if (buffer->getMesh().nIndices != 0)
             glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -126,6 +128,12 @@ public:
     }
     const string& getDrawMeshName(){
         return buffer->getMeshName();
+    }
+    void setModelMatrices(vector<Position> mm){
+        modelMatrices = mm;
+    }
+    vector<Position>& getModelMatrices(){
+        return modelMatrices;
     }
     void move(size_t index, float x, float y, float z){
         if(index < modelMatrices.size())

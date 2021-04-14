@@ -36,12 +36,15 @@ public:
     Shader& getShaderPtr(){
         return *shader;
     }
-    void setModelMatrices(vector<glm::mat4>& modelMatrices){
-        this->modelMatrices = modelMatrices;
+    void setModelMatrices(vector<Position>& modelMatrices){
+        this->modelMatrices.clear();
+        for(size_t i = 0; i < modelMatrices.size(); ++i){
+            this->modelMatrices.push_back(modelMatrices[i].getModelMatrix());
+        }
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * modelMatrices.size(), this->modelMatrices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * this->modelMatrices.size(), this->modelMatrices.data(), GL_STATIC_DRAW);
 
         shader->setMatAttribPointer<glm::mat4>("model", 4, 0, 1);
     }

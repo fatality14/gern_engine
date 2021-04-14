@@ -25,7 +25,12 @@ void drawFrame(Renderer& r){
     r.bindFramebufferByIndex(0, 1);
 
     currInstObj = r.getInstancedObjectByName("paimon");
-    currInstObj->draw(shaderInstObjectFunc);
+    currInstObj->draw(shaderInstObjectFunc, false, true);
+
+    int am = 30;
+    for(int i = 0; i < am; ++i){
+        currInstObj->rotate(i, 0, 1, 0);
+    }
 
     currSklObj = r.getSkeletonObjectByName("paimon");
     //currSklObj->draw(shaderSklObjectFunc);
@@ -158,13 +163,16 @@ int main (){
 
     vector<Position> poses;
     Position pos;
-    pos.moveTo(1,1,1);
-    pos.scaleTo(0.01,0.01,0.01);
-    poses.push_back(pos);
-    Position pos1;
-    pos1.moveTo(-1,-1,-1);
-    pos1.scaleTo(0.01,0.01,0.01);
-    poses.push_back(pos1);
+    pos.scaleTo(0.1,0.1,0.1);
+    float rad = 5;
+    int am = 30;
+    float shift = 360/am;
+    float angle = 0;
+    for(int i = 0; i < am; ++i){
+        pos.moveTo(rad*sin(angle),rad*cos(angle),0);
+        poses.push_back(pos);
+        angle += shift;
+    }
 
     renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
 
