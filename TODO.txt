@@ -14,3 +14,6 @@ make universal *Buffer class with a template not to copypaste code
 5
 move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
+
+6
+fix inifinite loading and make loading progress

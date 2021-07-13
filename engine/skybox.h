@@ -1,13 +1,13 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/window.h>
-#include <engine/view.h>
-#include <engine/perspective.h>
-#include <engine/buffer.h>
-#include <engine/shader.h>
-#include <engine/position.h>
-#include <engine/skyboxtexture.h>
+#include <common.h>
+#include <window.h>
+#include <view.h>
+#include <perspective.h>
+#include <buffer.h>
+#include <shader.h>
+#include <position.h>
+#include <skyboxtexture.h>
 
 class SkyboxObject{
 public:

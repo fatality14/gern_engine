@@ -1,7 +1,7 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/texture.h>
+#include <common.h>
+#include <texture.h>
 
 class Framebuffer{
 public:

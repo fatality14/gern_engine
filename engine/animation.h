@@ -1,7 +1,7 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/joint.h>
+#include <common.h>
+#include <joint.h>
 #include <chrono>
 
 class AnimationPose{

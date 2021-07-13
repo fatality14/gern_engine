@@ -1,8 +1,8 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/mesh.h>
-#include <engine/shader.h>
+#include <common.h>
+#include <mesh.h>
+#include <shader.h>
 
 //maybe add BufferList
 class Buffer{

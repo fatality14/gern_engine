@@ -1,7 +1,7 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/mesh.h>
+#include <common.h>
+#include <mesh.h>
 
 class MeshLoader : private Loader{
 public:

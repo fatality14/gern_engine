@@ -1,7 +1,7 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/window.h>
+#include <common.h>
+#include <window.h>
 
 class MouseListener{
 public:

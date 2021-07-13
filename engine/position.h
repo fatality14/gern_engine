@@ -1,10 +1,10 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/window.h>
-#include <engine/mouselistener.h>
-#include <engine/camera.h>
-#include <engine/shader.h>
+#include <common.h>
+#include <window.h>
+#include <mouselistener.h>
+#include <camera.h>
+#include <shader.h>
 
 class Position{
 public:

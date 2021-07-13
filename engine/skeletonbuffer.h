@@ -1,9 +1,9 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/mesh.h>
-#include <engine/shader.h>
-#include <engine/skeletonmesh.h>
+#include <common.h>
+#include <mesh.h>
+#include <shader.h>
+#include <skeletonmesh.h>
 
 //maybe add BufferList
 class SkeletonBuffer{

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/shader.h>
+#include <common.h>
+#include <shader.h>
 #include <type_traits>
 
 class ShaderUniformBaseClass{

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/mesh.h>
-#include <engine/shader.h>
-#include <engine/position.h>
+#include <common.h>
+#include <mesh.h>
+#include <shader.h>
+#include <position.h>
 
 //maybe add BufferList
 class InstancedBuffer{

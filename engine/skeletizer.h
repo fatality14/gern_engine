@@ -1,8 +1,8 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/mesh.h>
-#include <engine/skeletonmesh.h>
+#include <common.h>
+#include <mesh.h>
+#include <skeletonmesh.h>
 #include <algorithm>
 
 class Skeletizer : private Loader{

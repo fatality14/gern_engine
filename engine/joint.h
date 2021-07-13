@@ -1,8 +1,8 @@
 #pragma once
 
-#include <engine/common.h>
-#include <engine/jointposition.h>
-#include <engine/shader.h>
+#include <common.h>
+#include <jointposition.h>
+#include <shader.h>
 
 class Joint{
 public:

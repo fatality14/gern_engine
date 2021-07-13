@@ -1,10 +1,10 @@
-#include <engine/common.h>
-#include <engine/renderer.h>
-#include <engine/meshloader.h>
-#include <engine/skeletonobject.h>
-#include <engine/skeletizer.h>
-#include <engine/shaderuniform.h>
-#include <engine/instancedobject.h>
+#include <common.h>
+#include <renderer.h>
+#include <meshloader.h>
+#include <skeletonobject.h>
+#include <skeletizer.h>
+#include <shaderuniform.h>
+#include <instancedobject.h>
 
 int amount = 1;
 
@@ -96,30 +96,30 @@ int main (){
     TextureList tex;
     MaterialList materials;
 
-    meshList.push(meshLoader.load("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\skybox.obj", "skybox"));
-    meshList.push(meshLoader.load("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\quad.obj", "quad"));
-    meshList.push(meshLoader.load("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\sphere.obj", "sphere"));
-    meshList.push(meshLoader.load("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.obj", "paimon"));
+    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\skybox.obj", "skybox"));
+    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\quad.obj", "quad"));
+    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\sphere.obj", "sphere"));
+    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.obj", "paimon"));
 
     skeletonList.push(skeletizer.skeletize(*meshList.getByName("paimon"),
-                                           "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.skl"));
+                                           "C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.skl"));
 
-    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\obj_vertex.vsh",
-                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\obj_fragment.fsh", "default");
-    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skybox_vertex.vsh",
-                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skybox_fragment.fsh", "skybox");
-    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\screen_vertex.vsh",
-                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\screen_fragment.fsh", "screen");
-    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_vertex.vsh",
-                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
-    shaders.pushNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_vertex.vsh",
-                    "D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\shaders\\instanced_obj_fragment.fsh", "instanced");
+    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\obj_vertex.vsh",
+                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\obj_fragment.fsh", "default");
+    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\skybox_vertex.vsh",
+                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\skybox_fragment.fsh", "skybox");
+    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\screen_vertex.vsh",
+                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\screen_fragment.fsh", "screen");
+    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\skeleton_obj_vertex.vsh",
+                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
+    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\instanced_obj_vertex.vsh",
+                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\instanced_obj_fragment.fsh", "instanced");
 
-    tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
-    tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
-    tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg");//2
-    tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png");//3
-    tex.loadNew("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg");//4
+    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
+    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
+    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg");//2
+    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png");//3
+    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg");//4
 
     tex.addLayouts(8);
     tex.appendTextureToLayout(0, 0, 1, "texture0");//eyes back
@@ -158,7 +158,7 @@ int main (){
     renderer.getObjectByName("sphere")->scaleTo(0.01,0.01,0.01);
 
     renderer.addNewSkeletonObject(tex, paimonskl, &materials, "paimon");
-    renderer.getSkeletonObjectByIndex(0)->setAnimation("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
+    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
     renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<Position> poses;
@@ -177,12 +177,12 @@ int main (){
     renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
 
     vector<string> skyboxSides;
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\right.jpg");
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\left.jpg");
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\top.jpg");
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\bottom.jpg");
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\front.jpg");
-    skyboxSides.push_back("D:\\AYNP\\QtCreator\\Projects\\might_beeeeeeeeeeee\\skybox\\back.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\right.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\left.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\top.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\bottom.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\front.jpg");
+    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\back.jpg");
 
     renderer.addNewSkybox(skyboxSides, skyboxCube);
     renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
