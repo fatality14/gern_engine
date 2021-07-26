@@ -87,6 +87,10 @@ private:
 
     vector<TextureLayout> texLayouts;
 public:
+    TextureList(string name = "noname"){
+        this->name = name;
+    }
+
     void loadNew(string path, string name = "noname"){
         Texture* t = new Texture(path, name);
         t->loadTexture();
@@ -124,4 +128,6 @@ public:
     size_t layoutsAmount(){
         return texLayouts.size();
     }
+
+    string name;
 };
