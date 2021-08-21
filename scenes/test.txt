@@ -34,7 +34,7 @@ frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0
 meshobj tex sphere sphere
-sklobj tex paimonskl paimon C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
-instobj tex paimoninst 1 paimon
+sklobj tex paimonskl 1 paimon C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
+instobj tex paimoninst 1 1 paimon
 skybox C:\\Users\\PC\\Documents\\opengl\\skybox\\right.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\left.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\top.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\bottom.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\front.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\back.jpg
 bckcol 0.5 0 0 0.99

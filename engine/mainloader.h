@@ -222,6 +222,7 @@ public:
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 tmp4 = bite(" ", line, end);
+                tmp5 = bite(" ", line, end);
 
                 size_t which1 = 0, which2 = 0;
 
@@ -252,7 +253,7 @@ public:
                     angle += shift;
                 }
 
-                renderer.addNewInstancedObject(*texes.at(which1), *instBuffers.at(which2), &materials, poses, tmp4);
+                renderer.addNewInstancedObject(*texes.at(which1), *instBuffers.at(which2), &materials, poses, tmp5);
             }
             if(token == "skybox"){
                 vector<string> skyboxSides;
