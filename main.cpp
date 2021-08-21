@@ -5,6 +5,7 @@
 #include <skeletizer.h>
 #include <shaderuniform.h>
 #include <instancedobject.h>
+#include <mainloader.h>
 
 int amount = 1;
 
@@ -88,6 +89,10 @@ int main (){
     int window_height = 768;
 
     Renderer renderer(window_width, window_height);
+
+    MainLoader ml;
+    ml.load("C:\\Users\\PC\\Documents\\opengl\\scenes\\test.txt", renderer);
+/*
     MeshLoader meshLoader;
     MeshList meshList;
     SkeletonMeshList skeletonList;
@@ -96,30 +101,30 @@ int main (){
     TextureList tex;
     MaterialList materials;
 
-    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\skybox.obj", "skybox"));
-    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\quad.obj", "quad"));
-    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\sphere.obj", "sphere"));
-    meshList.push(meshLoader.load("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.obj", "paimon"));
+    meshList.push(meshLoader.load("C:\\Users\\PC\\Documents\\opengl\\models\\skybox.obj", "skybox"));
+    meshList.push(meshLoader.load("C:\\Users\\PC\\Documents\\opengl\\models\\quad.obj", "quad"));
+    meshList.push(meshLoader.load("C:\\Users\\PC\\Documents\\opengl\\models\\sphere.obj", "sphere"));
+    meshList.push(meshLoader.load("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.obj", "paimon"));
 
     skeletonList.push(skeletizer.skeletize(*meshList.getByName("paimon"),
-                                           "C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.skl"));
+                                           "C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.skl"));
 
-    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\obj_vertex.vsh",
-                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\obj_fragment.fsh", "default");
-    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\skybox_vertex.vsh",
-                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\skybox_fragment.fsh", "skybox");
-    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\screen_vertex.vsh",
-                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\screen_fragment.fsh", "screen");
-    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\skeleton_obj_vertex.vsh",
-                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
-    shaders.pushNew("C:\\Users\\1234\\Documents\\ogl\\shaders\\instanced_obj_vertex.vsh",
-                    "C:\\Users\\1234\\Documents\\ogl\\shaders\\instanced_obj_fragment.fsh", "instanced");
+    shaders.pushNew("C:\\Users\\PC\\Documents\\opengl\\shaders\\obj_vertex.vsh",
+                    "C:\\Users\\PC\\Documents\\opengl\\shaders\\obj_fragment.fsh", "default");
+    shaders.pushNew("C:\\Users\\PC\\Documents\\opengl\\shaders\\skybox_vertex.vsh",
+                    "C:\\Users\\PC\\Documents\\opengl\\shaders\\skybox_fragment.fsh", "skybox");
+    shaders.pushNew("C:\\Users\\PC\\Documents\\opengl\\shaders\\screen_vertex.vsh",
+                    "C:\\Users\\PC\\Documents\\opengl\\shaders\\screen_fragment.fsh", "screen");
+    shaders.pushNew("C:\\Users\\PC\\Documents\\opengl\\shaders\\skeleton_obj_vertex.vsh",
+                    "C:\\Users\\PC\\Documents\\opengl\\shaders\\skeleton_obj_fragment.fsh", "skeleton");
+    shaders.pushNew("C:\\Users\\PC\\Documents\\opengl\\shaders\\instanced_obj_vertex.vsh",
+                    "C:\\Users\\PC\\Documents\\opengl\\shaders\\instanced_obj_fragment.fsh", "instanced");
 
-    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
-    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
-    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg");//2
-    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png");//3
-    tex.loadNew("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg");//4
+    tex.loadNew("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg");//0
+    tex.loadNew("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg");//1
+    tex.loadNew("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg");//2
+    tex.loadNew("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png");//3
+    tex.loadNew("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg");//4
 
     tex.addLayouts(8);
     tex.appendTextureToLayout(0, 0, 1, "texture0");//eyes back
@@ -158,7 +163,7 @@ int main (){
     renderer.getObjectByName("sphere")->scaleTo(0.01,0.01,0.01);
 
     renderer.addNewSkeletonObject(tex, paimonskl, &materials, "paimon");
-    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\Users\\1234\\Documents\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
+    renderer.getSkeletonObjectByIndex(0)->setAnimation("C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.anm", 3);
     renderer.getSkeletonObjectByIndex(0)->startAnimation();
 
     vector<Position> poses;
@@ -177,17 +182,18 @@ int main (){
     renderer.addNewInstancedObject(tex, paimoninst, &materials, poses, "paimon");
 
     vector<string> skyboxSides;
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\right.jpg");
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\left.jpg");
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\top.jpg");
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\bottom.jpg");
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\front.jpg");
-    skyboxSides.push_back("C:\\Users\\1234\\Documents\\ogl\\skybox\\back.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\right.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\left.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\top.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\bottom.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\front.jpg");
+    skyboxSides.push_back("C:\\Users\\PC\\Documents\\opengl\\skybox\\back.jpg");
 
     renderer.addNewSkybox(skyboxSides, skyboxCube);
     renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
+*/
 
     renderer.render(drawFrame);
     return 0;

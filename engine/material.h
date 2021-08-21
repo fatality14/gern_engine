@@ -5,6 +5,10 @@
 
 class Material{
 public:
+    Material(string name = "noname"){
+        this->name = name;
+    }
+
     void pushToShader(Shader* s, string uniformName){
         s->setUniform3fv(uniformName + ".ambientColor", glm::value_ptr(ambientColor));
         s->setUniform3fv(uniformName + ".diffuseColor", glm::value_ptr(diffuseColor));
@@ -54,6 +58,8 @@ public:
     float getDissolve(){
         return dissolve;
     }
+
+    string name;
 private:
     glm::vec3 ambientColor = glm::vec3(1.f);
     glm::vec3 diffuseColor = glm::vec3(1.f);
