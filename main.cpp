@@ -26,7 +26,7 @@ void drawFrame(Renderer& r){
     r.bindFramebufferByIndex(0, 1);
 
     currInstObj = r.getInstancedObjectByName("paimon");
-    //currInstObj->draw(shaderInstObjectFunc, false, true);
+    currInstObj->draw(shaderInstObjectFunc, false, true);
 
     int am = 30;
     for(int i = 0; i < am; ++i){
@@ -34,11 +34,11 @@ void drawFrame(Renderer& r){
     }
 
     currSklObj = r.getSkeletonObjectByName("paimon");
-    //currSklObj->draw(shaderSklObjectFunc);
+    currSklObj->draw(shaderSklObjectFunc);
 
     currObj = r.getObjectByIndex(1);
     currObj->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
-    //currObj->draw(shaderObjectFunc);
+    currObj->draw(shaderObjectFunc);
 
 //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
     r.skyboxes->at(0)->draw();
@@ -91,8 +91,8 @@ int main (){
     Renderer renderer(window_width, window_height);
 
     MainLoader ml;
-    //ml.load("C:\\Users\\PC\\Documents\\opengl\\scenes\\test.txt", renderer);
-
+    ml.load("C:\\Users\\PC\\Documents\\opengl\\scenes\\test.txt", renderer);
+/*
     MeshLoader meshLoader;
     MeshList meshList;
     SkeletonMeshList skeletonList;
@@ -193,7 +193,7 @@ int main (){
     renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
 
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
-
+*/
 
     renderer.render(drawFrame);
     return 0;

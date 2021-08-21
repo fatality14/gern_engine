@@ -21,6 +21,7 @@ public:
         textureColorBuffers->addLayouts(1);
 
         this->name = name;
+        textureColorBuffers->name = name;
 
         glGenFramebuffers(1, &FBO);
         glGenRenderbuffers(1, &RBO);
