@@ -8,9 +8,11 @@
 //maybe add BufferList
 class InstancedBuffer{
 public:
-    InstancedBuffer(Mesh& m, Shader& s){
+    InstancedBuffer(Mesh& m, Shader& s, string name = "noname"){
         mesh = &m;
         shader= &s;
+
+        this->name = name;
 
         genBuffers();
     }
@@ -66,6 +68,7 @@ public:
         unbind();
     }
 
+    string name;
 private:
     Shader* shader;
 

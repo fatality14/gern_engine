@@ -1,0 +1,40 @@
+cwd 
+mesh C:\\Users\\PC\\Documents\\opengl\\models\\skybox.obj skybox
+mesh C:\\Users\\PC\\Documents\\opengl\\models\\quad.obj quad
+mesh C:\\Users\\PC\\Documents\\opengl\\models\\sphere.obj sphere
+mesh C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.obj paimon
+skl paimon C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.skl
+shad C:\\Users\\PC\\Documents\\opengl\\shaders\\obj_vertex.vsh C:\\Users\\PC\\Documents\\opengl\\shaders\\obj_fragment.fsh default
+shad C:\\Users\\PC\\Documents\\opengl\\shaders\\skybox_vertex.vsh C:\\Users\\PC\\Documents\\opengl\\shaders\\skybox_fragment.fsh skybox
+shad C:\\Users\\PC\\Documents\\opengl\\shaders\\screen_vertex.vsh C:\\Users\\PC\\Documents\\opengl\\shaders\\screen_fragment.fsh screen
+shad C:\\Users\\PC\\Documents\\opengl\\shaders\\skeleton_obj_vertex.vsh C:\\Users\\PC\\Documents\\opengl\\shaders\\skeleton_obj_fragment.fsh skeleton
+shad C:\\Users\\PC\\Documents\\opengl\\shaders\\instanced_obj_vertex.vsh C:\\Users\\PC\\Documents\\opengl\\shaders\\instanced_obj_fragment.fsh instanced
+tex tex
+texm C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg
+texm C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg
+texm C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg
+texm C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png
+texm C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg
+texl 0 0 1 texture0
+texl 1 0 2 texture0
+texl 2 0 1 texture0
+texl 3 0 0 texture0
+texl 4 0 0 texture0
+texl 5 0 2 texture0
+texl 6 0 4 texture0
+texl 7 0 0 texture0
+meshbuf skybox skybox skyboxCube
+meshbuf quad screen quad
+meshbuf sphere default sphere
+sklbuf paimon skeleton paimonskl
+instbuf paimon instanced paimoninst
+mat
+light 0 0 2 default
+frmb 1366 768 2 screenbuff
+meshobj screenbuff quad screen
+rot 0 180 0
+meshobj tex sphere sphere
+sklobj tex paimonskl 1 paimon C:\\Users\\PC\\Documents\\opengl\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
+instobj tex paimoninst 1 1 paimon
+skybox C:\\Users\\PC\\Documents\\opengl\\skybox\\right.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\left.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\top.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\bottom.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\front.jpg C:\\Users\\PC\\Documents\\opengl\\skybox\\back.jpg
+bckcol 0.5 0 0 0.99

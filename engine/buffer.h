@@ -7,9 +7,11 @@
 //maybe add BufferList
 class Buffer{
 public:
-    Buffer(Mesh& m, Shader& s){
+    Buffer(Mesh& m, Shader& s, string name = "noname"){
         mesh = &m;
         shader= &s;
+
+        this->name = name;
 
         genBuffers();
     }
@@ -47,6 +49,8 @@ public:
 
         unbind();
     }
+
+    string name;
 
 private:
     Shader* shader;
