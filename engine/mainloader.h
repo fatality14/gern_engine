@@ -122,7 +122,6 @@ public:
 
                 texes.push_back(framebuffer->textureColorBuffers);
             }
-            //make these apply to last added obj
             if(token == "move"){
                 float x = stof(bite(" ", line, end));
                 float y = stof(bite(" ", line, end));

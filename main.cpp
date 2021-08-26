@@ -91,7 +91,7 @@ int main (){
     Renderer renderer(window_width, window_height);
 
     MainLoader ml;
-    ml.load("C:\\Users\\PC\\Documents\\opengl\\scenes\\test.txt", renderer);
+    ml.load("C:\\Users\\1234\\Documents\\ogl\\scenes\\test.txt", renderer);
 /*
     MeshLoader meshLoader;
     MeshList meshList;
