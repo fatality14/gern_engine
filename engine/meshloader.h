@@ -15,6 +15,11 @@ public:
         ifstream f;
         f.open(path);
 
+        if(f.fail()){
+            cout << "Cannot open file: " << path << ", set empty mesh instead of" << endl;
+            return *mesh;
+        }
+
         string line;
 
         int switchCase;

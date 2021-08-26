@@ -15,5 +15,21 @@ make universal *Buffer class with a template not to copypaste code
 move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
 
-6
-fix inifinite loading and make loading progress
+размер экрана и основной цвет
+список мешей
+список скелетон мешей
+список шейдеров
+список текстур и их взаимосвязей с моделью
+список буферов
+список скелетон буферов
+список инстансед буферов
+спиоск материалов
+список фреймбуферов
+список объектов и их трансформаций
+список скелетон объектов и трансформаций
+список инстансед объектов и трансформаций
+список скайбоксов, их текстур и трансформаций
+
+отрисовка объектов
+набор переменных для ивентов
+интерфейс взаимодействия с объектами

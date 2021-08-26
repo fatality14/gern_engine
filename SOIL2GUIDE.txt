@@ -1,0 +1,6 @@
+1
+download https://github.com/zhenya11114/soil2-cmake
+2
+open in qt creator (or smth else) with cmake
+3
+build with cmake and get .a file in build* directory

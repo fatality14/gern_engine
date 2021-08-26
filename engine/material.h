@@ -28,7 +28,7 @@ public:
     void setSpecularHighlights(float specularHighlights){
         this->specularHighlights = specularHighlights;
     }
-    void setOticalDensity(float density){
+    void setOpticalDensity(float density){
         opticalDensity = density;
     }
     void setDissolve(float dissolve){
