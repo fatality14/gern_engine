@@ -13,20 +13,33 @@ public:
     GLenum pmFace;
     GLenum pmMode;
 
-    Window(int width, int height, GLenum pmFace = GL_FRONT_AND_BACK, GLenum pmMode = GL_FILL){
+    string windowName;
+
+    static bool isWindowInit;
+
+    Window(int width, int height, GLenum pmFace = GL_FRONT_AND_BACK, GLenum pmMode = GL_FILL, string windowName = "default"){
+        if(isWindowInit){
+            cout << "Only one window allowed for the process\n";
+            exit(0);
+        }
+
         this->width = width;
         this->height = height;
         fbWidth = width;
         fbHeight = height;
         this->pmFace = pmFace;
         this->pmMode = pmMode;
+        this->windowName = windowName;
 
-        init();
+        isWindowInit = true;
+        initGLFW();
+        initWindow();
     }
     Window(Window& w) = delete;
     ~Window(){
         glfwDestroyWindow(window);
         glfwTerminate();
+        isWindowInit = false;
     }
 
     void setPolygonMode(GLenum face = GL_FRONT_AND_BACK, GLenum mode = GL_FILL){
@@ -54,8 +67,8 @@ private:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     }
-    void initWindow(){
-        window = glfwCreateWindow(width, height, "Window", NULL, NULL);
+    void initWindowData(){
+        window = glfwCreateWindow(width, height, windowName.data(), NULL, NULL);
 
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
         glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
@@ -81,9 +94,8 @@ private:
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
-    void init(){
-        initGLFW();
-        initWindow();
+    void initWindow(){
+        initWindowData();
         initGLEW();
         setPolygonMode(pmFace, pmMode);
     }
@@ -92,3 +104,5 @@ private:
         glViewport(0, 0, fbW, fbH);
     }
 };
+
+bool Window::isWindowInit = false;

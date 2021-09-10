@@ -15,20 +15,26 @@ make universal *Buffer class with a template not to copypaste code
 move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
 
-размер экрана и основной цвет
-список мешей
-список скелетон мешей
-список шейдеров
-список текстур и их взаимосвязей с моделью
-список буферов
-список скелетон буферов
-список инстансед буферов
-спиоск материалов
-список фреймбуферов
-список объектов и их трансформаций
-список скелетон объектов и трансформаций
-список инстансед объектов и трансформаций
-список скайбоксов, их текстур и трансформаций
+6
+make WindowManager class from Window class and make the draw sequence for every window in Renderer
+
+7
+rename some classes to fit their names
+
+8
+add const qualifiers where it need to be
+
+9
+parse materials from the .obj properly, MaterialList must be in Mesh class instead of Object class
+
+10
+make Object interface class and move some common logic to it
+
+11
+rename some GL_* definitions to own enums
+
+12
+make the scene parser done
 
 отрисовка объектов
 набор переменных для ивентов
