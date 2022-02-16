@@ -151,7 +151,7 @@ public:
         clearBuffers();
     }
 
-    void render(void (*frameFunction)(Renderer&)){
+    void renderLoop(void (*frameFunction)(Renderer&)){
         doContinue = true;
         while (!glfwWindowShouldClose(window->getWindowPtr()))
         {

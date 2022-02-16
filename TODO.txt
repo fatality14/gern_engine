@@ -11,7 +11,7 @@ shader constructor to parse custom shader code into glsl
 4?
 make universal *Buffer class with a template not to copypaste code
 
-5
+5+-
 move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
 
@@ -34,7 +34,13 @@ make Object interface class and move some common logic to it
 rename some GL_* definitions to own enums
 
 12
-make the scene parser done
+provide glAttachShader not only for two shaders at a time but multiple in Shader class
+
+13
+it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
+
+14
+split CMakeList to compile other libraries only once
 
 отрисовка объектов
 набор переменных для ивентов

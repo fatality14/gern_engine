@@ -90,6 +90,7 @@ int main (){
 
     Renderer renderer(window_width, window_height);
 
+    int a;
     MainLoader ml;
     ml.load("C:\\Users\\1234\\Documents\\ogl\\scenes\\test.txt", renderer);
 /*
@@ -195,6 +196,6 @@ int main (){
     renderer.setBackgroundColor(0.5f, 0.f, 0.f, 0.99f);
 */
 
-    renderer.render(drawFrame);
+    renderer.renderLoop(drawFrame);
     return 0;
 }
