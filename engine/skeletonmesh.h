@@ -47,6 +47,8 @@ public:
         indices->push_back(b);
         indices->push_back(c);
     }
+
+    //remove?
     void genJointsFromRoot(){
         joints.appendFromRootJoint(rootJoint);
     }

@@ -21,14 +21,14 @@ public:
 
     void updateMatrices(){
         transform = parentTransform;
-        transform = glm::translate(transform, location);
 
         glm::quat q(glm::radians(rotation));
         transform = glm::translate(transform, origin);
+        transform = glm::translate(transform, location);
         transform = transform * glm::toMat4(q);
+        transform = glm::scale(transform, glm::vec3(scale));
         transform = glm::translate(transform, -origin);
 
-        transform = glm::scale(transform, glm::vec3(scale));
     }
 
     void move(float x, float y, float z){

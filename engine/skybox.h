@@ -12,7 +12,6 @@
 class SkyboxObject{
 public:
     SkyboxTexture* skyboxTexture;
-
     Window* window;
     View* view;
     Perspective* perspective;

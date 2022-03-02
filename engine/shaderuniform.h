@@ -37,13 +37,13 @@ public:
 private:
     T value;
     string uniformName;
-    Shader* shader;
+    Shader* shader;//remove?
     size_t size;
 };
 
 class ShaderUniformList : public List<ShaderUniformBaseClass>{
 public:
-    void pushToShaders(){
+    void pushAllToShader(){
         for(size_t i = 0; i < size(); ++i){
             at(i)->pushToShader();
         }

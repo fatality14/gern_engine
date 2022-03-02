@@ -14,7 +14,7 @@
 class Object{
 public:
     Window* window;
-    TextureList* texList;
+    TextureList* texList;//move to mesh? or use one in MaterialList
     Buffer* buffer;
     Shader* shader;//shader same as in buffer
     Position* position;
@@ -34,7 +34,7 @@ public:
            View& v, LightSourceList& lsl,
            MaterialList& ml, string name = "noname")
     {
-        if(w.getWindowPtr() != p.getWindowPtr() || p.getWindowPtr() != v.getWindowPtr()){
+        if(w.__getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";
             return;

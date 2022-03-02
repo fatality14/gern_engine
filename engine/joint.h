@@ -92,12 +92,15 @@ public:
         }
         s->setUniformMatrix4fv("jointTransforms", jointPoses.data(), size());
     }
+
+    //remove?
     void appendFromRootJoint(Joint& j){
         push(j);
         for(size_t i = 0; i < j.childs.size(); ++i){
             appendFromRootJoint(*j.childs.at(i));
         }
     }
+
     Joint& getById(uint id){
         for(size_t i = 0; i < size(); ++i){
             if(at(i)->id == id)

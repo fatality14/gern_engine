@@ -130,7 +130,7 @@ private:
         interpolationCoef = currAnimationTime/keyPoseTime - keyPoseIndex;
         //keyPoses[keyPoseIndex].timingFunction = [](float a) -> float {return glm::exp(-a*9);};
         interpolationCoef = keyPoses[keyPoseIndex].timingFunction(interpolationCoef);
-//        cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
+        //cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
         if(keyPoseIndex + 1 < keyPoses.size())
             currPose = interpolatePoses(keyPoses[keyPoseIndex], keyPoses[keyPoseIndex+1], interpolationCoef);
     }

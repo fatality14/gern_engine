@@ -8,7 +8,6 @@ public:
     GLuint textureId;
     string name;
     vector<string> facePaths;
-
     SkyboxTexture(vector<string> facePaths, string name = "noname"){
         this->facePaths = facePaths;
         this->name = name;

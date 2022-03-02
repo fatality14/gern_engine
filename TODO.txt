@@ -8,32 +8,32 @@ use "InstancedObject" to create custom particle system class
 3
 shader constructor to parse custom shader code into glsl
 
-4?
+!4
 make universal *Buffer class with a template not to copypaste code
 
-5+-
+!5
 move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
 
-6
+!6
 make WindowManager class from Window class and make the draw sequence for every window in Renderer
 
 7
-rename some classes to fit their names
+rename some classes to fit their names (like Skybox in Cubemap)
 
 8
 add const qualifiers where it need to be
 
-9
-parse materials from the .obj properly, MaterialList must be in Mesh class instead of Object class
+!9
+parse materials from the .mtl, MaterialList must be in Mesh class instead of Object class?
 
-10
+!10
 make Object interface class and move some common logic to it
 
 11
 rename some GL_* definitions to own enums
 
-12
+!12
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
 
 13
@@ -42,6 +42,59 @@ it is possible to reconstruct *Object render by using VBO, the only thing need i
 14
 split CMakeList to compile other libraries only once
 
+15
+make counter instead of noname in object etc names
+
+16
+hide window pointers etc in *Object classes
+
+!17
+disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
+
+!18
+catch if exceed index of vectors
+
+19
+do something with "ns" in texture layouts
+
+!20
+test ShaderUniform in shaderObjectFunc, or even use it without it, might move user logic in ShaderUniform
+also could use ShaderUniform in *Object draw function to maintain uniforms that must be updated
+
+21
+add list of user timing functions in animation
+
+!22 (9)
+for every model part fill its own material, made common material to multiuse
+remove material redaction in scene file
+
+!23
+add possibility to change current camera
+
+24
+add user function list in renderer?
+
+25
+make pose animation time user defined
+
+26 (11)
+map all opengl logic and enums to samecalled functions in its own class to make multiplatform and multiversional code
+
+add user logic hole like as in Renderer for every class
+or make interface for a lot of different cases instead
+
+27
+add namespaces
+
+28 (26)
+remove GLfloat etc where it must be just float etc
+
+!29
+a bug in animation while movin bone, it moves according to default object position
+
+99
+recorder class to render video?
+
 отрисовка объектов
-набор переменных для ивентов
-интерфейс взаимодействия с объектами
+класс для упрощения учёта набора переменных для ивентов
+интерфейс взаимодействия с объектами - файл с основной логикой взаимодействия

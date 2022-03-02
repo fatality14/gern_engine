@@ -8,7 +8,7 @@
 #include <skeletizer.h>
 #include <instancedobject.h>
 
-class  SceneLoader : private Loader{
+class SceneLoader : private Loader{
 public:
     void load(string path, Renderer& renderer){
         ifstream f;
@@ -133,6 +133,9 @@ public:
                 if(lastSklObj != nullptr){
                     lastSklObj->move(x,y,z);
                 }
+                if(lastSkybox != nullptr){
+                    lastSkybox->move(x,y,z);
+                }
             }
             if(token == "scale"){
                 float x = stof(bite(" ", line, end));
@@ -145,6 +148,9 @@ public:
                 if(lastSklObj != nullptr){
                     lastSklObj->scaleTo(x,y,z);
                 }
+                if(lastSkybox != nullptr){
+                    lastSkybox->scaleTo(x,y,z);
+                }
             }
             if(token == "rot"){
                 float x = stof(bite(" ", line, end));
@@ -156,6 +162,9 @@ public:
                 }
                 if(lastSklObj != nullptr){
                     lastSklObj->rotateTo(x,y,z);
+                }
+                if(lastSkybox != nullptr){
+                    lastSkybox->rotateTo(x,y,z);
                 }
             }
 
@@ -184,6 +193,7 @@ public:
                 renderer.addNewObject(*texes.at(which1), *meshBuffers.at(which2), &materials, tmp4);
                 lastMeshObj = renderer.getObjectByName(tmp4);
                 lastSklObj = nullptr;
+                lastSkybox = nullptr;
             }
             if(token == "sklobj"){
                 tmp1 = bite(" ", line, end);
@@ -214,6 +224,7 @@ public:
                 renderer.getSkeletonObjectByName(tmp4)->startAnimation();
                 lastSklObj = renderer.getSkeletonObjectByName(tmp4);
                 lastMeshObj = nullptr;
+                lastSkybox = nullptr;
 
             }
             if(token == "instobj"){
@@ -263,6 +274,8 @@ public:
                 skyboxSides.push_back(bite(" ", line, end));
                 skyboxSides.push_back(bite(" ", line, end));
 
+                tmp4 = bite(" ", line, end);
+
                 size_t which = 0;
 
                 for(size_t i = 0; i < sklBuffers.size(); ++i){
@@ -272,8 +285,11 @@ public:
                     }
                 }
 
-                renderer.addNewSkybox(skyboxSides, *meshBuffers.at(which));
-                renderer.getSkyboxObjectByIndex(0)->scaleTo(10,10,10);
+                renderer.addNewSkybox(skyboxSides, *meshBuffers.at(which), tmp4);
+
+                lastSkybox = renderer.getSkyboxObjectByName(tmp4);
+                lastSklObj = nullptr;
+                lastMeshObj = nullptr;
             }
             if(token == "bckcol"){
                 float r, g, b, a;
@@ -298,6 +314,7 @@ private:
 
     Object* lastMeshObj;
     SkeletonObject* lastSklObj;
+    SkyboxObject* lastSkybox;
 
     vector<Buffer*> meshBuffers;
     vector<SkeletonBuffer*> sklBuffers;

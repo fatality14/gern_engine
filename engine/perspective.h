@@ -23,11 +23,11 @@ public:
         s->setUniformMatrix4fv(uniformName, glm::value_ptr(projectionMatrix));
     }
     void updateMatrices(){
-        glfwGetFramebufferSize(window->getWindowPtr(), &window->fbWidth, &window->fbHeight);
+        glfwGetFramebufferSize(window->__getWindowPtr(), &window->fbWidth, &window->fbHeight);
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
     }
-    const GLFWwindow* getWindowPtr(){
-        return  window->getWindowPtr();
+    const GLFWwindow* __getWindowPtr(){
+        return  window->__getWindowPtr();
     }
     glm::mat4& getProjectionMatrix(){
         return projectionMatrix;
