@@ -34,7 +34,7 @@ public:
            View& v, LightSourceList& lsl,
            MaterialList& ml, vector<Position> modelMatrices, string name = "noname")
     {
-        if(w.__getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
+        if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";
             return;

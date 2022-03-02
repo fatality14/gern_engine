@@ -153,12 +153,12 @@ public:
 
     void renderLoop(void (*frameFunction)(Renderer&)){
         doContinue = true;
-        while (!glfwWindowShouldClose(window->__getWindowPtr()))
+        while (!glfwWindowShouldClose(window->getWindowPtr()))
         {
             glfwPollEvents();
 
             //get enter press event to fast close
-            if(glfwGetKey(window->__getWindowPtr(), GLFW_KEY_ENTER) == GLFW_PRESS){
+            if(glfwGetKey(window->getWindowPtr(), GLFW_KEY_ENTER) == GLFW_PRESS){
                 doContinue = false;
             }
 
@@ -168,11 +168,11 @@ public:
 
             frameFunction(*this);
 
-            glfwSwapBuffers(window->__getWindowPtr());
+            glfwSwapBuffers(window->getWindowPtr());
             glFlush();
 
             if(!doContinue){
-                glfwSetWindowShouldClose(window->__getWindowPtr(), GLFW_TRUE);
+                glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);
                 break;
             }
 

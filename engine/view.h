@@ -29,12 +29,12 @@ public:
         viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
     void setDefaultEvents(){
-        setEvent(window->__getWindowPtr(), A, camera->location -= camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->__getWindowPtr(), D, camera->location += camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->__getWindowPtr(), Q, camera->location -= camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->__getWindowPtr(), E, camera->location += camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->__getWindowPtr(), S, camera->location -= camera->front * camera->movementSpeed * mouse->dt);
-        setEvent(window->__getWindowPtr(), W, camera->location += camera->front * camera->movementSpeed * mouse->dt)
+        setEvent(window->getWindowPtr(), A, camera->location -= camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), D, camera->location += camera->right * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), Q, camera->location -= camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), E, camera->location += camera->up * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), S, camera->location -= camera->front * camera->movementSpeed * mouse->dt);
+        setEvent(window->getWindowPtr(), W, camera->location += camera->front * camera->movementSpeed * mouse->dt)
     }
     void setCamera(Camera& c){
         camera = &c;
@@ -43,7 +43,7 @@ public:
         return *camera;
     }
     const GLFWwindow* __getWindowPtr(){
-        return  window->__getWindowPtr();
+        return  window->getWindowPtr();
     }
     glm::mat4& getViewMatrix(){
         return viewMatrix;

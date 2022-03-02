@@ -53,7 +53,7 @@ public:
             glFrontFace(GL_CW);
         }
     }
-    GLFWwindow* __getWindowPtr(){
+    GLFWwindow* getWindowPtr(){
         return window;
     }
 private:
