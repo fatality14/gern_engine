@@ -2,39 +2,60 @@ cwd
 mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\skybox.obj skybox
 mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\quad.obj quad
 mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\sphere.obj sphere
-mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.obj paimon
-skl paimon C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.skl
+mesh D:\\Downloads\\82-obj\\obj\\ResidentialBuildings003.obj paimon
+mesh D:\\Downloads\\98-mars-photorealistic-2k\\Mars2K.obj mars
+skl mars D:\\Downloads\\98-mars-photorealistic-2k\\mars.skl
 shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\obj_fragment.fsh default
 shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skybox_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skybox_fragment.fsh skybox
 shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\screen_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\screen_fragment.fsh screen
 shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skeleton_obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skeleton_obj_fragment.fsh skeleton
 shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\instanced_obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\instanced_obj_fragment.fsh instanced
 tex tex
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg
-texl 0 0 1 texture0
-texl 1 0 2 texture0
-texl 2 0 1 texture0
-texl 3 0 0 texture0
-texl 4 0 0 texture0
-texl 5 0 2 texture0
-texl 6 0 4 texture0
-texl 7 0 0 texture0
+texm D:\\Downloads\\82-obj\\obj\\textures\\AussenWand_C.jpg
+texm D:\\Downloads\\82-obj\\obj\\textures\\Box_D.jpg
+texm D:\\Downloads\\82-obj\\obj\\textures\\Hotel_Hous_AO.png
+texm D:\\Downloads\\82-obj\\obj\\textures\\Steel_C.jpg
+texl 0 0 2 texture0
+tex blank
+texm C:\\Users\\1234\\Documents\\ogl\\pictures\\blank.png
+texl 0 0 0 texture0
+tex mars
+texm D:\\Downloads\\98-mars-photorealistic-2k\\Textures\\Diffuse_2K.png
+texl 0 0 0 texture0
 meshbuf skybox skybox skyboxCube
 meshbuf quad screen quad
+meshbuf quad default feet
 meshbuf sphere default sphere
-sklbuf paimon skeleton paimonskl
-instbuf paimon instanced paimoninst
+meshbuf paimon default paimon
+sklbuf mars skeleton paimonskl
 mat
 light 0 0 2 default
 frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0
-meshobj tex sphere sphere
-sklobj tex paimonskl 1 paimon C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
-instobj tex paimoninst 1 1 paimon
-skybox C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\right.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\left.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\top.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\bottom.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\front.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\back.jpg
+meshobj blank feet feet
+rot 90 0 0
+scale 100 100 100
+meshobj blank sphere sphere
+scale 0.01 0.01 0.01
+meshobj tex paimon paimon1
+move 10 0 0
+scale 0.3 0.3 0.3
+meshobj tex paimon paimon2
+move -10 0 0
+scale 0.3 0.3 0.3
+meshobj tex paimon paimon3
+move 10 0 10
+scale 0.3 0.3 0.3
+meshobj tex paimon paimon4
+move -10 0 -10
+scale 0.3 0.3 0.3
+meshobj tex paimon paimon5
+move 0 0 -10
+scale 0.3 0.3 0.3
+sklobj mars paimonskl 1 paimon D:\\Downloads\\98-mars-photorealistic-2k\\mars.anm 180
+scale 10 10 10
+move -50 50 0
+skybox C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\right.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\left.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\top.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\bottom.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\front.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\back.jpg skybox
+scale 100 100 100
 bckcol 0.5 0 0 0.99
