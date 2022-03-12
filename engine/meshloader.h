@@ -161,13 +161,13 @@ private:
     vector<uint> lastPolyIds;
     vector<uint> lastMtlIds;
 
-    vector<uintvec3>& parseIndexes(string& line, int numArgsF){
+    vector<uintvec3> parseIndexes(string& line, int numArgsF){
         uint ind[3];
         string copyLine = line;
         bool end;
         int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
 
-        vector<uintvec3>* indexes = new vector<uintvec3>;
+        vector<uintvec3> indexes;
 
         //cout << token << " ";
         while (true){
@@ -204,13 +204,13 @@ private:
             }
 
             --numArgsF;
-            indexes->push_back(uintvec3(ind[0], ind[1], ind[2]));
+            indexes.push_back(uintvec3(ind[0], ind[1], ind[2]));
 
             if(numArgsF == 0){
                 break;
             }
         }
-        return *indexes;
+        return indexes;
     }
     void calcNormals(){
         for(size_t i = 0; i < mesh->vertices->size(); i += 3){

@@ -1,20 +1,20 @@
-cwd
-mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\skybox.obj skybox
-mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\quad.obj quad
-mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\sphere.obj sphere
-mesh C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.obj paimon
-skl paimon C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.skl
-shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\obj_fragment.fsh default
-shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skybox_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skybox_fragment.fsh skybox
-shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\screen_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\screen_fragment.fsh screen
-shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skeleton_obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\skeleton_obj_fragment.fsh skeleton
-shad C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\instanced_obj_vertex.vsh C:\\Users\\\1234\\\Documents\\\ogl\\shaders\\instanced_obj_fragment.fsh instanced
+cwd C:\\Users\\\1234\\\Documents\\qtprojs\\ogl\\
+mesh models\\skybox.obj skybox
+mesh models\\quad.obj quad
+mesh models\\sphere.obj sphere
+mesh models\\GenshinImpactPack\\paimon\\paimon.obj paimon
+skl paimon models\\GenshinImpactPack\\paimon\\paimon.skl
+shad shaders\\obj_vertex.vsh shaders\\obj_fragment.fsh default
+shad shaders\\skybox_vertex.vsh shaders\\skybox_fragment.fsh skybox
+shad shaders\\screen_vertex.vsh shaders\\screen_fragment.fsh screen
+shad shaders\\skeleton_obj_vertex.vsh shaders\\skeleton_obj_fragment.fsh skeleton
+shad shaders\\instanced_obj_vertex.vsh shaders\\instanced_obj_fragment.fsh instanced
 tex tex
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\body.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\face.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\eyes.png
-texm C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg
+texm models\\GenshinImpactPack\\paimon\\Texture\\body.jpg
+texm models\\GenshinImpactPack\\paimon\\Texture\\face.jpg
+texm models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg
+texm models\\GenshinImpactPack\\paimon\\Texture\\eyes.png
+texm models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg
 texl 0 0 1 texture0
 texl 1 0 2 texture0
 texl 2 0 1 texture0
@@ -24,7 +24,7 @@ texl 5 0 2 texture0
 texl 6 0 4 texture0
 texl 7 0 0 texture0
 tex blank
-texm C:\\Users\\1234\\Documents\\ogl\\pictures\\blank.png
+texm pictures\\blank.png
 texl 0 0 0 texture0
 meshbuf skybox skybox skyboxCube
 meshbuf quad screen quad
@@ -38,8 +38,8 @@ meshobj screenbuff quad screen
 rot 0 180 0
 meshobj blank sphere sphere
 scale 0.01 0.01 0.01
-sklobj tex paimonskl 1 paimon C:\\Users\\\1234\\\Documents\\\ogl\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
+sklobj tex paimonskl 1 paimon models\\GenshinImpactPack\\paimon\\paimon.anm 3
 instobj tex paimoninst 1 1 paimon
-skybox C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\right.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\left.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\top.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\bottom.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\front.jpg C:\\Users\\\1234\\\Documents\\\ogl\\skybox\\back.jpg
+skybox skybox\\right.jpg skybox\\left.jpg skybox\\top.jpg skybox\\bottom.jpg skybox\\front.jpg skybox\\back.jpg
 scale 10 10 10
 bckcol 0.5 0 0 0.99

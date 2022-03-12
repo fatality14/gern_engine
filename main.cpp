@@ -89,10 +89,8 @@ int main (){
     int window_height = 768;
 
     Renderer renderer(window_width, window_height);
-
-    int a;
     SceneLoader sl;
-    sl.load("C:\\Users\\1234\\Documents\\ogl\\scenes\\test.txt", renderer);
+    sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\scenes\\test.txt", renderer);
 /*
     MeshLoader meshLoader;
     MeshList meshList;

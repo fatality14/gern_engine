@@ -156,24 +156,24 @@ public:
                 break;
         }
     }
-    string& bite(const string& delimiter, string& line, bool& end){
+    string bite(const string& delimiter, string& line, bool& end){
         size_t pos = 0;
-        string* token = new string;
+        string token;
 
         pos = line.find(delimiter);
         end = false;
 
         if(pos != string::npos){
-            *token = line.substr(0, pos);
+            token = line.substr(0, pos);
             line.erase(0, pos + delimiter.length());
         }
         else{
             end = true;
-            token = &line;
+            token = line;
         }
-        return *token;
+        return token;
     }
-    glm::vec3& parseVec3(string& line){
+    glm::vec3 parseVec3(string& line){
         float norm[3];
         int i = -1;
         bool end;
@@ -186,9 +186,11 @@ public:
             if(end)
                 break;
         }
-        return *new glm::vec3(norm[0], norm[1], norm[2]);
+
+        glm::vec3 ret = glm::vec3(norm[0], norm[1], norm[2]);
+        return ret;
     }
-    glm::vec2& parseVec2(string& line){
+    glm::vec2 parseVec2(string& line){
         float norm[2];
         int i = -1;
         bool end;
@@ -201,6 +203,8 @@ public:
             if(end)
                 break;
         }
-        return *new glm::vec2(norm[0], norm[1]);
+
+        glm::vec2 ret = glm::vec2(norm[0], norm[1]);
+        return ret;
     }
 };

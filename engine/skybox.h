@@ -35,6 +35,10 @@ public:
     }
     SkyboxObject(SkyboxObject& t) = delete;
 
+    ~SkyboxObject(){
+        delete skyboxTexture;
+    }
+
     void draw(){
         window->setDrawOrder(false);
         shader->bind();

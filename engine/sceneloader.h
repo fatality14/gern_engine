@@ -10,6 +10,21 @@
 
 class SceneLoader : private Loader{
 public:
+    ~SceneLoader(){
+        for(size_t i = 0; i < meshBuffers.size(); ++i){
+            delete meshBuffers[i];
+        }
+        for(size_t i = 0; i < sklBuffers.size(); ++i){
+            delete sklBuffers[i];
+        }
+        for(size_t i = 0; i < instBuffers.size(); ++i){
+            delete instBuffers[i];
+        }
+        for(size_t i = 0; i < texes.size(); ++i){
+            delete texes[i];
+        }
+    }
+
     void load(string path, Renderer& renderer){
         ifstream f;
         f.open(path);
@@ -27,6 +42,8 @@ public:
         string tmp1, tmp2, tmp3, tmp4, tmp5;
         size_t itmp1, itmp2, itmp3;
 
+        //TODO: check if file is not init to prevent infinie loading
+
         while(!f.eof()){
 
             getline(f, line);
@@ -35,18 +52,18 @@ public:
             token = bite(" ", line, end);
 
             if(token == "mesh"){
-                tmp1 = bite(" ", line, end);
+                tmp1 = cwd + bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
                 meshList.push(meshLoader.load(tmp1, tmp2));
             }
             if(token == "skl"){
                 tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
+                tmp2 = cwd + bite(" ", line, end);
                 skeletonList.push(skeletizer.skeletize(*meshList.getByName(tmp1), tmp2));
             }
             if(token == "shad"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
+                tmp1 = cwd + bite(" ", line, end);
+                tmp2 = cwd + bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 //vertex, fragment, name
                 shaders.pushNew(tmp1, tmp2, tmp3);
@@ -55,7 +72,7 @@ public:
                 texes.push_back(new TextureList(line));
             }
             if(token == "texm"){
-                texes.at(texes.size()-1)->loadNew(line);
+                texes.at(texes.size()-1)->loadNew(cwd + line);
             }
             if(token == "texl"){
                 texes.at(texes.size()-1)->addLayouts(1);
@@ -200,7 +217,7 @@ public:
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 tmp4 = bite(" ", line, end);
-                tmp5 = bite(" ", line, end);
+                tmp5 = cwd + bite(" ", line, end);
                 itmp1 = stoi(bite(" ", line, end));
 
                 size_t which1 = 0, which2 = 0;
@@ -225,7 +242,6 @@ public:
                 lastSklObj = renderer.getSkeletonObjectByName(tmp4);
                 lastMeshObj = nullptr;
                 lastSkybox = nullptr;
-
             }
             if(token == "instobj"){
                 tmp1 = bite(" ", line, end);
@@ -267,12 +283,12 @@ public:
             }
             if(token == "skybox"){
                 vector<string> skyboxSides;
-                skyboxSides.push_back(bite(" ", line, end));
-                skyboxSides.push_back(bite(" ", line, end));
-                skyboxSides.push_back(bite(" ", line, end));
-                skyboxSides.push_back(bite(" ", line, end));
-                skyboxSides.push_back(bite(" ", line, end));
-                skyboxSides.push_back(bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
+                skyboxSides.push_back(cwd + bite(" ", line, end));
 
                 tmp4 = bite(" ", line, end);
 

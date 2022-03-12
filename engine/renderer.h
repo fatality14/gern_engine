@@ -32,7 +32,6 @@ public:
 
     Renderer(int windowWidth, int windowHeight){
         window = new Window(windowWidth, windowHeight);
-
         perspective = new Perspective(*window);
         mouse = new MouseListener(*window);
         camList = new CameraList();
@@ -46,7 +45,6 @@ public:
         lightSources = new LightSourceList;
     }
     ~Renderer(){
-        delete window;
         delete perspective;
         delete view;
         delete mouse;
@@ -55,6 +53,7 @@ public:
         delete objects;
         delete skeletonObjects;
         delete instancedObjects;
+        delete window;
     }
 
     //make arguments optional
