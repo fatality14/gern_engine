@@ -10,11 +10,6 @@ public:
     string path;
 
     Texture(string name = "noname"){
-        this->path = "";
-        this->name = name;
-        glGenTextures(1, &textureId);
-    }
-    Texture(string path, string name = "noname"){
         this->path = path;
         this->name = name;
         glGenTextures(1, &textureId);
@@ -32,7 +27,7 @@ public:
     void bind(){
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
-    void loadTexture(){
+    void loadTexture(string path){
         //load image
         image_width = 0;
         image_height = 0;
@@ -49,7 +44,7 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         //set texture data and mipmap
-        //mipmap is used to compress texture or smthg like this
+        //mipmap is used to compress texture
         if(image){
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -59,13 +54,51 @@ public:
         }
 
         //free space
-        SOIL_free_image_data(image);
+        delete[] image;
+        image = nullptr;
+    }
+
+    void setTextureSize(int width, int height){
+        image_width = width;
+        image_height = height;
+    }
+    int getTextureWidth(){
+        return image_width;
+    }
+    int getTextureHeight(){
+        return image_height;
+    }
+
+    void setNewTextureData(unsigned char* data){
+        bind();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
+    unsigned char& loadDataFromShader(){
+        if(image != nullptr){
+            delete[] image;
+            image = nullptr;
+        }
+
+        image = new unsigned char[image_width * image_height * 4];
+        bind();
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+//        int save_result = SOIL_save_image
+//            (
+//                "new_terrain.bmp",
+//                SOIL_SAVE_TYPE_BMP,
+//                image_width, image_height, 4,
+//                c
+//            );
+        return *image;
     }
 private:
     int image_width;
     int image_height;
 
-    unsigned char* image;
+    unsigned char* image = nullptr;
 
 };
 
@@ -92,8 +125,8 @@ public:
     }
 
     void loadNew(string path, string name = "noname"){
-        Texture* t = new Texture(path, name);
-        t->loadTexture();
+        Texture* t = new Texture(name);
+        t->loadTexture(path);
         push(*t);
         unbindTextures();
     }

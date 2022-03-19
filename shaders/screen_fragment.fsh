@@ -53,7 +53,7 @@ void main()
 //    vec3 sampleTex[9];
 //    for(int i = 0; i < 9; i++)
 //    {
-//        sampleTex[i] = vec3(texture(textureColorBuffer0, vs_texcoord.st + offsets[i]));
+//        sampleTex[i] = vec3(texture(textureColorBuffer1, vs_texcoord.st + offsets[i]));
 //    }
 //    vec3 col = vec3(0.0);
 //    for(int i = 0; i < 9; i++)

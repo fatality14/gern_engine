@@ -43,10 +43,25 @@ void drawFrame(Renderer& r){
 //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
     r.skyboxes->at(0)->draw();
     ///////////////////////////////
+    static unsigned char* image;
+    static Texture* t = r.getFramebufferByName("screenbuff")->textureColorBuffers->getByName("textureColorBuffer1");
+
     r.bindDefaultFramebuffer();
+
+    if(amount != 1){
+        t->setNewTextureData(image);
+    }
 
     currObj = r.getObjectByName("screen");
     currObj->draw(shaderObjectFunc);
+
+
+    if(amount == 1){
+        image = &t->loadDataFromShader();
+
+        ++amount;
+    }
+
     ///////////////////////////////
     static float defaultSpeed = r.view->getCamera().movementSpeed;
 

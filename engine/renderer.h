@@ -135,6 +135,18 @@ public:
         skyboxes->popByName(name);
     }
 
+    Framebuffer* getFramebufferByIndex(size_t index){
+        return framebuffers->at(index);
+    }
+    Framebuffer* getFramebufferByName(string name){
+        return framebuffers->getByName(name);
+    }
+    void popFramebufferByIndex(size_t index){
+        framebuffers->popByIndex(index);
+    }
+    void popFramebufferByName(string name){
+        framebuffers->popByName(name);
+    }
     void bindFramebufferByIndex(size_t index, GLint attachmentNum = 0){
         framebuffers->at(index)->bind();
         framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
