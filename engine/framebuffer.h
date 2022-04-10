@@ -82,6 +82,6 @@ private:
     }
 };
 
-class FramebufferList : public List<Framebuffer>{
+class FramebufferList : public AList<Framebuffer>{
 
 };

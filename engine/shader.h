@@ -187,7 +187,7 @@ private:
     }
 };
 
-class ShaderList : public List<Shader>{
+class ShaderList : public AList<Shader>{
 public:
     void pushNew(string vertexPath, string fragmentPath, string name = "noname"){
         Shader* shader = new Shader(vertexPath, fragmentPath, name);

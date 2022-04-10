@@ -1,45 +1,28 @@
 #pragma once
 
-#include <common.h>
-#include <window.h>
-#include <view.h>
-#include <perspective.h>
+#include <aobject.h>
 #include <buffer.h>
-#include <shader.h>
-#include <position.h>
 #include <skyboxtexture.h>
+#include <texture.h>
 
-class SkyboxObject{
+class SkyboxObject : public AObject<SkyboxObject, Buffer>{
 public:
     SkyboxTexture* skyboxTexture;
-    Window* window;
-    View* view;
-    Perspective* perspective;
-    Buffer* buffer;
-    Shader* shader;//same as in buffer
-    Position* position;
 
-    string name;
+    TextureList tl;//remove this later
 
-    SkyboxObject(SkyboxTexture& st, Window& w, Buffer& b, Perspective& p, View& v){
+    SkyboxObject(Window& w, SkyboxTexture& st,
+                 Buffer& b, Perspective& p,
+                 View& v, string name = "noname")
+        : AObject(w, tl, b, p, v, name)
+    {
         skyboxTexture = &st;
-        window = &w;
-        buffer = &b;
-        shader = &buffer->getShaderPtr();
-        perspective = &p;
-        view = &v;
-
-        position = new Position();
-
-        name = skyboxTexture->name;
     }
-    SkyboxObject(SkyboxObject& t) = delete;
-
     ~SkyboxObject(){
         delete skyboxTexture;
     }
 
-    void draw(){
+    virtual void draw(void (*shaderPassFunction)(SkyboxObject&), int flags = 0) override{
         window->setDrawOrder(false);
         shader->bind();
 
@@ -68,44 +51,8 @@ public:
     SkyboxTexture& getTexture(){
         return *skyboxTexture;
     }
-    void move(float x, float y, float z){
-        position->move(x,y,z);
-    }
-    void move(glm::vec3 location){
-        position->move(location);
-    }
-    void moveTo(float x, float y, float z){
-        position->moveTo(x,y,z);
-    }
-    void moveTo(glm::vec3 location){
-        position->moveTo(location);
-    }
-    void rotate(float x, float y, float z){
-        position->rotate(x,y,z);
-    }
-    void rotate(glm::vec3 rotation){
-        position->rotate(rotation);
-    }
-    void rotateTo(float x, float y, float z){
-        position->rotateTo(x,y,z);
-    }
-    void rotateTo(glm::vec3 rotation){
-        position->rotateTo(rotation);
-    }
-    void scaleBy(float x, float y, float z){
-        position->scaleBy(x,y,z);
-    }
-    void scaleBy(glm::vec3 scale){
-        position->scaleBy(scale);
-    }
-    void scaleTo(float x, float y, float z){
-        position->scaleTo(x,y,z);
-    }
-    void scaleTo(glm::vec3 scale){
-        position->scaleTo(scale);
-    }
 };
 
-class SkyboxList : public List<SkyboxObject>{
+class SkyboxList : public AList<SkyboxObject>{
 
 };

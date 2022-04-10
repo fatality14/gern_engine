@@ -8,7 +8,7 @@
 #include <skeletizer.h>
 #include <instancedobject.h>
 
-class SceneLoader : private Loader{
+class SceneLoader : private ALoader{
 public:
     ~SceneLoader(){
         for(size_t i = 0; i < meshBuffers.size(); ++i){
@@ -97,18 +97,21 @@ public:
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 meshBuffers.push_back(new Buffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
+                meshBuffers.at(meshBuffers.size() - 1)->genBuffers();
             }
             if(token == "sklbuf"){
                 tmp1 = bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 sklBuffers.push_back(new SkeletonBuffer(*skeletonList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
+                sklBuffers.at(sklBuffers.size() - 1)->genBuffers();
             }
             if(token == "instbuf"){
                 tmp1 = bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
                 instBuffers.push_back(new InstancedBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
+                instBuffers.at(instBuffers.size() - 1)->genBuffers();
             }
             if(token == "mat"){
                 //TODO: replace this with good code

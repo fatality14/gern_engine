@@ -3,7 +3,7 @@
 #include <common.h>
 #include <mesh.h>
 
-class MeshLoader : private Loader{
+class MeshLoader : private ALoader{
 public:
     MeshLoader(){
         allPolyIndexes = new vector<vector<uintvec3>>;

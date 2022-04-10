@@ -7,10 +7,8 @@ class Texture{
 public:
     GLuint textureId;
     string name;
-    string path;
 
     Texture(string name = "noname"){
-        this->path = path;
         this->name = name;
         glGenTextures(1, &textureId);
     }
@@ -102,7 +100,7 @@ private:
 
 };
 
-class TextureList : public List<Texture>{
+class TextureList : public AList<Texture>{
 private:
     struct TextureLayout{
         void pushTexture(GLint n, size_t textureIndex, string uniformName){

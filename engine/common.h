@@ -31,6 +31,7 @@ typedef unsigned int uint;
 
 float someCounter = 0;
 
+
 //TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes are just data containers, rename classes or smth else
 //TODO: add shaderlist to renderer, let renderer choose which shader should be applied to object
@@ -38,12 +39,15 @@ float someCounter = 0;
 //      might make variable to check current active shader to check if its uniforms are already up-to-date
 //      or make class ShaderUpdater to dinamically push data to shader
 //TODO: make methods to access the objects of built-in classes
-struct Vertex{
+
+struct IVertex{};
+
+struct Vertex : public IVertex{
     glm::vec3 position;
     glm::vec2 texcoord;
     glm::vec3 normal;
 };
-struct SkeletonVertex{
+struct SkeletonVertex : public IVertex{
     glm::vec3 position;
     glm::vec2 texcoord;
     glm::vec3 normal;
@@ -63,12 +67,17 @@ struct uintvec3{
     uint z;
 };
 
+
+struct IList{};
+
+//T must have "name" field
+//might implement it with sfinae
 template<class T>
-class List{
+class AList : public IList{
 public:
     //add check for repeating names in list
 
-    ~List(){
+    ~AList(){
         for(size_t i = 0; i < list.size(); i++){
             delete list.at(i);
         }
@@ -111,7 +120,10 @@ private:
     vector<T*> list;
 };
 
-class Loader{
+
+struct ILoader{};
+
+class ALoader : public ILoader{
 public:
     string token;
 
@@ -206,5 +218,57 @@ public:
 
         glm::vec2 ret = glm::vec2(norm[0], norm[1]);
         return ret;
+    }
+};
+
+
+struct IMesh{};
+
+//restrict T type with common vertex interface
+template <class T>
+class AMesh : public IMesh{
+public:
+    //add some methods to change polygons
+    vector<T>* vertices;
+    vector<uint>* indices;
+    vector<uint> partEndVertexIds;
+    vector<uint> partEndMtlIds;
+
+    uint nVertices = 0;
+    uint nIndices = 0;
+
+    string name;
+
+    AMesh(string name = "noname"){
+        static_assert(std::is_base_of<IVertex, T>::value, "Template parameter must be derived from IVertex");
+
+        this->name = name;
+
+        vertices = new vector<T>();
+        this->indices = new vector<uint>();
+    }
+    AMesh(const T* vertices, uint nVertices, uint* indices, uint nIndices, string name = "noname"){
+        static_assert(std::is_base_of<IVertex, T>::value, "Template parameter must be derived from IVertex");
+
+        this->vertices = new vector<T>(vertices, vertices + nVertices);
+        this->indices = new vector<uint>(indices, indices + nIndices);
+
+        this->nVertices = nVertices;
+        this->nIndices = nIndices;
+
+        this->name = name;
+    }
+    ~AMesh(){
+        delete vertices;
+        delete indices;
+    }
+
+    void pushVertex(T v){
+        vertices->push_back(v);
+    }
+    void addPolyByIndices(uint a, uint b, uint c){
+        indices->push_back(a);
+        indices->push_back(b);
+        indices->push_back(c);
     }
 };

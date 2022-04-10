@@ -76,7 +76,7 @@ public:
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths, name);
-        SkyboxObject* so = new SkyboxObject(*st, *window, b, *perspective, *view);
+        SkyboxObject* so = new SkyboxObject(*window, *st, b, *perspective, *view, name);
         skyboxes->push(*so);
     }
     void addFramebuffer(Framebuffer& fb){

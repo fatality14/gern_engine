@@ -1,31 +1,17 @@
 #pragma once
 
-#include <common.h>
-#include <window.h>
-#include <view.h>
-#include <perspective.h>
+#include <aobject.h>
 #include <instancedbuffer.h>
-#include <shader.h>
-#include <position.h>
-#include <texture.h>
 #include <lightsource.h>
 #include <material.h>
 
-class InstancedObject{
+class InstancedObject : public AObject<InstancedObject, InstancedBuffer>{
 public:
-    Window* window;
-    TextureList* texList;
-    InstancedBuffer* buffer;
-    Shader* shader;//shader same as in buffer
-    vector<Position> modelMatrices;
-    View* view;
-    Perspective* perspective;
     LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
 
-    string name;
+    vector<Position> modelMatrices;
 
-    static GLuint drawmode;
     static GLuint currShaderId;
 
     //make arguments optional
@@ -33,35 +19,20 @@ public:
            InstancedBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
            MaterialList& ml, vector<Position> modelMatrices, string name = "noname")
+        : AObject(w, t, b, p, v, name)
     {
-        if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
-            cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
-            cout << "Object not created\n";
-            return;
-        }
-
-        window = &w;
-        texList = &t;
-        buffer = &b;
-        shader = &buffer->getShaderPtr();
-        perspective = &p;
-        view = &v;
+        this->modelMatrices = modelMatrices;
         lightSources = &lsl;
         materials = &ml;
 
-        this->modelMatrices = modelMatrices;
         updateBufferModelMats();
-
-        this->name = name;
     }
 
-    static void setDrawMode(GLuint GL_drawmode){
-        drawmode = GL_drawmode;
-    }
     void updateBufferModelMats(){
         buffer->setModelMatrices(modelMatrices);
     }
-    void draw(void (*shaderPassFunction)(InstancedObject&), bool isSameShaderPassFunctionAsPrevCall = false, bool isStaticObject = true){
+
+    void draw(void (*shaderPassFunction)(InstancedObject&), int flags = 0) override{
         shader->bind();
 
         if(currShaderId != shader->program){
@@ -70,13 +41,13 @@ public:
             perspective->pushToShader(shader, "projectionMatrix");
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
-        if(!isSameShaderPassFunctionAsPrevCall){
+        if(flags == 0 || flags == 1){
             shaderPassFunction(*this);
         }
 
         buffer->bind();
 
-        if(!isStaticObject){
+        if(flags == 1){
             updateBufferModelMats();
         }
 
@@ -120,24 +91,16 @@ public:
         texList->unbindTextures();
     }
 
-    void setTextureList(TextureList& tl){
-        texList = &tl;
-    }
-    TextureList& getTextureList(){
-        return *texList;
-    }
-    const string& getDrawMeshName(){
-        return buffer->getMeshName();
-    }
     void setModelMatrices(vector<Position> mm){
         modelMatrices = mm;
     }
     vector<Position>& getModelMatrices(){
         return modelMatrices;
     }
+
     void move(size_t index, float x, float y, float z){
-        if(index < modelMatrices.size())
-            modelMatrices[index].move(x,y,z);
+            if(index < modelMatrices.size())
+                modelMatrices[index].move(x,y,z);
     }
     void move(size_t index, glm::vec3 location){
         if(index < modelMatrices.size())
@@ -184,9 +147,9 @@ public:
             modelMatrices[index].scaleTo(scale);
     }
 };
-GLuint InstancedObject::currShaderId = -1;
-GLuint InstancedObject::drawmode = GL_TRIANGLES;
 
-class InstancedObjects : public List<InstancedObject>{
+GLuint InstancedObject::currShaderId = -1;
+
+class InstancedObjects : public AList<InstancedObject>{
 
 };

@@ -24,7 +24,7 @@ public:
 };
 
 
-class Animation : private Loader{
+class Animation : private ALoader{
 public:
     float animationTime;
     float currAnimationTime;

@@ -28,7 +28,6 @@ public:
         transform = transform * glm::toMat4(q);
         transform = glm::scale(transform, glm::vec3(scale));
         transform = glm::translate(transform, -origin);
-
     }
 
     void move(float x, float y, float z){

@@ -5,7 +5,7 @@
 #include <skeletonmesh.h>
 #include <algorithm>
 
-class Skeletizer : private Loader{
+class Skeletizer : private ALoader{
 public:
     SkeletonMesh& skeletize(Mesh& mesh, string skeletonPath){
         skeletonMesh = new SkeletonMesh;

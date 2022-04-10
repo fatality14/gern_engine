@@ -80,7 +80,7 @@ public:
     }
 };
 
-class JointList : public List<Joint>{
+class JointList : public AList<Joint>{
 public:
     void pushToShader(Shader* s){
         jointPoses.clear();

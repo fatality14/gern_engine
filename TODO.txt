@@ -29,6 +29,7 @@ parse materials from the .mtl, MaterialList must be in Mesh class instead of Obj
 
 !10
 make Object interface class and move some common logic to it
+also could remove add*Object methods in Renderer
 
 11
 rename some GL_* definitions to own enums
@@ -71,8 +72,8 @@ remove material redaction in scene file
 !23
 add possibility to change current camera
 
-24
-add user function list in renderer?
+24?
+add user function list in renderer
 
 25
 make pose animation time user defined
@@ -92,8 +93,20 @@ remove GLfloat etc where it must be just float etc
 !29
 a bug in animation while movin bone, it moves according to default object position
 
-99
-recorder class to render video?
+30
+pass user function in setDefaultEvents
+
+31?
+split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
+
+32
+add parameter list to *Object draw function instead of a single bool
+
+!33
+do something with *List, IObject and other common cases
+
+99?
+recorder class to render video
 
 отрисовка объектов
 класс для упрощения учёта набора переменных для ивентов

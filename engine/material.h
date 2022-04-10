@@ -71,6 +71,6 @@ private:
     //Texture* colorTexture;
 };
 
-class MaterialList : public List<Material>{
+class MaterialList : public AList<Material>{
 
 };

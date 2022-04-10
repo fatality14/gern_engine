@@ -1,63 +1,27 @@
 #pragma once
 
-#include <common.h>
-#include <window.h>
-#include <view.h>
-#include <perspective.h>
+#include <aobject.h>
 #include <buffer.h>
-#include <shader.h>
-#include <position.h>
-#include <texture.h>
 #include <lightsource.h>
 #include <material.h>
 
-class Object{
+class Object : public AObject<Object, Buffer>{
 public:
-    Window* window;
-    TextureList* texList;//move to mesh? or use one in MaterialList
-    Buffer* buffer;
-    Shader* shader;//shader same as in buffer
-    Position* position;
-    View* view;
-    Perspective* perspective;
     LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
-
-    string name;
-
-    static GLuint drawmode;
-    static GLuint currShaderId;
 
     //make arguments optional
     Object(Window& w, TextureList& t,
            Buffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
            MaterialList& ml, string name = "noname")
+        : AObject(w, t, b, p, v, name)
     {
-        if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
-            cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
-            cout << "Object not created\n";
-            return;
-        }
-
-        window = &w;
-        texList = &t;
-        buffer = &b;
-        shader = &buffer->getShaderPtr();
-        perspective = &p;
-        view = &v;
         lightSources = &lsl;
         materials = &ml;
-
-        this->name = name;
-
-        position = new Position();
     }
 
-    static void setDrawMode(GLuint GL_drawmode){
-        drawmode = GL_drawmode;
-    }
-    void draw(void (*shaderPassFunction)(Object&), bool isSameShaderPassFunctionAsPrevCall = false){
+    void draw(void (*shaderPassFunction)(Object&), int flags = 0) override{
         shader->bind();
 
         position->pushToShader(shader, "modelMatrix");
@@ -69,7 +33,7 @@ public:
             perspective->pushToShader(shader, "projectionMatrix");
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
-        if(!isSameShaderPassFunctionAsPrevCall){
+        if(flags == 0){
             shaderPassFunction(*this);
         }
 
@@ -114,55 +78,11 @@ public:
         texList->unbindTextures();
     }
 
-    void setTextureList(TextureList& tl){
-        texList = &tl;
-    }
-    TextureList& getTextureList(){
-        return *texList;
-    }
-    const string& getDrawMeshName(){
-        return buffer->getMeshName();
-    }
-    void move(float x, float y, float z){
-        position->move(x,y,z);
-    }
-    void move(glm::vec3 location){
-        position->move(location);
-    }
-    void moveTo(float x, float y, float z){
-        position->moveTo(x,y,z);
-    }
-    void moveTo(glm::vec3 location){
-        position->moveTo(location);
-    }
-    void rotate(float x, float y, float z){
-        position->rotate(x,y,z);
-    }
-    void rotate(glm::vec3 rotation){
-        position->rotate(rotation);
-    }
-    void rotateTo(float x, float y, float z){
-        position->rotateTo(x,y,z);
-    }
-    void rotateTo(glm::vec3 rotation){
-        position->rotateTo(rotation);
-    }
-    void scaleBy(float x, float y, float z){
-        position->scaleBy(x,y,z);
-    }
-    void scaleBy(glm::vec3 scale){
-        position->scaleBy(scale);
-    }
-    void scaleTo(float x, float y, float z){
-        position->scaleTo(x,y,z);
-    }
-    void scaleTo(glm::vec3 scale){
-        position->scaleTo(scale);
-    }
+    static GLuint currShaderId;
 };
-GLuint Object::currShaderId = -1;
-GLuint Object::drawmode = GL_TRIANGLES;
 
-class Objects : public List<Object>{
+GLuint Object::currShaderId = -1;
+
+class Objects : public AList<Object>{
 
 };

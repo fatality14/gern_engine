@@ -1,42 +1,16 @@
 #pragma once
 
-#include <common.h>
 #include <mesh.h>
-#include <shader.h>
 #include <position.h>
+#include <abuffer.h>
 
 //maybe add BufferList
-class InstancedBuffer{
+class InstancedBuffer : public ABuffer<Mesh, Vertex, InstancedBuffer>{
 public:
-    InstancedBuffer(Mesh& m, Shader& s, string name = "noname"){
-        mesh = &m;
-        shader= &s;
+    using ABuffer::ABuffer;
 
-        this->name = name;
-
-        genBuffers();
-    }
-    InstancedBuffer(InstancedBuffer& b) = delete;
     ~InstancedBuffer(){
-        glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &VBO1);
-        glDeleteBuffers(1, &EBO);
-        glDeleteVertexArrays(1, &VAO);
-    }
-    void bind(){
-        glBindVertexArray(VAO);
-    }
-    void unbind(){
-        glBindVertexArray(0);
-    }
-    const string& getMeshName(){
-        return mesh->name;
-    }
-    Mesh& getMesh(){
-        return *mesh;
-    }
-    Shader& getShaderPtr(){
-        return *shader;
     }
     void setModelMatrices(vector<Position>& modelMatrices){
         this->modelMatrices.clear();
@@ -51,15 +25,9 @@ public:
         shader->setMatAttribPointer<glm::mat4>("model", 4, 0, 1);
     }
     void setShader(Shader* s){
-        shader = s;
+        ABuffer::setShader(s);
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-        shader->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
-        shader->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setFloatAttribPointer<Vertex>("vertex_normal", 3, offsetof(Vertex, normal));
+        bind();
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO1);
 
@@ -68,38 +36,24 @@ public:
         unbind();
     }
 
-    string name;
-private:
-    Shader* shader;
-
-    GLuint VAO;
-    GLuint VBO, VBO1;
-    GLuint EBO;
-
-    Mesh* mesh;
-
-    vector<glm::mat4> modelMatrices;
+    static void specifyAttribPointers(Shader* s){
+        s->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
+        s->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));
+        s->setFloatAttribPointer<Vertex>("vertex_normal", 3, offsetof(Vertex, normal));
+    }
 
     void genBuffers(){
-        //init and use vao that works just like vbo and ebo buffers wrapper
-        glCreateVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
+        ABuffer::genBuffers();
 
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
-
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
+        bind();
 
         glGenBuffers(1, &VBO1);
-
-        shader->setFloatAttribPointer<Vertex>("vertex_position", 3, offsetof(Vertex, position));
-        shader->setFloatAttribPointer<Vertex>("vertex_texcoord", 2, offsetof(Vertex, texcoord));
-        shader->setFloatAttribPointer<Vertex>("vertex_normal", 3, offsetof(Vertex, normal));
 
         //current vao should be set in while window loop
         unbind();
     }
+
+private:
+    GLuint VBO1;
+    vector<glm::mat4> modelMatrices;
 };

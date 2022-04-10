@@ -1,37 +1,19 @@
 #pragma once
 
-#include <common.h>
-#include <window.h>
-#include <view.h>
-#include <perspective.h>
-#include <buffer.h>
-#include <shader.h>
-#include <position.h>
-#include <texture.h>
-#include <lightsource.h>
-#include <material.h>
+#include <aobject.h>
 #include <skeletonbuffer.h>
 #include <animation.h>
+#include <lightsource.h>
+#include <material.h>
 
-class SkeletonObject{
+class SkeletonObject : public AObject<SkeletonObject, SkeletonBuffer>{
 public:
-    Window* window;
-    TextureList* texList;
-    SkeletonBuffer* buffer;
-    Shader* shader;//shader same as in buffer
-    Position* position;
-    View* view;
-    Perspective* perspective;
-    LightSourceList* lightSources;
     Animation* animation;
+    LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
 
-//    vector<glm::mat4> transitions;//add Joint class hierarchy and remove transitions from here
-
-    string name;
     bool doAnimation = false;
 
-    static GLuint drawmode;
     static GLuint currShaderId;
 
     //make arguments optional
@@ -39,31 +21,13 @@ public:
            SkeletonBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
            MaterialList& ml, string name = "noname")
+        : AObject(w, t, b, p, v, name)
     {
-        if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
-            cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
-            cout << "Object not created\n";
-            return;
-        }
-
-        window = &w;
-        texList = &t;
-        buffer = &b;
-        shader = &buffer->getShaderPtr();
-        perspective = &p;
-        view = &v;
-        lightSources = &lsl;
         animation = new Animation(buffer->getMesh().joints);
+        lightSources = &lsl;
         materials = &ml;
-
-        this->name = name;
-
-        position = new Position();
     }
 
-    static void setDrawMode(GLuint GL_drawmode){
-        drawmode = GL_drawmode;
-    }
     void setAnimation(string animationFilePath, float animationTime){
         animation->parseKeyPoses(animationFilePath);
         animation->animationTime = animationTime;
@@ -74,7 +38,8 @@ public:
     void startAnimation(){
         doAnimation = true;
     }
-    void draw(void (*shaderPassFunction)(SkeletonObject&), bool isSameShaderPassFunctionAsPrevCall = false){
+
+    void draw(void (*shaderPassFunction)(SkeletonObject&), int flags = 0){
         SkeletonMesh* currMesh = &buffer->getMesh();
 
         shader->bind();
@@ -90,7 +55,7 @@ public:
             perspective->pushToShader(shader, "projectionMatrix");
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
-        if(!isSameShaderPassFunctionAsPrevCall){
+        if(flags == 0){
             shaderPassFunction(*this);
         }
         if(doAnimation){
@@ -136,50 +101,10 @@ public:
         shader->unbind();
         texList->unbindTextures();
     }
-
-    void setTextureList(TextureList& tl){
-        texList = &tl;
-    }
-    TextureList& getTextureList(){
-        return *texList;
-    }
-    const string& getDrawMeshName(){
-        return buffer->getMeshName();
-    }
-    void move(float x, float y, float z){
-        position->move(x,y,z);
-    }
-    void move(glm::vec3 location){
-        position->move(location);
-    }
-    void moveTo(float x, float y, float z){
-        position->moveTo(x,y,z);
-    }
-    void moveTo(glm::vec3 location){
-        position->moveTo(location);
-    }
-    void rotate(float x, float y, float z){
-        position->rotate(x,y,z);
-    }
-    void rotate(glm::vec3 rotation){
-        position->rotate(rotation);
-    }
-    void rotateTo(float x, float y, float z){
-        position->rotateTo(x,y,z);
-    }
-    void rotateTo(glm::vec3 rotation){
-        position->rotateTo(rotation);
-    }
-    void scaleTo(float x, float y, float z){
-        position->scaleTo(x,y,z);
-    }
-    void scaleTo(glm::vec3 scale){
-        position->scaleTo(scale);
-    }
 };
-GLuint SkeletonObject::currShaderId = -1;
-GLuint SkeletonObject::drawmode = GL_TRIANGLES;
 
-class SkeletonObjects : public List<SkeletonObject>{
+GLuint SkeletonObject::currShaderId = -1;
+
+class SkeletonObjects : public AList<SkeletonObject>{
 
 };

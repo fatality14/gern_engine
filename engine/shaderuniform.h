@@ -44,7 +44,7 @@ private:
     size_t size;
 };
 
-class ShaderUniformList : public List<ShaderUniformBaseClass>{
+class ShaderUniformList : public AList<ShaderUniformBaseClass>{
 public:
     void pushAllToShader(Shader* shader){
         for(size_t i = 0; i < size(); ++i){
