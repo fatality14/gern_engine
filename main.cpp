@@ -3,32 +3,40 @@
 #include <meshloader.h>
 #include <skeletonobject.h>
 #include <skeletizer.h>
-#include <shaderuniform.h>
+#include <shaderfield.h>
 #include <instancedobject.h>
 #include <sceneloader.h>
 
 int amount = 2;
-
-void shaderObjectFunc(Object& o){
-    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
-}
-void shaderSklObjectFunc(SkeletonObject& o){
-    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
-}
-void shaderInstObjectFunc(InstancedObject& o){
-    o.lightSources->pushToShaderByIndex(o.shader, 0, "lightPos0");
-}
-void skyboxObjectFunc(SkyboxObject& o){}
+bool once = true;
 
 void drawFrame(Renderer& r){
     static Object* currObj;
     static SkeletonObject* currSklObj;
     static InstancedObject* currInstObj;
     ///////////////////////////////
+    if(once){
+        for(size_t i = 0; i < r.objects->size(); ++i){
+            currObj = r.objects->at(i);
+            IShaderField* light = new ShaderUniform<glm::vec3>(currObj->lightSources->at(0)->lightPos, "lightPos0");
+            currObj->shaderFields.push(*light);
+        }
+        for(size_t i = 0; i < r.skeletonObjects->size(); ++i){
+            currSklObj = r.skeletonObjects->at(i);
+            IShaderField* light = new ShaderUniform<glm::vec3>(currSklObj->lightSources->at(0)->lightPos, "lightPos0");
+            currSklObj->shaderFields.push(*light);
+        }
+        for(size_t i = 0; i < r.instancedObjects->size(); ++i){
+            currInstObj = r.instancedObjects->at(i);
+            IShaderField* light = new ShaderUniform<glm::vec3>(currInstObj->lightSources->at(0)->lightPos, "lightPos0");
+            currInstObj->shaderFields.push(*light);
+        }
+    }
+    ///////////////////////////////
     r.bindFramebufferByIndex(0, 1);
 
     currInstObj = r.getInstancedObjectByName("paimon");
-    currInstObj->draw(shaderInstObjectFunc, 2);
+    currInstObj->draw(1);
 
     int am = 30;
     for(int i = 0; i < am; ++i){
@@ -36,14 +44,14 @@ void drawFrame(Renderer& r){
     }
 
     currSklObj = r.getSkeletonObjectByName("paimon");
-    currSklObj->draw(shaderSklObjectFunc);
+    currSklObj->draw();
 
     currObj = r.getObjectByIndex(1);
     currObj->position->moveTo((r.view->getCamera().location + r.view->getCamera().front));
-    currObj->draw(shaderObjectFunc);
+    currObj->draw();
 
 //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
-    r.skyboxes->at(0)->draw(skyboxObjectFunc);
+    r.skyboxes->at(0)->draw();
     ///////////////////////////////
     static unsigned char* image;
     static Texture* t = r.getFramebufferByName("screenbuff")->textureColorBuffers->getByName("textureColorBuffer1");
@@ -55,7 +63,7 @@ void drawFrame(Renderer& r){
     }
 
     currObj = r.getObjectByName("screen");
-    currObj->draw(shaderObjectFunc);
+    currObj->draw();
 
 
     if(amount == 1){

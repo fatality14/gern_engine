@@ -6,7 +6,7 @@
 #include <lightsource.h>
 #include <material.h>
 
-class SkeletonObject : public AObject<SkeletonObject, SkeletonBuffer>{
+class SkeletonObject : public AObject<SkeletonBuffer>{
 public:
     Animation* animation;
     LightSourceList* lightSources;
@@ -39,7 +39,7 @@ public:
         doAnimation = true;
     }
 
-    void draw(void (*shaderPassFunction)(SkeletonObject&), int flags = 0){
+    void draw(int flags = 0){
         SkeletonMesh* currMesh = &buffer->getMesh();
 
         shader->bind();
@@ -56,7 +56,7 @@ public:
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
         if(flags == 0){
-            shaderPassFunction(*this);
+            shaderFields.pushAllToShader(*shader);
         }
         if(doAnimation){
             animation->applyCurrPose();

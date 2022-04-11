@@ -5,7 +5,7 @@
 #include <lightsource.h>
 #include <material.h>
 
-class Object : public AObject<Object, Buffer>{
+class Object : public AObject<Buffer>{
 public:
     LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
@@ -21,7 +21,7 @@ public:
         materials = &ml;
     }
 
-    void draw(void (*shaderPassFunction)(Object&), int flags = 0) override{
+    void draw(int flags = 0) override{
         shader->bind();
 
         position->pushToShader(shader, "modelMatrix");
@@ -34,7 +34,7 @@ public:
             view->pushToShader(shader, "viewMatrix", "cameraPos");
         }
         if(flags == 0){
-            shaderPassFunction(*this);
+            shaderFields.pushAllToShader(*shader);
         }
 
         buffer->bind();

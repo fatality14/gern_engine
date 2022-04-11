@@ -4,22 +4,23 @@
 #include <window.h>
 #include <view.h>
 #include <perspective.h>
-#include <shader.h>
+#include <shaderfield.h>
 #include <position.h>
 #include <texture.h>
 
 class IObject{};
 
-template <class T, class U>
+template <class T>
 class AObject : public IObject{
 public:
     Window* window;
-    TextureList* texList;//move to mesh? or use one in MaterialList
-    U* buffer;
+    TextureList* texList;//move to mesh? or use in MaterialList
+    T* buffer;
     Shader* shader;//shader same as in buffer
     Position* position;
     View* view;
     Perspective* perspective;
+    ShaderFieldList shaderFields;
 
     string name;
 
@@ -27,7 +28,7 @@ public:
 
     //make arguments optional
     AObject(Window& w, TextureList& t,
-           U& b, Perspective& p,
+           T& b, Perspective& p,
            View& v, string name = "noname")
     {
         if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
@@ -57,7 +58,7 @@ public:
         drawmode = GL_drawmode;
     }
 
-    virtual void draw(void (*shaderPassFunction)(T&), int flags = 0) = 0;
+    virtual void draw(int flags = 0) = 0;
 
     void setTextureList(TextureList& tl){
         texList = &tl;

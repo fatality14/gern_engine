@@ -1,11 +1,11 @@
 #pragma once
 
 #include <common.h>
-#include <shader.h>
+#include <shaderfield.h>
 
 class IBuffer{};
 
-template <class T, class U, class D>
+template <class T, class U>
 class ABuffer : public IBuffer{
 public:
     ABuffer(T& m, Shader& s, string name = "noname"){
@@ -45,7 +45,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-        D::specifyAttribPointers(shader);
+        shaderfields.pushAllToShader(*shader);
         unbind();
     }
 
@@ -62,7 +62,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
 
-        D::specifyAttribPointers(shader);
+        shaderfields.pushAllToShader(*shader);
 
         //current vao should be set in while window loop
         unbind();
@@ -72,6 +72,7 @@ public:
 
 protected:
     Shader* shader;
+    ShaderFieldList shaderfields;
 
     GLuint VAO;
     GLuint VBO;

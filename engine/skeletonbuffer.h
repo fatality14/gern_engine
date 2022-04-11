@@ -4,15 +4,31 @@
 #include <abuffer.h>
 
 //maybe add BufferList
-class SkeletonBuffer : public ABuffer<SkeletonMesh, SkeletonVertex, SkeletonBuffer>{
+class SkeletonBuffer : public ABuffer<SkeletonMesh, SkeletonVertex>{
 public:
-    using ABuffer::ABuffer;
+    SkeletonBuffer(SkeletonMesh& m, Shader& s, string name = "noname") : ABuffer(m, s, name){
+        IShaderField* vpos = new ShaderAttrib<GLfloat, SkeletonVertex>(
+                    "vertex_position", 3,
+                    offsetof(SkeletonVertex, position));
 
-    static void specifyAttribPointers(Shader* s){
-        s->setFloatAttribPointer<SkeletonVertex>("vertex_position", 3, offsetof(SkeletonVertex, position));
-        s->setFloatAttribPointer<SkeletonVertex>("vertex_texcoord", 2, offsetof(SkeletonVertex, texcoord));
-        s->setFloatAttribPointer<SkeletonVertex>("vertex_normal", 3, offsetof(SkeletonVertex, normal));
-        s->setFloatAttribPointer<SkeletonVertex>("vertex_joints", 3, offsetof(SkeletonVertex, joints));
-        s->setFloatAttribPointer<SkeletonVertex>("vertex_weights", 3, offsetof(SkeletonVertex, weights));
+        IShaderField* vtex = new ShaderAttrib<GLfloat, SkeletonVertex>(
+                    "vertex_texcoord", 2,
+                    offsetof(SkeletonVertex, texcoord));
+
+        IShaderField* vnorm = new ShaderAttrib<GLfloat, SkeletonVertex>(
+                    "vertex_normal", 3,
+                    offsetof(SkeletonVertex, normal));
+        IShaderField* vjoints = new ShaderAttrib<GLfloat, SkeletonVertex>(
+                    "vertex_joints", 3,
+                    offsetof(SkeletonVertex, joints));
+        IShaderField* vweights = new ShaderAttrib<GLfloat, SkeletonVertex>(
+                    "vertex_weights", 3,
+                    offsetof(SkeletonVertex, weights));
+
+        shaderfields.push(*vpos);
+        shaderfields.push(*vtex);
+        shaderfields.push(*vnorm);
+        shaderfields.push(*vjoints);
+        shaderfields.push(*vweights);
     }
 };

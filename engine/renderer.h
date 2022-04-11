@@ -10,7 +10,7 @@
 #include <texture.h>
 #include <lightsource.h>
 #include <material.h>
-#include <skybox.h>
+#include <skyboxobject.h>
 #include <framebuffer.h>
 #include <object.h>
 #include <skeletonobject.h>
@@ -25,6 +25,9 @@ public:
     MouseListener* mouse;
     CameraList* camList;//void addCamera
     SkyboxList* skyboxes;
+    Objects* objects;
+    SkeletonObjects* skeletonObjects;
+    InstancedObjects* instancedObjects;
     FramebufferList* framebuffers;
     LightSourceList* lightSources;
 
@@ -204,8 +207,5 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 private:
-    Objects* objects;
-    SkeletonObjects* skeletonObjects;
-    InstancedObjects* instancedObjects;
     bool doContinue = false;
 };
