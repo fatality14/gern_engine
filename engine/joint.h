@@ -4,7 +4,7 @@
 #include <jointposition.h>
 #include <shaderfield.h>
 
-class Joint{
+class Joint : public ICommon{
 public:
     vector<Joint*> childs;
     JointPosition* position;

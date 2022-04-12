@@ -5,7 +5,6 @@
 
 class LightSource : public IShaderField{
 public:
-    string name;
     glm::vec3 lightPos;
 
     LightSource(string name = "noname"){

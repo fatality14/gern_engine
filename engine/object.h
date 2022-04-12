@@ -19,28 +19,29 @@ public:
     {
         lightSources = &lsl;
         materials = &ml;
+
+        shaderFields.push(*position);
+        shaderFields.push(*perspective);
+        shaderFields.push(*view);
     }
 
     void draw(int flags = 0) override{
         shader->bind();
 
-        position->pushToShader(*shader);
         position->setDefaultEvents(window);
 
         if(currShaderId != shader->program){
-            currShaderId = shader->program;
-
             perspective->pushToShader(*shader);
-
-            view->setShaderParams("viewMatrix", "cameraPos");
             view->pushToShader(*shader);
+
+            currShaderId = shader->program;
         }
         if(flags == 0){
-            shaderFields.pushAllToShader(*shader);
+            shaderFields.pushToShader(*shader);
         }
 
-        buffer->bind();
 
+        buffer->bind();
 
         if (buffer->getMesh().nIndices != 0)
             glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);

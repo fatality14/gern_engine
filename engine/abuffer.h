@@ -3,7 +3,7 @@
 #include <common.h>
 #include <shaderfield.h>
 
-class IBuffer{};
+class IBuffer : public ICommon{};
 
 template <class T, class U>
 class ABuffer : public IBuffer{
@@ -45,7 +45,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-        shaderfields.pushAllToShader(*shader);
+        shaderfields.pushToShader(*shader);
         unbind();
     }
 
@@ -62,7 +62,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
 
-        shaderfields.pushAllToShader(*shader);
+        shaderfields.pushToShader(*shader);
 
         //current vao should be set in while window loop
         unbind();

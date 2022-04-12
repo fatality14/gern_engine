@@ -32,6 +32,8 @@ typedef unsigned int uint;
 float someCounter = 0;
 
 
+class ICommon{public :virtual ~ICommon(){}};
+
 //TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes are just data containers, rename classes or smth else
 //TODO: add shaderlist to renderer, let renderer choose which shader should be applied to object
@@ -40,6 +42,7 @@ float someCounter = 0;
 //      or make class ShaderUpdater to dinamically push data to shader
 //TODO: make methods to access the objects of built-in classes
 
+//no need for ICommon here cause of offsetof function
 struct IVertex{};
 
 struct Vertex : public IVertex{
@@ -55,7 +58,7 @@ struct SkeletonVertex : public IVertex{
     glm::vec3 weights;
 };
 
-struct uintvec3{
+struct uintvec3 : public ICommon{
     uintvec3(uint x, uint y, uint z){
         this->x = x;
         this->y = y;
@@ -68,7 +71,7 @@ struct uintvec3{
 };
 
 
-struct IList{};
+struct IList : public ICommon{};
 
 //T must have "name" field
 //might implement it with sfinae
@@ -128,7 +131,7 @@ private:
 };
 
 
-struct ILoader{};
+struct ILoader : public ICommon{};
 
 class ALoader : public ILoader{
 public:
@@ -229,7 +232,7 @@ public:
 };
 
 
-struct IMesh{};
+struct IMesh : public ICommon{};
 
 //restrict T type with common vertex interface
 template <class T>
@@ -280,7 +283,7 @@ public:
     }
 };
 
-class ITexture{
+class ITexture : public ICommon{
 public:
     virtual void loadTexture() = 0;
 };

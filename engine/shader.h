@@ -2,7 +2,7 @@
 
 #include <common.h>
 
-class Shader{
+class Shader : public ICommon{
 public:
     GLuint program;
     string name;

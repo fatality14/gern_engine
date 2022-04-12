@@ -28,6 +28,9 @@ public:
         materials = &ml;
 
         shaderFields.push(buffer->getMesh().joints);
+        shaderFields.push(*position);
+        shaderFields.push(*perspective);
+        shaderFields.push(*view);
     }
 
     void setAnimation(string animationFilePath, float animationTime){
@@ -46,29 +49,17 @@ public:
 
         shader->bind();
 
-        position->pushToShader(*shader);
         position->setDefaultEvents(window);
-//        currMesh->joints.pushToShader(*shader);
 
         if(currShaderId != shader->program){
-            currShaderId = shader->program;
-
             perspective->pushToShader(*shader);
-
-            view->setShaderParams("viewMatrix", "cameraPos");
             view->pushToShader(*shader);
+
+            currShaderId = shader->program;            
         }
 
-        //if not static
-        if(flags == 0){
-            shaderFields.pushAllToShader(*shader);
-        }
-        else{
-            if(once){
-                shaderFields.pushAllToShader(*shader);
-                once = false;
-            }
-        }
+        shaderFields.pushToShader(*shader);
+
         if(doAnimation){
             animation->applyCurrPose();
         }
@@ -113,8 +104,6 @@ public:
         shader->unbind();
         texList->unbindTextures();
     }
-private:
-    bool once = true;
 };
 
 GLuint SkeletonObject::currShaderId = -1;

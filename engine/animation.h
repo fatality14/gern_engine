@@ -4,7 +4,7 @@
 #include <joint.h>
 #include <chrono>
 
-class AnimationPose{
+class AnimationPose : public ICommon{
 public:
     vector<glm::vec3> locations;
     vector<glm::vec3> rotations;

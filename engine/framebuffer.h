@@ -3,7 +3,7 @@
 #include <common.h>
 #include <texture.h>
 
-class Framebuffer{
+class Framebuffer : public ICommon{
 public:
     GLuint FBO;
     GLuint RBO;

@@ -25,6 +25,8 @@ public:
         lightSources = &lsl;
         materials = &ml;
 
+        shaderFields.push(*view);
+        shaderFields.push(*perspective);
         updateBufferModelMats();
     }
 
@@ -36,20 +38,21 @@ public:
         shader->bind();
 
         if(currShaderId != shader->program){
-            currShaderId = shader->program;
-
             perspective->pushToShader(*shader);
-
-            view->setShaderParams("viewMatrix", "cameraPos");
             view->pushToShader(*shader);
+
+            currShaderId = shader->program;
         }
-        if(flags == 0 || flags == 1){
-            shaderFields.pushAllToShader(*shader);
+
+        //if different fields in comp with prev draw
+        if(flags <= 1){
+            shaderFields.pushToShader(*shader);
         }
 
         buffer->bind();
 
-        if(flags == 1){
+        //if there's need to update positions
+        if(flags == 0){
             updateBufferModelMats();
         }
 

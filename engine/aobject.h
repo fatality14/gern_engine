@@ -8,7 +8,7 @@
 #include <position.h>
 #include <texture.h>
 
-class IObject{
+class IObject : public ICommon{
 public:
     virtual void draw(int flags = 0) = 0;
     virtual ~IObject(){};

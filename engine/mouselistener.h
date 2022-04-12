@@ -3,7 +3,7 @@
 #include <common.h>
 #include <window.h>
 
-class MouseListener{
+class MouseListener : public ICommon{
 public:
     float dt;
     float currTime;

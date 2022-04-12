@@ -9,6 +9,7 @@ class SkyboxObject : public AObject<Buffer>{
 public:
     SkyboxTexture* skyboxTexture;
 
+
     TextureList tl;//remove this later
 
     SkyboxObject(Window& w, SkyboxTexture& st,
@@ -17,23 +18,30 @@ public:
         : AObject(w, tl, b, p, v, name)
     {
         skyboxTexture = &st;
+
+        shaderFields.push(*view);
+        shaderFields.push(*skyboxTexture);
+        shaderFields.push(*position);
+        shaderFields.push(*perspective);
     }
     ~SkyboxObject(){
         delete skyboxTexture;
     }
 
+    static GLuint currShaderId;
+
     virtual void draw(int flags = 0) override{
         window->setDrawOrder(false);
         shader->bind();
 
-        position->pushToShader(*shader);
-        perspective->pushToShader(*shader);
+        if(currShaderId != shader->program){
+            perspective->pushToShader(*shader);
+            view->pushToShader(*shader);
 
-        view->setShaderParams("viewMatrix", "cameraPos");
-        view->pushToShader(*shader);
+            currShaderId = shader->program;
+        }
 
-        skyboxTexture->setShaderParams(0, "skybox");
-        skyboxTexture->pushToShader(*shader);
+        shaderFields.pushToShader(*shader);
 
         position->setDefaultEvents(window);//remove this later
 
@@ -56,6 +64,8 @@ public:
         return *skyboxTexture;
     }
 };
+
+GLuint SkyboxObject::currShaderId = -1;
 
 class SkyboxList : public AList<SkyboxObject>{
 

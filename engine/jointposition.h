@@ -2,7 +2,7 @@
 
 #include <common.h>
 
-class JointPosition{
+class JointPosition : public ICommon{
 public:
     glm::vec3 tip;
     glm::vec3 origin;

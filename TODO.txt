@@ -101,11 +101,11 @@ split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple ti
 !32
 do something with *List, IObject and other common cases
 
-!33
++33
 +add IShaderField interface to textures and all other classes
 +make parameters of pushToShader as fields wherever it needed
-Shader methods should be called only in IShaderField childs
-add setShaderParams method to IShaderField?
++Shader methods should be called mostly in IShaderField childs
+?add setShaderParams method to IShaderField
 
 !34
 remove duplicate name fields in SceneLoader and all related

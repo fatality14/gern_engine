@@ -2,7 +2,7 @@
 
 #include <common.h>
 
-class Window{
+class Window : public ICommon{
 public:
     int width;
     int height;

@@ -46,6 +46,10 @@ public:
         skyboxes = new SkyboxList;
         framebuffers = new FramebufferList;
         lightSources = new LightSourceList;
+
+        perspective->selfPushable = false;
+        view->selfPushable = false;
+        view->setShaderParams("viewMatrix", "cameraPos");
     }
     ~Renderer(){
         delete perspective;
@@ -79,6 +83,7 @@ public:
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths);
+        st->setShaderParams(0, "skybox");
         SkyboxObject* so = new SkyboxObject(*window, *st, b, *perspective, *view, name);
         skyboxes->push(*so);
     }
@@ -193,6 +198,7 @@ public:
             Object::currShaderId = -1;
             SkeletonObject::currShaderId = -1;
             InstancedObject::currShaderId = -1;
+            SkyboxObject::currShaderId = -1;
         }
     }
     void setBackgroundColor(float r, float g, float b, float a){

@@ -4,11 +4,12 @@
 #include <shader.h>
 #include <type_traits>
 
-class IShaderField{
+class IShaderField : public ICommon{
 public:
     virtual void pushToShader(Shader& shader) = 0;
     virtual ~IShaderField() = default;
     string name;
+    bool selfPushable = true;
 };
 
 template <class T>
@@ -96,9 +97,11 @@ public:
 
     }
 
-    void pushAllToShader(Shader& shader){
+    void pushToShader(Shader& shader){
         for(size_t i = 0; i < size(); ++i){
-            at(i)->pushToShader(shader);
+            if(at(i)->selfPushable){
+                at(i)->pushToShader(shader);
+            }
         }
     }
 };

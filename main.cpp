@@ -50,7 +50,7 @@ void drawFrame(Renderer& r){
     r.bindFramebufferByIndex(0, 1);
 
     currInstObj = r.getInstancedObjectByName("paimon");
-    currInstObj->draw(1);
+    currInstObj->draw();
 
     int am = 30;
     for(int i = 0; i < am; ++i){

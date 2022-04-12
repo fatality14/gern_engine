@@ -2,7 +2,7 @@
 
 #include <common.h>
 
-class Camera{
+class Camera : public ICommon{
 public:
     string name;
 
