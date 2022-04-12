@@ -2,7 +2,7 @@
 
 #include <common.h>
 #include <jointposition.h>
-#include <shader.h>
+#include <shaderfield.h>
 
 class Joint{
 public:
@@ -80,9 +80,13 @@ public:
     }
 };
 
-class JointList : public AList<Joint>{
+class JointList : public AList<Joint>, public IShaderField{
 public:
-    void pushToShader(Shader* s){
+    JointList(){
+        name = "jointTransforms";
+    }
+
+    void pushToShader(Shader& s) override{
         jointPoses.clear();
         for(size_t i = 0; i < size(); ++i){
             float* mat = (float*)glm::value_ptr(at(i)->position->getModelMatrix());
@@ -90,7 +94,7 @@ public:
                 jointPoses.push_back(mat[j]);
             }
         }
-        s->setUniformMatrix4fv("jointTransforms", jointPoses.data(), size());
+        s.setUniformMatrix4fv(name, jointPoses.data(), size());
     }
 
     //remove?

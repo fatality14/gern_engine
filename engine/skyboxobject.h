@@ -26,10 +26,14 @@ public:
         window->setDrawOrder(false);
         shader->bind();
 
-        position->pushToShader(shader, "modelMatrix");
-        perspective->pushToShader(shader, "projectionMatrix");
-        view->pushToShader(shader, "viewMatrix", "cameraPos");
-        skyboxTexture->pushToShader(shader, 0, "skybox");
+        position->pushToShader(*shader);
+        perspective->pushToShader(*shader);
+
+        view->setShaderParams("viewMatrix", "cameraPos");
+        view->pushToShader(*shader);
+
+        skyboxTexture->setShaderParams(0, "skybox");
+        skyboxTexture->pushToShader(*shader);
 
         position->setDefaultEvents(window);//remove this later
 

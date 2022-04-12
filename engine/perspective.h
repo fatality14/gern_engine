@@ -4,9 +4,9 @@
 #include <window.h>
 #include <mouselistener.h>
 #include <camera.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class Perspective{
+class Perspective : public IShaderField{
 public:
     float fov = 90.f;
     float nearPlane = 0.001f;
@@ -16,11 +16,12 @@ public:
         window = &w;
 
         projectionMatrix = glm::perspective(glm::radians(fov), static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane, farPlane);
+        name = "projectionMatrix";
     }
 
-    void pushToShader(Shader* s, string uniformName){
+    void pushToShader(Shader& s) override{
         updateMatrices();
-        s->setUniformMatrix4fv(uniformName, glm::value_ptr(projectionMatrix));
+        s.setUniformMatrix4fv(name, glm::value_ptr(projectionMatrix));
     }
     void updateMatrices(){
         glfwGetFramebufferSize(window->getWindowPtr(), &window->fbWidth, &window->fbHeight);

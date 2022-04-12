@@ -78,7 +78,7 @@ public:
         instancedObjects->push(*o);
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
-        SkyboxTexture* st = new SkyboxTexture(facePaths, name);
+        SkyboxTexture* st = new SkyboxTexture(facePaths);
         SkyboxObject* so = new SkyboxObject(*window, *st, b, *perspective, *view, name);
         skyboxes->push(*so);
     }

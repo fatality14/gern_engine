@@ -38,8 +38,10 @@ public:
         if(currShaderId != shader->program){
             currShaderId = shader->program;
 
-            perspective->pushToShader(shader, "projectionMatrix");
-            view->pushToShader(shader, "viewMatrix", "cameraPos");
+            perspective->pushToShader(*shader);
+
+            view->setShaderParams("viewMatrix", "cameraPos");
+            view->pushToShader(*shader);
         }
         if(flags == 0 || flags == 1){
             shaderFields.pushAllToShader(*shader);
@@ -64,13 +66,14 @@ public:
                 if(textureI == texList->layoutsAmount()){
                     textureI = 0;
                 }
-                texList->pushLayoutToShader(textureI, shader);
+                texList->setShaderParams(textureI);
+                texList->pushToShader(*shader);
                 ++textureI;
 
                 if(materialI == materials->size()){
                     materialI = 0;
                 }
-                materials->at(materialI)->pushToShader(shader, "material");
+                materials->at(materialI)->pushToShader(*shader);
                 ++materialI;
 
                 if(j == 0){

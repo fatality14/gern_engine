@@ -34,8 +34,9 @@ public:
 
     void genTextureColorBuffers(size_t amount){
         for(size_t i = 0; i < amount; i++){
-            Texture* t = new Texture("textureColorBuffer"+to_string(i));
+            Texture* t = new Texture;
 
+            t->setUniformName("textureColorBuffer"+to_string(i));
             t->setTextureSize(width, height);
 
             textureColorBuffers->push(*t);

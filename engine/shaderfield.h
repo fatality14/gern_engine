@@ -7,8 +7,8 @@
 class IShaderField{
 public:
     virtual void pushToShader(Shader& shader) = 0;
-
-    //virtual destructor?
+    virtual ~IShaderField() = default;
+    string name;
 };
 
 template <class T>
@@ -41,7 +41,6 @@ public:
     }
 private:
     T value;
-    string name;
     size_t size;
 };
 
@@ -51,21 +50,20 @@ template <class T, class U>
 class ShaderAttrib : public IShaderField{
 public:
     ShaderAttrib(string layoutName, int vecSize, size_t offset){
-        this->layoutName = layoutName;
+        this->name = layoutName;
         this->vecSize = vecSize;
         this->offset = offset;
     }
 
     void pushToShader(Shader& shader) override{
         if constexpr (std::is_same<T, GLint>::value){
-            shader.setIntAttribPointer<U>(layoutName, vecSize, offset);
+            shader.setIntAttribPointer<U>(name, vecSize, offset);
         }
         else if constexpr (std::is_same<T, GLfloat>::value){
-            shader.setFloatAttribPointer<U>(layoutName, vecSize, offset);
+            shader.setFloatAttribPointer<U>(name, vecSize, offset);
         }
     }
 private:
-    string layoutName;
     int vecSize;
     size_t offset;
 };
@@ -74,17 +72,16 @@ template <class U>
 class ShaderMatAttrib : public IShaderField{
 public:
     ShaderMatAttrib(string layoutName, int matSize, size_t offset, size_t divisor = 0){
-        this->layoutName = layoutName;
+        this->name = layoutName;
         this->matSize = matSize;
         this->offset = offset;
         this->divisor = divisor;
     }
 
     void pushToShader(Shader& shader) override{
-        shader.setMatAttribPointer<U>(layoutName, matSize, offset, divisor);
+        shader.setMatAttribPointer<U>(name, matSize, offset, divisor);
     }
 private:
-    string layoutName;
     int matSize;
     size_t offset;
     size_t divisor;
@@ -92,6 +89,13 @@ private:
 
 class ShaderFieldList : public AList<IShaderField>{
 public:
+    ShaderFieldList(){
+        owndestructor = true;
+    }
+    ~ShaderFieldList(){
+
+    }
+
     void pushAllToShader(Shader& shader){
         for(size_t i = 0; i < size(); ++i){
             at(i)->pushToShader(shader);

@@ -115,7 +115,7 @@ public:
             }
             if(token == "mat"){
                 //TODO: replace this with good code
-                Material* mat = new Material;
+                Material* mat = new Material("material");
                 mat->setAmbientColor(0.01f,0.01f,0.01f);
                 mat->setSpecularHighlights(20);
 

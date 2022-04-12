@@ -1,23 +1,30 @@
 #pragma once
 
 #include <common.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class Texture{
+class Texture : public ITexture, public IShaderField{
 public:
     GLuint textureId;
-    string name;
+    GLint n;
 
-    Texture(string name = "noname"){
-        this->name = name;
+    Texture(){
         glGenTextures(1, &textureId);
     }
     Texture(Texture& t) = delete;
     ~Texture(){
         glDeleteTextures(1, &textureId);
     }
-    void pushToShader(Shader* shader, GLint n, string uniformName){
-        shader->setUniform1i(uniformName, n);
+
+    void setUniformName(string uniformName){
+        this->name = uniformName;
+    }
+    void setShaderParams(GLint n, string uniformName){
+        this->n = n;
+        this->name = uniformName;
+    }
+    void pushToShader(Shader& shader) override{
+        shader.setUniform1i(name, n);
 
         glActiveTexture(GL_TEXTURE0 + n);
         bind();
@@ -25,7 +32,11 @@ public:
     void bind(){
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
-    void loadTexture(string path){
+
+    void setLoadParams(string path){
+        this->path = path;
+    }
+    void loadTexture() override{
         //load image
         image_width = 0;
         image_height = 0;
@@ -96,11 +107,13 @@ private:
     int image_width;
     int image_height;
 
+    string path;
+
     unsigned char* image = nullptr;
 
 };
 
-class TextureList : public AList<Texture>{
+class TextureList : public AList<Texture>, public IShaderField{
 private:
     struct TextureLayout{
         void pushTexture(GLint n, size_t textureIndex, string uniformName){
@@ -117,22 +130,25 @@ private:
     };
 
     vector<TextureLayout> texLayouts;
+
+    void pushTextureToShaderByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
+        at(textureIndex)->setShaderParams(n, uniformName);
+        at(textureIndex)->pushToShader(*shader);
+    }
+
+    size_t layoutId = 0;
 public:
     TextureList(string name = "noname"){
         this->name = name;
     }
 
-    void loadNew(string path, string name = "noname"){
-        Texture* t = new Texture(name);
-        t->loadTexture(path);
+    void loadNew(string path){
+        Texture* t = new Texture;
+
+        t->setLoadParams(path);
+        t->loadTexture();
         push(*t);
         unbindTextures();
-    }
-    void pushTextureToShaderByIndex(Shader* shader, GLint n, size_t textureIndex, string uniformName){
-        at(textureIndex)->pushToShader(shader, n, uniformName);
-    }
-    void pushTextureToShaderByName(Shader* shader, GLint n, string textureName, string uniformName){
-        getByName(textureName)->pushToShader(shader, n, uniformName);
     }
     void unbindTextures(){
         glActiveTexture(0);
@@ -147,10 +163,14 @@ public:
             texLayouts.push_back(TextureLayout());
         }
     }
-    void pushLayoutToShader(size_t layoutId, Shader* shader){
+
+    void setShaderParams(size_t layoutId){
+        this->layoutId = layoutId;
+    }
+    void pushToShader(Shader& shader) override{
         TextureLayout* currLayout = &texLayouts.at(layoutId);
-        for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){
-            pushTextureToShaderByIndex(shader,
+        for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){            
+            pushTextureToShaderByIndex(&shader,
                                currLayout->ns.at(i),
                                currLayout->textureIndexes.at(i),
                                currLayout->uniformNames.at(i));

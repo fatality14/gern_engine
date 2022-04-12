@@ -1,31 +1,34 @@
 #pragma once
 
 #include <common.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class SkyboxTexture{
+class SkyboxTexture : public ITexture, public IShaderField{
 public:
     GLuint textureId;
-    string name;
     vector<string> facePaths;
-    SkyboxTexture(vector<string> facePaths, string name = "noname"){
+    SkyboxTexture(vector<string> facePaths){
         this->facePaths = facePaths;
-        this->name = name;
 
-        loadSkybox();
+        loadTexture();
     }
     SkyboxTexture(SkyboxTexture& st) = delete;
     ~SkyboxTexture(){
         glDeleteTextures(1, &textureId);
     }
 
-    void pushToShader(Shader* shader, GLint n, string uniformName){
-        shader->setUniform1i(uniformName, n);
+    void setShaderParams(GLint n, string uniformName){
+        this->n = n;
+        this->name = uniformName;
+    }
+    void pushToShader(Shader& shader) override{
+        shader.setUniform1i(name, n);
 
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0 + n);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
     }
-    void loadSkybox(){
+
+    void loadTexture() override{
         //load image
         image_width = 0;
         image_height = 0;
@@ -55,6 +58,8 @@ public:
 private:
     int image_width;
     int image_height;
+
+    GLint n = 0;
 
     unsigned char* image;
 };

@@ -26,6 +26,8 @@ public:
         animation = new Animation(buffer->getMesh().joints);
         lightSources = &lsl;
         materials = &ml;
+
+        shaderFields.push(buffer->getMesh().joints);
     }
 
     void setAnimation(string animationFilePath, float animationTime){
@@ -44,19 +46,28 @@ public:
 
         shader->bind();
 
-        position->pushToShader(shader, "modelMatrix");
+        position->pushToShader(*shader);
         position->setDefaultEvents(window);
-        currMesh->joints.pushToShader(shader);
+//        currMesh->joints.pushToShader(*shader);
 
         if(currShaderId != shader->program){
             currShaderId = shader->program;
 
-//            shader->setUniformMatrix4fv("jointTransforms", transitions.data(), 50);
-            perspective->pushToShader(shader, "projectionMatrix");
-            view->pushToShader(shader, "viewMatrix", "cameraPos");
+            perspective->pushToShader(*shader);
+
+            view->setShaderParams("viewMatrix", "cameraPos");
+            view->pushToShader(*shader);
         }
+
+        //if not static
         if(flags == 0){
             shaderFields.pushAllToShader(*shader);
+        }
+        else{
+            if(once){
+                shaderFields.pushAllToShader(*shader);
+                once = false;
+            }
         }
         if(doAnimation){
             animation->applyCurrPose();
@@ -77,13 +88,14 @@ public:
                 if(textureI == texList->layoutsAmount()){
                     textureI = 0;
                 }
-                texList->pushLayoutToShader(textureI, shader);
+                texList->setShaderParams(textureI);
+                texList->pushToShader(*shader);
                 ++textureI;
 
                 if(materialI == materials->size()){
                     materialI = 0;
                 }
-                materials->at(materialI)->pushToShader(shader, "material");
+                materials->at(materialI)->pushToShader(*shader);
                 ++materialI;
 
                 if(j == 0){
@@ -101,6 +113,8 @@ public:
         shader->unbind();
         texList->unbindTextures();
     }
+private:
+    bool once = true;
 };
 
 GLuint SkeletonObject::currShaderId = -1;

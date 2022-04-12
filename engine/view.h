@@ -4,9 +4,9 @@
 #include <window.h>
 #include <mouselistener.h>
 #include <camera.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class View{
+class View : public IShaderField{
 public:
     View(Window& w, MouseListener& ml, Camera& c){
         window = &w;
@@ -18,10 +18,14 @@ public:
         viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
 
-    void pushToShader(Shader* s, string viewMatrixUniformName, string cameraPosUniformName){
+    void setShaderParams(string viewMatrixUniformName, string cameraPosUniformName){
+        name = viewMatrixUniformName;
+        name1 = cameraPosUniformName;
+    }
+    void pushToShader(Shader& s) override{
         updateMatrices();
-        s->setUniformMatrix4fv(viewMatrixUniformName, glm::value_ptr(viewMatrix));
-        s->setUniform3fv(cameraPosUniformName, glm::value_ptr(camera->location));
+        s.setUniformMatrix4fv(name, glm::value_ptr(viewMatrix));
+        s.setUniform3fv(name1, glm::value_ptr(camera->location));
     }
     void updateMatrices(){
         updateCameraPosition();
@@ -56,6 +60,8 @@ private:
 
     glm::mat4 viewMatrix;
     glm::vec3 worldUp;
+
+    string name1;
 
     void updateCameraPosition(){
         camera->pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;

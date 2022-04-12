@@ -78,8 +78,13 @@ public:
     //add check for repeating names in list
 
     ~AList(){
-        for(size_t i = 0; i < list.size(); i++){
-            delete list.at(i);
+        if(owndestructor){
+            return;
+        }
+        else{
+            for(size_t i = 0; i < list.size(); i++){
+                delete list.at(i);
+            }
         }
     }
 
@@ -116,8 +121,10 @@ public:
         }
         list.clear();
     }
-private:
     vector<T*> list;
+
+    bool owndestructor = false;
+private:
 };
 
 
@@ -258,7 +265,7 @@ public:
 
         this->name = name;
     }
-    ~AMesh(){
+    virtual ~AMesh(){
         delete vertices;
         delete indices;
     }
@@ -271,4 +278,9 @@ public:
         indices->push_back(b);
         indices->push_back(c);
     }
+};
+
+class ITexture{
+public:
+    virtual void loadTexture() = 0;
 };

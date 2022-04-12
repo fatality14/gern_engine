@@ -1,22 +1,22 @@
 #pragma once
 
 #include <common.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class Material{
+class Material : public IShaderField{
 public:
     Material(string name = "noname"){
         this->name = name;
     }
 
-    void pushToShader(Shader* s, string uniformName){
-        s->setUniform3fv(uniformName + ".ambientColor", glm::value_ptr(ambientColor));
-        s->setUniform3fv(uniformName + ".diffuseColor", glm::value_ptr(diffuseColor));
-        s->setUniform3fv(uniformName + ".specularColor", glm::value_ptr(specularColor));
+    void pushToShader(Shader& s) override{
+        s.setUniform3fv(name + ".ambientColor", glm::value_ptr(ambientColor));
+        s.setUniform3fv(name + ".diffuseColor", glm::value_ptr(diffuseColor));
+        s.setUniform3fv(name + ".specularColor", glm::value_ptr(specularColor));
 
-        s->setUniform1f(uniformName + ".specularHighlights", specularHighlights);
-        s->setUniform1f(uniformName + ".opticalDensity", opticalDensity);
-        s->setUniform1f(uniformName + ".dissolve", dissolve);
+        s.setUniform1f(name + ".specularHighlights", specularHighlights);
+        s.setUniform1f(name + ".opticalDensity", opticalDensity);
+        s.setUniform1f(name + ".dissolve", dissolve);
     }
 
     void setAmbientColor(float r, float g, float b){

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <common.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class LightSource{
+class LightSource : public IShaderField{
 public:
     string name;
     glm::vec3 lightPos;
@@ -13,8 +13,8 @@ public:
         lightPos = glm::vec3(0.f, 0.f, 2.f);
     }
 
-    void pushToShader(Shader* s, string uniformName){
-        s->setUniform3fv(uniformName, glm::value_ptr(lightPos));
+    void pushToShader(Shader& s) override{
+        s.setUniform3fv(name, glm::value_ptr(lightPos));
     }
     void setPosition(float x, float y, float z){
         lightPos.x += x;
@@ -27,13 +27,5 @@ class LightSourceList : public AList<LightSource>{
 public:
     void pushNew(string name = "noname"){
         push(*(new LightSource(name)));
-    }
-    void pushToShaderByIndex(Shader* s, size_t index, string uniformName){
-        LightSource* currentSource = at(index);
-        currentSource->pushToShader(s, uniformName);
-    }
-    void pushToShaderByName(Shader* s, string name, string uniformName){
-        LightSource* currentSource = getByName(name);
-        s->setUniform3fv(uniformName.data(), glm::value_ptr(currentSource->lightPos));
     }
 };

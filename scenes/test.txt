@@ -32,7 +32,7 @@ meshbuf sphere default sphere
 sklbuf paimon skeleton paimonskl
 instbuf paimon instanced paimoninst
 mat
-light 0 0 2 default
+light 0 0 2 lightPos0
 frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0

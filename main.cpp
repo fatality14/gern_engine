@@ -15,23 +15,37 @@ void drawFrame(Renderer& r){
     static SkeletonObject* currSklObj;
     static InstancedObject* currInstObj;
     ///////////////////////////////
+
+    //move that in draw function
+    //it is needed to delete light pointer here
     if(once){
         for(size_t i = 0; i < r.objects->size(); ++i){
             currObj = r.objects->at(i);
-            IShaderField* light = new ShaderUniform<glm::vec3>(currObj->lightSources->at(0)->lightPos, "lightPos0");
-            currObj->shaderFields.push(*light);
+            currObj->shaderFields.push(*currObj->lightSources->at(0));
         }
         for(size_t i = 0; i < r.skeletonObjects->size(); ++i){
             currSklObj = r.skeletonObjects->at(i);
-            IShaderField* light = new ShaderUniform<glm::vec3>(currSklObj->lightSources->at(0)->lightPos, "lightPos0");
-            currSklObj->shaderFields.push(*light);
+            currSklObj->shaderFields.push(*currSklObj->lightSources->at(0));
         }
         for(size_t i = 0; i < r.instancedObjects->size(); ++i){
             currInstObj = r.instancedObjects->at(i);
-            IShaderField* light = new ShaderUniform<glm::vec3>(currInstObj->lightSources->at(0)->lightPos, "lightPos0");
-            currInstObj->shaderFields.push(*light);
+            currInstObj->shaderFields.push(*currInstObj->lightSources->at(0));
         }
+        once = false;
     }
+
+//    for(size_t i = 0; i < r.objects->size(); ++i){
+//        currObj = r.objects->at(i);
+//        ((ShaderUniform<glm::vec3>*)currObj->shaderFields.getByName("lightPos0"))->setValue(currObj->lightSources->at(0)->lightPos);
+//    }
+//    for(size_t i = 0; i < r.skeletonObjects->size(); ++i){
+//        currSklObj = r.skeletonObjects->at(i);
+//        ((ShaderUniform<glm::vec3>*)currSklObj->shaderFields.getByName("lightPos0"))->setValue(currSklObj->lightSources->at(0)->lightPos);
+//    }
+//    for(size_t i = 0; i < r.instancedObjects->size(); ++i){
+//        currInstObj = r.instancedObjects->at(i);
+//        ((ShaderUniform<glm::vec3>*)currInstObj->shaderFields.getByName("lightPos0"))->setValue(currInstObj->lightSources->at(0)->lightPos);
+//    }
     ///////////////////////////////
     r.bindFramebufferByIndex(0, 1);
 
@@ -89,7 +103,7 @@ void drawFrame(Renderer& r){
         r.view->getCamera().movementSpeed = defaultSpeed;
     }
 
-    setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("default")->lightPos = r.view->getCamera().location);
+    setEvent(r.window->getWindowPtr(), F, r.lightSources->getByName("lightPos0")->lightPos = r.view->getCamera().location);
 
     setEvent(r.window->getWindowPtr(), J, if(someCounter + 1 <= 19) someCounter += 1.f/10.f; cout << someCounter << endl);
     setEvent(r.window->getWindowPtr(), K, if(someCounter - 1 >= 0) someCounter -= 1.f/10.f; cout << someCounter << endl);

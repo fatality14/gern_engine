@@ -8,7 +8,7 @@ use "InstancedObject" to create custom particle system class
 3
 shader constructor to parse custom shader code into glsl
 
-!4
++4
 make universal *Buffer class with a template not to copypaste code
 
 !5
@@ -27,9 +27,8 @@ add const qualifiers where it need to be
 !9
 parse materials from the .mtl, MaterialList must be in Mesh class instead of Object class?
 
-!10
++10
 make Object interface class and move some common logic to it
-also could remove add*Object methods in Renderer
 
 11
 rename some GL_* definitions to own enums
@@ -58,7 +57,7 @@ catch if exceed index of vectors
 19
 do something with "ns" in texture layouts
 
-!20
++20
 test ShaderUniform in shaderObjectFunc, or even use it without it, might move user logic in ShaderUniform
 also could use ShaderUniform in *Object draw function to maintain uniforms that must be updated
 
@@ -99,11 +98,23 @@ pass user function in setDefaultEvents
 31?
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
 
-32
-add parameter list to *Object draw function instead of a single bool
+!32
+do something with *List, IObject and other common cases
 
 !33
-do something with *List, IObject and other common cases
++add IShaderField interface to textures and all other classes
++make parameters of pushToShader as fields wherever it needed
+Shader methods should be called only in IShaderField childs
+add setShaderParams method to IShaderField?
+
+!34
+remove duplicate name fields in SceneLoader and all related
+
+!35
+make all IShaderField attrib in buffer like vmodel in InstancedBuffer
+
+!36?
+move load method to ILoader and use it in sceneloader
 
 99?
 recorder class to render video

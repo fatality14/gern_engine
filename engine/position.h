@@ -4,19 +4,20 @@
 #include <window.h>
 #include <mouselistener.h>
 #include <camera.h>
-#include <shader.h>
+#include <shaderfield.h>
 
-class Position{
+class Position : public IShaderField{
 public:
     Position(){
         location = glm::vec3(0.f);
         rotation = glm::vec3 (0.f);
         scale = glm::vec3(1.f);
         modelMatrix = glm::mat4(1.f);
+        name = "modelMatrix";
     }
 
-    void pushToShader(Shader* s, string uniformName){
-        s->setUniformMatrix4fv(uniformName, glm::value_ptr(modelMatrix));
+    void pushToShader(Shader& s) override{
+        s.setUniformMatrix4fv(name, glm::value_ptr(modelMatrix));
     }
     void updateMatrices(){
         modelMatrix = glm::mat4(1.f);
