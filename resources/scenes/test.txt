@@ -1,31 +1,31 @@
 cwd C:\\Users\\\1234\\\Documents\\qtprojs\\ogl\\
-mesh models\\skybox.obj skybox
-mesh models\\quad.obj quad
-mesh models\\sphere.obj sphere
-mesh models\\GenshinImpactPack\\paimon\\paimon.obj paimon
-skl paimon models\\GenshinImpactPack\\paimon\\paimon.skl
+mesh resources\\models\\skybox.obj skybox
+mesh resources\\models\\quad.obj quad
+mesh resources\\models\\sphere.obj sphere
+mesh resources\\models\\GenshinImpactPack\\paimon\\paimon.obj paimon
+skl paimon resources\\models\\GenshinImpactPack\\paimon\\paimon.skl
 shad shaders\\obj_vertex.vsh shaders\\obj_fragment.fsh default
 shad shaders\\skybox_vertex.vsh shaders\\skybox_fragment.fsh skybox
 shad shaders\\screen_vertex.vsh shaders\\screen_fragment.fsh screen
 shad shaders\\skeleton_obj_vertex.vsh shaders\\skeleton_obj_fragment.fsh skeleton
 shad shaders\\instanced_obj_vertex.vsh shaders\\instanced_obj_fragment.fsh instanced
 tex blank
-texm pictures\\blank.png
+texm resources\\pictures\\blank.png
 texl 0 0 0 texture0
 meshbuf skybox skybox skyboxCube
 meshbuf quad screen quad
 meshbuf sphere default sphere
 sklbuf paimon skeleton paimonskl
 instbuf paimon instanced paimoninst
-mat models\\GenshinImpactPack\\paimon\\paimon.mtl models\\GenshinImpactPack\\paimon\\Texture paimonmat
+mat resources\\models\\GenshinImpactPack\\paimon\\paimon.mtl resources\\models\\GenshinImpactPack\\paimon\\Texture paimonmat
 light 0 0 2 lightPos0
 frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0
 meshobj blank sphere sphere
 scale 0.01 0.01 0.01
-sklobj paimonmat paimonskl 1 paimon models\\GenshinImpactPack\\paimon\\paimon.anm 3
+sklobj paimonmat paimonskl 1 paimon resources\\models\\GenshinImpactPack\\paimon\\paimon.anm 3
 instobj paimonmat paimoninst 1 1 paimon
-skybox skybox\\right.jpg skybox\\left.jpg skybox\\top.jpg skybox\\bottom.jpg skybox\\front.jpg skybox\\back.jpg
+skybox resources\\skybox\\right.jpg resources\\skybox\\left.jpg resources\\skybox\\top.jpg resources\\skybox\\bottom.jpg resources\\skybox\\front.jpg resources\\skybox\\back.jpg
 scale 10 10 10
 bckcol 0.5 0 0 0.99

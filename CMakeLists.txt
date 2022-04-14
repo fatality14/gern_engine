@@ -20,7 +20,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll" ".a")
 add_executable(ogl main.cpp)
 
 target_compile_options(ogl PRIVATE -Wall -Wextra -pedantic)
-target_include_directories(ogl PRIVATE engine/ GL_H/ GLFW/ SOIL2/ glm/ libs/)
+target_include_directories(ogl PRIVATE engine/ thirdparty/GL_H/ thirdparty/GLFW/ thirdparty/SOIL2/ thirdparty/glm/ libs/)
 
 find_library(GLEW32 glew32 libs)
 find_library(GLFW3 glfw3 libs)

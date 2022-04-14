@@ -131,14 +131,7 @@ make Window proxy pattern
 make AnimationList and all related
 
 lastplan:
-move TextureList to Material
-keep tex texm texl fields in SceneLoader
-allow to set TextureList of Material from SceneLoader
-
-add MaterialLoader to parse .mtl and fill Material
-
-modify mat command of SceneLoader to load Material with MaterialLoader
-modify *obj command to set Material of *Object by name
+17
 
 
 99?

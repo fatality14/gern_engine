@@ -131,7 +131,7 @@ int main (){
 
     Renderer renderer(window_width, window_height);
     SceneLoader sl;
-    sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\scenes\\test.txt", renderer);
+    sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", renderer);
 
     renderer.renderLoop(drawFrame);
 
