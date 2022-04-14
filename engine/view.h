@@ -20,12 +20,12 @@ public:
 
     void setShaderParams(string viewMatrixUniformName, string cameraPosUniformName){
         name = viewMatrixUniformName;
-        name1 = cameraPosUniformName;
+        cameraName = cameraPosUniformName;
     }
     void pushToShader(Shader& s) override{
         updateMatrices();
         s.setUniformMatrix4fv(name, glm::value_ptr(viewMatrix));
-        s.setUniform3fv(name1, glm::value_ptr(camera->location));
+        s.setUniform3fv(cameraName, glm::value_ptr(camera->location));
     }
     void updateMatrices(){
         updateCameraPosition();
@@ -61,7 +61,7 @@ private:
     glm::mat4 viewMatrix;
     glm::vec3 worldUp;
 
-    string name1;
+    string cameraName;
 
     void updateCameraPosition(){
         camera->pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;

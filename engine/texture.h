@@ -19,8 +19,8 @@ public:
     void setUniformName(string uniformName){
         this->name = uniformName;
     }
-    void setShaderParams(GLint n, string uniformName){
-        this->n = n;
+    void setShaderParams(GLint texuteUnit, string uniformName){
+        this->n = texuteUnit;
         this->name = uniformName;
     }
     void pushToShader(Shader& shader) override{
@@ -116,15 +116,15 @@ private:
 class TextureList : public AList<Texture>, public IShaderField{
 private:
     struct TextureLayout{
-        void pushTexture(GLint n, size_t textureIndex, string uniformName){
-            ns.push_back(n);
+        void pushTexture(GLint texutreUnit, size_t textureIndex, string uniformName){
+            texutreUnits.push_back(texutreUnit);
             textureIndexes.push_back(textureIndex);
             uniformNames.push_back(uniformName);
             ++layoutSize;
         }
 
         int layoutSize = 0;
-        vector<GLint> ns;
+        vector<GLint> texutreUnits;
         vector<size_t> textureIndexes;
         vector<string> uniformNames;
     };
@@ -155,8 +155,8 @@ public:
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void appendTextureToLayout(size_t layoutId, GLint n, size_t textureIndex, string uniformName){
-        texLayouts.at(layoutId).pushTexture(n, textureIndex, uniformName);
+    void appendTextureToLayout(size_t layoutId, GLint textureUnit, size_t textureIndex, string uniformName){
+        texLayouts.at(layoutId).pushTexture(textureUnit, textureIndex, uniformName);
     }
     void addLayouts(int amount){
         for(int i = 0; i < amount; ++i){
@@ -171,7 +171,7 @@ public:
         TextureLayout* currLayout = &texLayouts.at(layoutId);
         for(size_t i = 0; i < currLayout->textureIndexes.size(); ++i){            
             pushTextureToShaderByIndex(&shader,
-                               currLayout->ns.at(i),
+                               currLayout->texutreUnits.at(i),
                                currLayout->textureIndexes.at(i),
                                currLayout->uniformNames.at(i));
         }

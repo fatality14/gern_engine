@@ -39,6 +39,7 @@ public:
         mouse = new MouseListener(*window);
         camList = new CameraList();
         camList->push(*(new Camera("default")));
+        camList->at(0)->location.z += 3;
         view = new View(*window, *mouse, *camList->at(0));
         objects = new Objects;
         skeletonObjects = new SkeletonObjects;

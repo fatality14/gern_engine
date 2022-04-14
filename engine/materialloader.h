@@ -26,7 +26,6 @@ public:
 
         //TODO: check if file is not init to prevent infinie loading
 
-
         while(!f.eof()){
             Material* m;
 

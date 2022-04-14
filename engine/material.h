@@ -7,7 +7,6 @@
 class Material : public IShaderField{
 public:
     Material(string matname = "noname"){
-        this->name = name;
         this->matname = matname;
     }
 
@@ -85,6 +84,10 @@ private:
 
 class Materials : public AList<Material>{
 public:
+    void pushNew(string matname = "noname"){
+        push(*(new Material(matname)));
+    }
+
     TextureList* textures = new TextureList;
     string name = "noname";
 };

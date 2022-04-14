@@ -5,7 +5,7 @@ project(ogl LANGUAGES CXX)
 find_program(CCACHE_FOUND ccache D:/AYNP/ccache46_64)
 if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "D:/AYNP/ccache46_64/ccache.exe")
-    message("123")
+    message("using ccache")
 endif(CCACHE_FOUND)
 
 set(CMAKE_CXX_STANDARD 17)

@@ -24,9 +24,6 @@ public:
         for(size_t i = 0; i < instBuffers.size(); ++i){
             delete instBuffers[i];
         }
-//        for(size_t i = 0; i < texes.size(); ++i){
-//            delete texes[i];
-//        }
         for(size_t i = 0; i < materialLists.size(); ++i){
             delete materialLists[i];
         }
@@ -96,11 +93,9 @@ public:
                 instBuffers.push_back(new InstancedBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
                 instBuffers.at(instBuffers.size() - 1)->genBuffers();
             }
-
-//            fix it in the same way as framebuffers
             if(token == "tex"){
                 Materials* texbmat = new Materials;
-                texbmat->push(*(new Material));
+                texbmat->pushNew();
                 texbmat->name = line;
 
                 materialLists.push_back(texbmat);
@@ -172,7 +167,7 @@ public:
                 renderer.addFramebuffer(*framebuffer);
 
                 Materials* frmbmat = new Materials;
-                frmbmat->push(*(new Material));
+                frmbmat->pushNew();
 
                 frmbmat->name = tmp1;
                 frmbmat->textures = framebuffer->textureColorBuffers;
