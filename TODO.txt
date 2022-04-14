@@ -1,4 +1,4 @@
-1
++1
 class containing arraylist of mat4, vec4 etc and method to pass them in shader
 an object of the class should be situated in "*Object", "View", "Perspective" etc classes to pass everything to shader
 
@@ -12,7 +12,7 @@ shader constructor to parse custom shader code into glsl
 make universal *Buffer class with a template not to copypaste code
 
 !5
-move all main() loading strings to file and make loader class
++move all main() loading strings to file and make loader class
 renderer should parse .txt with loader class and then render everything in declared sequence
 
 !6
@@ -20,6 +20,7 @@ make WindowManager class from Window class and make the draw sequence for every 
 
 7
 rename some classes to fit their names (like Skybox in Cubemap)
+move every class to its header and move headers to its folders
 
 8
 add const qualifiers where it need to be
@@ -36,16 +37,16 @@ rename some GL_* definitions to own enums
 !12
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
 
-13
+13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
 
-14
+14?
 split CMakeList to compile other libraries only once
 
-15
+15?
 make counter instead of noname in object etc names
 
-16
+16?
 hide window pointers etc in *Object classes
 
 !17
@@ -65,8 +66,8 @@ also could use ShaderUniform in *Object draw function to maintain uniforms that 
 add list of user timing functions in animation
 
 !22 (9)
-for every model part fill its own material, made common material to multiuse
-remove material redaction in scene file
+for every model part fill its own material, make common material to multiuse
+add material redaction in scene file?
 
 !23
 add possibility to change current camera
@@ -74,13 +75,13 @@ add possibility to change current camera
 24?
 add user function list in renderer
 
-25
+!25
 make pose animation time user defined
 
 26 (11)
 map all opengl logic and enums to samecalled functions in its own class to make multiplatform and multiversional code
 
-add user logic hole like as in Renderer for every class
+add user logic hole like as in Renderer for every class?
 or make interface for a lot of different cases instead
 
 27
@@ -89,11 +90,12 @@ add namespaces
 28 (26)
 remove GLfloat etc where it must be just float etc
 
-!29
+!29?
 a bug in animation while movin bone, it moves according to default object position
 
-30
+!30
 pass user function in setDefaultEvents
+or which is better make Event class
 
 31?
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
@@ -102,23 +104,39 @@ split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple ti
 do something with *List, IObject and other common cases
 
 +33
-+add IShaderField interface to textures and all other classes
-+make parameters of pushToShader as fields wherever it needed
-+Shader methods should be called mostly in IShaderField childs
-?add setShaderParams method to IShaderField
+add IShaderField interface to textures and all other classes
+make parameters of pushToShader as fields wherever it needed
+Shader methods should be called mostly in IShaderField childs
+add setShaderParams method to IShaderField?
 
 !34
 remove duplicate name fields in SceneLoader and all related
 
-!35
++35
 make all IShaderField attrib in buffer like vmodel in InstancedBuffer
 
 !36?
 move load method to ILoader and use it in sceneloader
 
+37
+in case of different mesh file formats modify MeshLoader
+
+38
+make Window proxy pattern
+
+lastplan:
+move TextureList to Material
+keep tex texm texl fields in SceneLoader
+allow to set TextureList of Material from SceneLoader
+
+add MaterialLoader to parse .mtl and fill Material
+
+modify mat command of SceneLoader to load Material with MaterialLoader
+modify *obj command to set Material of *Object by name
+
+
 99?
 recorder class to render video
 
-отрисовка объектов
 класс для упрощения учёта набора переменных для ивентов
 интерфейс взаимодействия с объектами - файл с основной логикой взаимодействия

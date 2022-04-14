@@ -2,13 +2,18 @@
 
 #include <common.h>
 #include <shaderfield.h>
+#include <texture.h>
 
 class Material : public IShaderField{
 public:
-    Material(string name = "noname"){
+    Material(string matname = "noname"){
         this->name = name;
+        this->matname = matname;
     }
 
+    void setShaderParams(string name){
+        this->name = name;
+    }
     void pushToShader(Shader& s) override{
         s.setUniform3fv(name + ".ambientColor", glm::value_ptr(ambientColor));
         s.setUniform3fv(name + ".diffuseColor", glm::value_ptr(diffuseColor));
@@ -59,7 +64,14 @@ public:
         return dissolve;
     }
 
-    string name;
+    void pushTextureName(string t){
+        textureNames.push_back(t);
+    }
+    vector<string> getTextureNames(){
+        return textureNames;
+    }
+
+    string matname;
 private:
     glm::vec3 ambientColor = glm::vec3(1.f);
     glm::vec3 diffuseColor = glm::vec3(1.f);
@@ -68,9 +80,11 @@ private:
     float specularHighlights = 1.f;
     float opticalDensity = 1.f;
     float dissolve = 1.f;
-    //Texture* colorTexture;
+    vector<string> textureNames;
 };
 
-class MaterialList : public AList<Material>{
-
+class Materials : public AList<Material>{
+public:
+    TextureList* textures = new TextureList;
+    string name = "noname";
 };

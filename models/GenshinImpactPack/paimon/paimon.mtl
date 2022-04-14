@@ -1,61 +1,61 @@
 # File produced by Open Asset Import Library (http://www.assimp.sf.net)
 # (assimp v5.0.639693989)
 
-newmtl 
+newmtl a
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\脸.jpg
+map_Kd face.jpg
 
-newmtl 
+newmtl b
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\头发.jpg
+map_Kd hair.jpg
 
-newmtl 
+newmtl c
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\脸.jpg
+map_Kd face.jpg
 
-newmtl 
+newmtl d
 Kd 0.80000001 0.80000001 0.80000001
 Ka 0.60000002 0.60000002 0.60000002
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\衣服.jpg
+map_Kd body.jpg
 
-newmtl 
+newmtl e
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\衣服.jpg
+map_Kd body.jpg
 
-newmtl 
+newmtl f
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\头发.jpg
+map_Kd hair.jpg
 
-newmtl 
+newmtl g
 Kd 0.75294119 0.75294119 0.75294119
 Ka 0.75294119 0.75294119 0.75294119
 Ks 0 0 0
 d 0.80000001
 illum 1
-map_Kd Texture\披风2.jpg
+map_Kd cloak.jpg
 
 newmtl en
 Kd 1 1 1
@@ -63,5 +63,5 @@ Ka 0.5 0.5 0.5
 Ks 0 0 0
 d 1
 illum 1
-map_Kd Texture\表情.png
+map_Kd eyes.png
 

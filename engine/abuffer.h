@@ -9,7 +9,7 @@ template <class T, class U>
 class ABuffer : public IBuffer{
 public:
     ABuffer(T& m, Shader& s, string name = "noname"){
-        static_assert(std::is_base_of<AMesh<U>, T>::value, "Template parameter T must be derived from AMesh");
+        static_assert(std::is_base_of<IMesh, T>::value, "Template parameter T must be derived from IMesh");
         static_assert(std::is_base_of<IVertex, U>::value, "Template parameter U must be derived from IVertex");
 
         mesh = &m;

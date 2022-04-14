@@ -69,16 +69,25 @@ public:
         ls->setPosition(x,y,z);
         lightSources->push(*ls);
     }
-    void addNewObject(TextureList& tl, Buffer& b, MaterialList* ml, string name = "noname"){
-        Object* o = new Object(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
+    void addNewObject(Buffer& b, Materials* ml, string name = "noname"){
+        for(size_t i = 0; i < ml->list.size(); ++i){
+            ml->list.at(i)->setShaderParams("material");
+        }
+        Object* o = new Object(*window, b, *perspective, *view, *lightSources, *ml, name);
         objects->push(*o);
     }
-    void addNewSkeletonObject(TextureList& tl, SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
-        SkeletonObject* o = new SkeletonObject(*window, tl, b, *perspective, *view, *lightSources, *ml, name);
+    void addNewSkeletonObject(SkeletonBuffer& b, Materials* ml, string name = "noname"){
+        for(size_t i = 0; i < ml->list.size(); ++i){
+            ml->list.at(i)->setShaderParams("material");
+        }
+        SkeletonObject* o = new SkeletonObject(*window, b, *perspective, *view, *lightSources, *ml, name);
         skeletonObjects->push(*o);
     }
-    void addNewInstancedObject(TextureList& tl, InstancedBuffer& b, MaterialList* ml, vector<Position>& mm, string name = "noname"){
-        InstancedObject* o = new InstancedObject(*window, tl, b, *perspective, *view, *lightSources, *ml, mm, name);
+    void addNewInstancedObject(InstancedBuffer& b, Materials* ml, vector<Position>& mm, string name = "noname"){
+        for(size_t i = 0; i < ml->list.size(); ++i){
+            ml->list.at(i)->setShaderParams("material");
+        }
+        InstancedObject* o = new InstancedObject(*window, b, *perspective, *view, *lightSources, *ml, mm, name);
         instancedObjects->push(*o);
     }
     void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){

@@ -8,22 +8,23 @@
 class InstancedObject : public AObject<InstancedBuffer>{
 public:
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    Materials* materials;//move to mesh
+    TextureList* texList;
 
     vector<Position> modelMatrices;
 
     static GLuint currShaderId;
 
     //make arguments optional
-    InstancedObject(Window& w, TextureList& t,
-           InstancedBuffer& b, Perspective& p,
+    InstancedObject(Window& w, InstancedBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           MaterialList& ml, vector<Position> modelMatrices, string name = "noname")
-        : AObject(w, t, b, p, v, name)
+           Materials& ml, vector<Position> modelMatrices, string name = "noname")
+        : AObject(w, b, p, v, name)
     {
         this->modelMatrices = modelMatrices;
         lightSources = &lsl;
         materials = &ml;
+        texList = materials->textures;
 
         shaderFields.push(*view);
         shaderFields.push(*perspective);
@@ -32,6 +33,13 @@ public:
 
     void updateBufferModelMats(){
         buffer->setModelMatrices(modelMatrices);
+    }
+
+    void setTextureList(TextureList& tl){
+        texList = &tl;
+    }
+    TextureList& getTextureList(){
+        return *texList;
     }
 
     void draw(int flags = 0) override{

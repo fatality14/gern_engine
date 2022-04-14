@@ -10,22 +10,23 @@ class SkeletonObject : public AObject<SkeletonBuffer>{
 public:
     Animation* animation;
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    Materials* materials;//move to mesh
+    TextureList* texList;
 
     bool doAnimation = false;
 
     static GLuint currShaderId;
 
     //make arguments optional
-    SkeletonObject(Window& w, TextureList& t,
-           SkeletonBuffer& b, Perspective& p,
+    SkeletonObject(Window& w, SkeletonBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           MaterialList& ml, string name = "noname")
-        : AObject(w, t, b, p, v, name)
+           Materials& ml, string name = "noname")
+        : AObject(w, b, p, v, name)
     {
         animation = new Animation(buffer->getMesh().joints);
         lightSources = &lsl;
         materials = &ml;
+        texList = materials->textures;
 
         shaderFields.push(buffer->getMesh().joints);
         shaderFields.push(*position);

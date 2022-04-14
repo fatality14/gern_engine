@@ -9,20 +9,6 @@ shad shaders\\skybox_vertex.vsh shaders\\skybox_fragment.fsh skybox
 shad shaders\\screen_vertex.vsh shaders\\screen_fragment.fsh screen
 shad shaders\\skeleton_obj_vertex.vsh shaders\\skeleton_obj_fragment.fsh skeleton
 shad shaders\\instanced_obj_vertex.vsh shaders\\instanced_obj_fragment.fsh instanced
-tex tex
-texm models\\GenshinImpactPack\\paimon\\Texture\\body.jpg
-texm models\\GenshinImpactPack\\paimon\\Texture\\face.jpg
-texm models\\GenshinImpactPack\\paimon\\Texture\\hair.jpg
-texm models\\GenshinImpactPack\\paimon\\Texture\\eyes.png
-texm models\\GenshinImpactPack\\paimon\\Texture\\cloak.jpg
-texl 0 0 1 texture0
-texl 1 0 2 texture0
-texl 2 0 1 texture0
-texl 3 0 0 texture0
-texl 4 0 0 texture0
-texl 5 0 2 texture0
-texl 6 0 4 texture0
-texl 7 0 0 texture0
 tex blank
 texm pictures\\blank.png
 texl 0 0 0 texture0
@@ -31,15 +17,15 @@ meshbuf quad screen quad
 meshbuf sphere default sphere
 sklbuf paimon skeleton paimonskl
 instbuf paimon instanced paimoninst
-mat
+mat models\\GenshinImpactPack\\paimon\\paimon.mtl models\\GenshinImpactPack\\paimon\\Texture paimonmat
 light 0 0 2 lightPos0
 frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0
 meshobj blank sphere sphere
 scale 0.01 0.01 0.01
-sklobj tex paimonskl 1 paimon models\\GenshinImpactPack\\paimon\\paimon.anm 3
-instobj tex paimoninst 1 1 paimon
+sklobj paimonmat paimonskl 1 paimon models\\GenshinImpactPack\\paimon\\paimon.anm 3
+instobj paimonmat paimoninst 1 1 paimon
 skybox skybox\\right.jpg skybox\\left.jpg skybox\\top.jpg skybox\\bottom.jpg skybox\\front.jpg skybox\\back.jpg
 scale 10 10 10
 bckcol 0.5 0 0 0.99

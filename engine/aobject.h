@@ -7,6 +7,7 @@
 #include <shaderfield.h>
 #include <position.h>
 #include <texture.h>
+#include <buffer.h>
 
 class IObject : public ICommon{
 public:
@@ -18,7 +19,6 @@ template <class T>
 class AObject : public IObject{
 public:
     Window* window;
-    TextureList* texList;//move to mesh? or use in MaterialList
     T* buffer;
     Shader* shader;//shader same as in buffer
     Position* position;
@@ -31,10 +31,11 @@ public:
     GLuint drawmode = GL_TRIANGLES;
 
     //make arguments optional
-    AObject(Window& w, TextureList& t,
-           T& b, Perspective& p,
+    AObject(Window& w, T& b, Perspective& p,
            View& v, string name = "noname")
     {
+        static_assert(std::is_base_of<IBuffer, T>::value, "Template parameter T must be derived from IBuffer");
+
         if(w.getWindowPtr() != p.__getWindowPtr() || p.__getWindowPtr() != v.__getWindowPtr()){
             cout << "Perspective and view passed in \"Object\" constructor must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";
@@ -42,7 +43,6 @@ public:
         }
 
         window = &w;
-        texList = &t;
         buffer = &b;
         shader = &buffer->getShaderPtr();
         perspective = &p;
@@ -64,12 +64,6 @@ public:
 
     virtual void draw(int flags = 0) = 0;
 
-    void setTextureList(TextureList& tl){
-        texList = &tl;
-    }
-    TextureList& getTextureList(){
-        return *texList;
-    }
     const string& getDrawMeshName(){
         return buffer->getMeshName();
     }

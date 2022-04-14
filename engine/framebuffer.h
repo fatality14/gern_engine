@@ -27,7 +27,7 @@ public:
         glGenRenderbuffers(1, &RBO);
     }
     ~Framebuffer(){
-        delete textureColorBuffers;
+        delete textureColorBuffers;//a bug if someone takes TextureList control and clear it
         glDeleteBuffers(1, &FBO);
         glDeleteBuffers(1, &RBO);
     }

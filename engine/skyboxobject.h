@@ -9,13 +9,10 @@ class SkyboxObject : public AObject<Buffer>{
 public:
     SkyboxTexture* skyboxTexture;
 
-
-    TextureList tl;//remove this later
-
     SkyboxObject(Window& w, SkyboxTexture& st,
                  Buffer& b, Perspective& p,
                  View& v, string name = "noname")
-        : AObject(w, tl, b, p, v, name)
+        : AObject(w, b, p, v, name)
     {
         skyboxTexture = &st;
 

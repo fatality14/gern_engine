@@ -34,7 +34,7 @@ vec3 calcDiffuseLightVec(in vec3 lightPosition, in vec3 color){
     //cos between normal and from light to pos vec
     float diffuseAngle = dot(posToLightDirVec, normalize(vs_normal));
     //vec of three coefs
-    return color * diffuseAngle;
+    return 0.3f * color * diffuseAngle;
 }
 vec3 calcSpecularLightVec(in vec3 lightPosition, in vec3 color, in float specularHighlights, in sampler2D tex){
     //vec from light to pos

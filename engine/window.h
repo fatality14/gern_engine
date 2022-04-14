@@ -13,7 +13,7 @@ public:
     GLenum pmFace;
     GLenum pmMode;
 
-    string windowName;
+    string name;
 
     static bool isWindowInit;
 
@@ -29,7 +29,7 @@ public:
         fbHeight = height;
         this->pmFace = pmFace;
         this->pmMode = pmMode;
-        this->windowName = windowName;
+        this->name = windowName;
 
         isWindowInit = true;
         initGLFW();
@@ -68,7 +68,7 @@ private:
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     }
     void initWindowData(){
-        window = glfwCreateWindow(width, height, windowName.data(), NULL, NULL);
+        window = glfwCreateWindow(width, height, name.data(), NULL, NULL);
 
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
         glfwGetFramebufferSize(window, &fbWidth, &fbHeight);

@@ -11,27 +11,13 @@ public:
         : ABuffer(m, s, name),
           vmodel("model", 4, 0, 1)
     {
-        shaderfields.push(*vpos);
-        shaderfields.push(*vtex);
-        shaderfields.push(*vnorm);
+        shaderfields.push(vpos);
+        shaderfields.push(vtex);
+        shaderfields.push(vnorm);
     }
     ~InstancedBuffer(){
-        delete vpos;
-        delete vtex;
-        delete vnorm;
         glDeleteBuffers(1, &VBO1);
     }
-    IShaderField* vpos = new ShaderAttrib<GLfloat, Vertex>(
-                "vertex_position", 3,
-                offsetof(Vertex, position));
-
-    IShaderField* vtex = new ShaderAttrib<GLfloat, Vertex>(
-                "vertex_texcoord", 2,
-                offsetof(Vertex, texcoord));
-
-    IShaderField* vnorm = new ShaderAttrib<GLfloat, Vertex>(
-                "vertex_normal", 3,
-                offsetof(Vertex, normal));
 
     void setModelMatrices(vector<Position>& modelMatrices){
         this->modelMatrices.clear();
@@ -72,4 +58,16 @@ private:
     GLuint VBO1;
     vector<glm::mat4> modelMatrices;
     ShaderMatAttrib<glm::mat4> vmodel;
+
+    ShaderAttrib<GLfloat, Vertex> vpos = ShaderAttrib<GLfloat, Vertex>(
+                "vertex_position", 3,
+                offsetof(Vertex, position));
+
+    ShaderAttrib<GLfloat, Vertex> vtex = ShaderAttrib<GLfloat, Vertex>(
+                "vertex_texcoord", 2,
+                offsetof(Vertex, texcoord));
+
+    ShaderAttrib<GLfloat, Vertex> vnorm = ShaderAttrib<GLfloat, Vertex>(
+                "vertex_normal", 3,
+                offsetof(Vertex, normal));
 };

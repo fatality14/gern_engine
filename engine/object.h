@@ -8,21 +8,29 @@
 class Object : public AObject<Buffer>{
 public:
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    Materials* materials;//move to mesh
+    TextureList* texList;
 
     //make arguments optional
-    Object(Window& w, TextureList& t,
-           Buffer& b, Perspective& p,
+    Object(Window& w, Buffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           MaterialList& ml, string name = "noname")
-        : AObject(w, t, b, p, v, name)
+           Materials& ml, string name = "noname")
+        : AObject(w, b, p, v, name)
     {
         lightSources = &lsl;
         materials = &ml;
+        texList = materials->textures;
 
         shaderFields.push(*position);
         shaderFields.push(*perspective);
         shaderFields.push(*view);
+    }
+
+    void setTextureList(TextureList& tl){
+        texList = &tl;
+    }
+    TextureList& getTextureList(){
+        return *texList;
     }
 
     void draw(int flags = 0) override{

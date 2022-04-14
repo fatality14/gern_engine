@@ -7,6 +7,10 @@
 #include <skeletonobject.h>
 #include <skeletizer.h>
 #include <instancedobject.h>
+#include <materialloader.h>
+
+#include <unordered_set>
+#include <unordered_map>
 
 class SceneLoader : private ALoader{
 public:
@@ -20,8 +24,11 @@ public:
         for(size_t i = 0; i < instBuffers.size(); ++i){
             delete instBuffers[i];
         }
-        for(size_t i = 0; i < texes.size(); ++i){
-            delete texes[i];
+//        for(size_t i = 0; i < texes.size(); ++i){
+//            delete texes[i];
+//        }
+        for(size_t i = 0; i < materialLists.size(); ++i){
+            delete materialLists[i];
         }
     }
 
@@ -68,30 +75,6 @@ public:
                 //vertex, fragment, name
                 shaders.pushNew(tmp1, tmp2, tmp3);
             }
-            if(token == "tex"){
-                texes.push_back(new TextureList(line));
-            }
-            if(token == "texm"){
-                texes.at(texes.size()-1)->loadNew(cwd + line);
-            }
-            if(token == "texl"){
-                texes.at(texes.size()-1)->addLayouts(1);
-
-                itmp1 = stoi(bite(" ", line, end));
-                itmp2 = stoi(bite(" ", line, end));
-                itmp3 = stoi(bite(" ", line, end));
-                tmp1 = bite(" ", line, end);
-
-                texes.at(texes.size()-1)->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
-                /*bool end;
-
-                while (true){
-                    token = bite(" ", line, end);
-                    keyPoses.at(pAmount).ids.push_back(stoi(token));
-                    if(end)
-                        break;
-                }*/
-            }
             if(token == "meshbuf"){
                 tmp1 = bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
@@ -113,13 +96,61 @@ public:
                 instBuffers.push_back(new InstancedBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
                 instBuffers.at(instBuffers.size() - 1)->genBuffers();
             }
-            if(token == "mat"){
-                //TODO: replace this with good code
-                Material* mat = new Material("material");
-                mat->setAmbientColor(0.01f,0.01f,0.01f);
-                mat->setSpecularHighlights(20);
 
-                materials.push(*mat);
+//            fix it in the same way as framebuffers
+            if(token == "tex"){
+                Materials* texbmat = new Materials;
+                texbmat->push(*(new Material));
+                texbmat->name = line;
+
+                materialLists.push_back(texbmat);
+            }
+            if(token == "texm"){
+                materialLists.at(materialLists.size()-1)->textures->loadNew(cwd + line);
+            }
+            if(token == "texl"){
+                materialLists.at(materialLists.size()-1)->textures->addLayouts(1);
+
+                itmp1 = stoi(bite(" ", line, end));
+                itmp2 = stoi(bite(" ", line, end));
+                itmp3 = stoi(bite(" ", line, end));
+                tmp1 = bite(" ", line, end);
+
+                materialLists.at(materialLists.size()-1)->textures->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
+            }
+
+            //fix to use other textures than map_Kd
+            if(token == "mat"){
+                tmp1 = cwd + bite(" ", line, end);
+                tmp2 = bite(" ", line, end);
+                tmp3 = bite(" ", line, end);
+
+                materialLoader.load(tmp1);
+                Materials* materials = materialLoader.list;
+                TextureList* textures = materials->textures;
+
+                textures->addLayouts(materials->size());//gen layout for each material
+
+                unordered_set<string> loaded;
+                unordered_map<string, size_t> ids;
+                size_t idCounter = 0;
+                for(size_t i = 0; i < materials->size(); ++i){//for every material
+                    string texName = materials->at(i)->getTextureNames().at(0);//texture name
+                    if(loaded.count(texName) == 0){//if not loaded
+                        textures->loadNew(cwd + tmp2 + "\\\\" + texName);//load by path
+                        loaded.emplace(texName);//mark loaded
+                        ids.emplace(pair(texName, idCounter));//map name to id in TextureList
+                        ++idCounter;
+                    }
+                }
+
+                for(size_t i = 0; i < materials->size(); ++i){
+                    string texName = materials->at(i)->getTextureNames().at(0);//texture name
+                    textures->appendTextureToLayout(i, 0, ids.at(texName), "texture0");
+                }
+
+                materials->name = tmp3;
+                materialLists.push_back(materials);
             }
             if(token == "light"){
                 float x = stof(bite(" ", line, end));
@@ -140,7 +171,12 @@ public:
                 framebuffer->genTextureColorBuffers(itmp3);
                 renderer.addFramebuffer(*framebuffer);
 
-                texes.push_back(framebuffer->textureColorBuffers);
+                Materials* frmbmat = new Materials;
+                frmbmat->push(*(new Material));
+
+                frmbmat->name = tmp1;
+                frmbmat->textures = framebuffer->textureColorBuffers;
+                materialLists.push_back(frmbmat);
             }
             if(token == "move"){
                 float x = stof(bite(" ", line, end));
@@ -187,7 +223,6 @@ public:
                     lastSkybox->rotateTo(x,y,z);
                 }
             }
-
             if(token == "meshobj"){
                 tmp1 = bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
@@ -196,8 +231,15 @@ public:
 
                 size_t which1 = 0, which2 = 0;
 
-                for(size_t i = 0; i < texes.size(); ++i){
-                    if(texes.at(i)->name == tmp1){
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+                for(size_t i = 0; i < materialLists.size(); ++i){
+                    if(materialLists.at(i)->name == tmp1){
                         which1 = i;
                         break;
                     }
@@ -209,8 +251,9 @@ public:
                         break;
                     }
                 }
-
-                renderer.addNewObject(*texes.at(which1), *meshBuffers.at(which2), &materials, tmp4);
+                //remove textures from addNewObject cause it moved it Materials
+                renderer.addNewObject(*meshBuffers.at(which2),
+                                      materialLists.at(which1), tmp4);
                 lastMeshObj = renderer.getObjectByName(tmp4);
                 lastSklObj = nullptr;
                 lastSkybox = nullptr;
@@ -225,12 +268,20 @@ public:
 
                 size_t which1 = 0, which2 = 0;
 
-                for(size_t i = 0; i < texes.size(); ++i){
-                    if(texes.at(i)->name == tmp1){
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+                for(size_t i = 0; i < materialLists.size(); ++i){
+                    if(materialLists.at(i)->name == tmp1){
                         which1 = i;
                         break;
                     }
                 }
+
 
                 for(size_t i = 0; i < sklBuffers.size(); ++i){
                     if(sklBuffers.at(i)->name == tmp2){
@@ -239,7 +290,8 @@ public:
                     }
                 }
 
-                renderer.addNewSkeletonObject(*texes.at(which1), *sklBuffers.at(which2), &materials, tmp4);
+                renderer.addNewSkeletonObject(*sklBuffers.at(which2),
+                                              materialLists.at(which1), tmp4);
                 renderer.getSkeletonObjectByName(tmp4)->setAnimation(tmp5, itmp1);
                 renderer.getSkeletonObjectByName(tmp4)->startAnimation();
                 lastSklObj = renderer.getSkeletonObjectByName(tmp4);
@@ -255,8 +307,15 @@ public:
 
                 size_t which1 = 0, which2 = 0;
 
-                for(size_t i = 0; i < texes.size(); ++i){
-                    if(texes.at(i)->name == tmp1){
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+                for(size_t i = 0; i < materialLists.size(); ++i){
+                    if(materialLists.at(i)->name == tmp1){
                         which1 = i;
                         break;
                     }
@@ -282,7 +341,7 @@ public:
                     angle += shift;
                 }
 
-                renderer.addNewInstancedObject(*texes.at(which1), *instBuffers.at(which2), &materials, poses, tmp5);
+                renderer.addNewInstancedObject(*instBuffers.at(which2), materialLists.at(which1), poses, tmp5);
             }
             if(token == "skybox"){
                 vector<string> skyboxSides;
@@ -327,9 +386,9 @@ private:
     MeshList meshList;
     SkeletonMeshList skeletonList;
     Skeletizer skeletizer;
+    MaterialLoader materialLoader;
     ShaderList shaders;
-    vector<TextureList*> texes;
-    MaterialList materials;
+    vector<Materials*> materialLists;
 
     Object* lastMeshObj;
     SkeletonObject* lastSklObj;
