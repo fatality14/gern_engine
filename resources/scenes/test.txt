@@ -1,5 +1,5 @@
 cwd C:\\Users\\\1234\\\Documents\\qtprojs\\ogl\\
-mesh resources\\models\\skybox.obj skybox
+mesh resources\\models\\box.obj skybox
 mesh resources\\models\\quad.obj quad
 mesh resources\\models\\sphere.obj sphere
 mesh resources\\models\\GenshinImpactPack\\paimon\\paimon.obj paimon

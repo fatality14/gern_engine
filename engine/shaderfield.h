@@ -94,7 +94,7 @@ public:
         owndestructor = true;
     }
     ~ShaderFieldList(){
-
+        //...
     }
 
     void pushToShader(Shader& shader){

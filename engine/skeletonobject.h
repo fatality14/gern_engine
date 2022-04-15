@@ -10,7 +10,7 @@ class SkeletonObject : public AObject<SkeletonBuffer>{
 public:
     Animation* animation;
     LightSourceList* lightSources;
-    Materials* materials;//move to mesh
+    MaterialList* materials;//move to mesh
     TextureList* texList;
 
     bool doAnimation = false;
@@ -20,7 +20,7 @@ public:
     //make arguments optional
     SkeletonObject(Window& w, SkeletonBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           Materials& ml, string name = "noname")
+           MaterialList& ml, string name = "noname")
         : AObject(w, b, p, v, name)
     {
         animation = new Animation(buffer->getMesh().joints);

@@ -5,7 +5,7 @@
 #include <renderer.h>
 #include <meshloader.h>
 #include <skeletonobject.h>
-#include <skeletizer.h>
+#include <skeletonloader.h>
 #include <instancedobject.h>
 #include <materialloader.h>
 
@@ -76,7 +76,7 @@ public:
                 tmp1 = bite(" ", line, end);
                 tmp2 = bite(" ", line, end);
                 tmp3 = bite(" ", line, end);
-                meshBuffers.push_back(new Buffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
+                meshBuffers.push_back(new MeshBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
                 meshBuffers.at(meshBuffers.size() - 1)->genBuffers();
             }
             if(token == "sklbuf"){
@@ -94,7 +94,7 @@ public:
                 instBuffers.at(instBuffers.size() - 1)->genBuffers();
             }
             if(token == "tex"){
-                Materials* texbmat = new Materials;
+                MaterialList* texbmat = new MaterialList;
                 texbmat->pushNew();
                 texbmat->name = line;
 
@@ -121,7 +121,7 @@ public:
                 tmp3 = bite(" ", line, end);
 
                 materialLoader.load(tmp1);
-                Materials* materials = materialLoader.list;
+                MaterialList* materials = materialLoader.list;
                 TextureList* textures = materials->textures;
 
                 textures->addLayouts(materials->size());//gen layout for each material
@@ -166,7 +166,7 @@ public:
                 framebuffer->genTextureColorBuffers(itmp3);
                 renderer.addFramebuffer(*framebuffer);
 
-                Materials* frmbmat = new Materials;
+                MaterialList* frmbmat = new MaterialList;
                 frmbmat->pushNew();
 
                 frmbmat->name = tmp1;
@@ -247,7 +247,7 @@ public:
                     }
                 }
                 //remove textures from addNewObject cause it moved it Materials
-                renderer.addNewObject(*meshBuffers.at(which2),
+                renderer.addNewMeshObject(*meshBuffers.at(which2),
                                       materialLists.at(which1), tmp4);
                 lastMeshObj = renderer.getObjectByName(tmp4);
                 lastSklObj = nullptr;
@@ -380,16 +380,16 @@ private:
     MeshLoader meshLoader;
     MeshList meshList;
     SkeletonMeshList skeletonList;
-    Skeletizer skeletizer;
+    SkeletonLoader skeletizer;
     MaterialLoader materialLoader;
     ShaderList shaders;
-    vector<Materials*> materialLists;
+    vector<MaterialList*> materialLists;
 
-    Object* lastMeshObj;
+    MeshObject* lastMeshObj;
     SkeletonObject* lastSklObj;
     SkyboxObject* lastSkybox;
 
-    vector<Buffer*> meshBuffers;
+    vector<MeshBuffer*> meshBuffers;
     vector<SkeletonBuffer*> sklBuffers;
     vector<InstancedBuffer*> instBuffers;
 };

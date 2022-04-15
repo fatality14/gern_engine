@@ -48,14 +48,14 @@ use precompile headers
 15
 make counter instead of noname in object etc names
 
-16?
+16
 hide window pointers etc in *Object classes
 
-!17
+17
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
 or just let texture hot change
 
-!18
+18
 catch if exceed index of vectors
 
 +19
@@ -68,17 +68,17 @@ also could use ShaderUniform in *Object draw function to maintain uniforms that 
 21
 add list of user timing functions in animation
 
-!22 (9)
++22 (9)
 for every model part fill its own material, make common material to multiuse
 add material redaction in scene file?
 
-!23
+23
 add possibility to change current camera
 
 24?
 add user function list in renderer
 
-!25
+25
 make pose animation time user defined
 
 26 (11)
@@ -93,7 +93,7 @@ add namespaces
 28 (26)
 remove GLfloat etc where it must be just float etc
 
-!29?
+29?
 a bug in animation while movin bone, it moves according to default object position
 
 !30
@@ -114,11 +114,12 @@ add setShaderParams method to IShaderField?
 
 !34
 remove duplicate name fields in SceneLoader and all related
+names should be splitted from shader fields?
 
 +35
 make all IShaderField attrib in buffer like vmodel in InstancedBuffer
 
-!36?
+36?
 move load method to ILoader and use it in sceneloader
 
 37
@@ -131,7 +132,7 @@ make Window proxy pattern
 make AnimationList and all related
 
 lastplan:
-17
+30, 32
 
 
 99?

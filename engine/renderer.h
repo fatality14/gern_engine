@@ -4,7 +4,7 @@
 #include <window.h>
 #include <view.h>
 #include <perspective.h>
-#include <buffer.h>
+#include <meshbuffer.h>
 #include <shader.h>
 #include <position.h>
 #include <texture.h>
@@ -12,7 +12,7 @@
 #include <material.h>
 #include <skyboxobject.h>
 #include <framebuffer.h>
-#include <object.h>
+#include <meshobject.h>
 #include <skeletonobject.h>
 #include <instancedobject.h>
 
@@ -25,7 +25,7 @@ public:
     MouseListener* mouse;
     CameraList* camList;//void addCamera
     SkyboxList* skyboxes;
-    Objects* objects;
+    MeshObjectList* meshObjects;
     SkeletonObjects* skeletonObjects;
     InstancedObjects* instancedObjects;
     FramebufferList* framebuffers;
@@ -41,7 +41,7 @@ public:
         camList->push(*(new Camera("default")));
         camList->at(0)->location.z += 3;
         view = new View(*window, *mouse, *camList->at(0));
-        objects = new Objects;
+        meshObjects = new MeshObjectList;
         skeletonObjects = new SkeletonObjects;
         instancedObjects = new InstancedObjects;
         skyboxes = new SkyboxList;
@@ -58,7 +58,7 @@ public:
         delete mouse;
         delete camList;
         delete skyboxes;
-        delete objects;
+        delete meshObjects;
         delete skeletonObjects;
         delete instancedObjects;
         delete window;
@@ -70,28 +70,28 @@ public:
         ls->setPosition(x,y,z);
         lightSources->push(*ls);
     }
-    void addNewObject(Buffer& b, Materials* ml, string name = "noname"){
+    void addNewMeshObject(MeshBuffer& b, MaterialList* ml, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
-        Object* o = new Object(*window, b, *perspective, *view, *lightSources, *ml, name);
-        objects->push(*o);
+        MeshObject* o = new MeshObject(*window, b, *perspective, *view, *lightSources, *ml, name);
+        meshObjects->push(*o);
     }
-    void addNewSkeletonObject(SkeletonBuffer& b, Materials* ml, string name = "noname"){
+    void addNewSkeletonObject(SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
         SkeletonObject* o = new SkeletonObject(*window, b, *perspective, *view, *lightSources, *ml, name);
         skeletonObjects->push(*o);
     }
-    void addNewInstancedObject(InstancedBuffer& b, Materials* ml, vector<Position>& mm, string name = "noname"){
+    void addNewInstancedObject(InstancedBuffer& b, MaterialList* ml, vector<Position>& mm, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
         InstancedObject* o = new InstancedObject(*window, b, *perspective, *view, *lightSources, *ml, mm, name);
         instancedObjects->push(*o);
     }
-    void addNewSkybox(vector<string> facePaths, Buffer& b, string name = "noname"){
+    void addNewSkybox(vector<string> facePaths, MeshBuffer& b, string name = "noname"){
         SkyboxTexture* st = new SkyboxTexture(facePaths);
         st->setShaderParams(0, "skybox");
         SkyboxObject* so = new SkyboxObject(*window, *st, b, *perspective, *view, name);
@@ -101,17 +101,17 @@ public:
         framebuffers->push(fb);
     }
 
-    Object* getObjectByIndex(size_t index){
-        return objects->at(index);
+    MeshObject* getObjectByIndex(size_t index){
+        return meshObjects->at(index);
     }
-    Object* getObjectByName(string name){
-        return objects->getByName(name);
+    MeshObject* getObjectByName(string name){
+        return meshObjects->getByName(name);
     }
     void popObjectByIndex(size_t index){
-        objects->popByIndex(index);
+        meshObjects->popByIndex(index);
     }
     void popObjectByName(string name){
-        objects->popByName(name);
+        meshObjects->popByName(name);
     }
 
     SkeletonObject* getSkeletonObjectByIndex(size_t index){
@@ -205,7 +205,7 @@ public:
                 break;
             }
 
-            Object::currShaderId = -1;
+            MeshObject::currShaderId = -1;
             SkeletonObject::currShaderId = -1;
             InstancedObject::currShaderId = -1;
             SkyboxObject::currShaderId = -1;

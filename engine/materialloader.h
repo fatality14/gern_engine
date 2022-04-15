@@ -5,10 +5,10 @@
 
 class MaterialLoader : private ALoader{
 public:
-    Materials* list;
+    MaterialList* list;
 
     void load(string path){
-        list = new Materials;
+        list = new MaterialList;
 
         ifstream f;
         f.open(path);

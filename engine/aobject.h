@@ -7,7 +7,7 @@
 #include <shaderfield.h>
 #include <position.h>
 #include <texture.h>
-#include <buffer.h>
+#include <meshbuffer.h>
 
 class IObject : public ICommon{
 public:
@@ -103,4 +103,8 @@ public:
     void scaleTo(glm::vec3 scale){
         position->scaleTo(scale);
     }
+};
+
+class IObjectList : public AList<IObject>{
+
 };

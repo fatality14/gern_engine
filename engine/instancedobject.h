@@ -8,7 +8,7 @@
 class InstancedObject : public AObject<InstancedBuffer>{
 public:
     LightSourceList* lightSources;
-    Materials* materials;//move to mesh
+    MaterialList* materials;//move to mesh
     TextureList* texList;
 
     vector<Position> modelMatrices;
@@ -18,7 +18,7 @@ public:
     //make arguments optional
     InstancedObject(Window& w, InstancedBuffer& b, Perspective& p,
            View& v, LightSourceList& lsl,
-           Materials& ml, vector<Position> modelMatrices, string name = "noname")
+           MaterialList& ml, vector<Position> modelMatrices, string name = "noname")
         : AObject(w, b, p, v, name)
     {
         this->modelMatrices = modelMatrices;

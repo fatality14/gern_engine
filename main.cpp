@@ -2,7 +2,7 @@
 #include <renderer.h>
 #include <meshloader.h>
 #include <skeletonobject.h>
-#include <skeletizer.h>
+#include <skeletonloader.h>
 #include <shaderfield.h>
 #include <instancedobject.h>
 #include <sceneloader.h>
@@ -13,7 +13,7 @@ int amount = 2;
 bool once = true;
 
 void drawFrame(Renderer& r){
-    static Object* currObj;
+    static MeshObject* currObj;
     static SkeletonObject* currSklObj;
     static InstancedObject* currInstObj;
     ///////////////////////////////
@@ -21,8 +21,8 @@ void drawFrame(Renderer& r){
     //move that in draw function
     //it is needed to delete light pointer here
     if(once){
-        for(size_t i = 0; i < r.objects->size(); ++i){
-            currObj = r.objects->at(i);
+        for(size_t i = 0; i < r.meshObjects->size(); ++i){
+            currObj = r.meshObjects->at(i);
             currObj->shaderFields.push(*currObj->lightSources->at(0));
         }
         for(size_t i = 0; i < r.skeletonObjects->size(); ++i){

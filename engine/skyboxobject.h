@@ -1,16 +1,16 @@
 #pragma once
 
 #include <aobject.h>
-#include <buffer.h>
+#include <meshbuffer.h>
 #include <skyboxtexture.h>
 #include <texture.h>
 
-class SkyboxObject : public AObject<Buffer>{
+class SkyboxObject : public AObject<MeshBuffer>{
 public:
     SkyboxTexture* skyboxTexture;
 
     SkyboxObject(Window& w, SkyboxTexture& st,
-                 Buffer& b, Perspective& p,
+                 MeshBuffer& b, Perspective& p,
                  View& v, string name = "noname")
         : AObject(w, b, p, v, name)
     {
