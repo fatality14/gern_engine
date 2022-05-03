@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
+//must be inheritable to support IFrameModel of Renderer
 class SceneLoader : private ALoader{
 public:
     ~SceneLoader(){
@@ -154,7 +155,7 @@ public:
                 tmp1 = bite(" ", line, end);
 
                 //x,y,z,name
-                renderer.addNewLightSource(x, y, z, tmp1);
+                renderer.model->addNewLightSource(x, y, z, tmp1);
             }
             if(token == "frmb"){
                 itmp1 = stoi(bite(" ", line, end));
@@ -164,7 +165,7 @@ public:
 
                 Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
                 framebuffer->genTextureColorBuffers(itmp3);
-                renderer.addFramebuffer(*framebuffer);
+                renderer.model->addFramebuffer(*framebuffer);
 
                 MaterialList* frmbmat = new MaterialList;
                 frmbmat->pushNew();
@@ -247,9 +248,9 @@ public:
                     }
                 }
                 //remove textures from addNewObject cause it moved it Materials
-                renderer.addNewMeshObject(*meshBuffers.at(which2),
+                renderer.model->addNewObject(*meshBuffers.at(which2),
                                       materialLists.at(which1), tmp4);
-                lastMeshObj = renderer.getObjectByName(tmp4);
+                lastMeshObj = renderer.model->getMeshObject(tmp4);
                 lastSklObj = nullptr;
                 lastSkybox = nullptr;
             }
@@ -285,11 +286,12 @@ public:
                     }
                 }
 
-                renderer.addNewSkeletonObject(*sklBuffers.at(which2),
+                renderer.model->addNewObject(*sklBuffers.at(which2),
                                               materialLists.at(which1), tmp4);
-                renderer.getSkeletonObjectByName(tmp4)->setAnimation(tmp5, itmp1);
-                renderer.getSkeletonObjectByName(tmp4)->startAnimation();
-                lastSklObj = renderer.getSkeletonObjectByName(tmp4);
+                renderer.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, itmp1, tmp5);//add name instead of last arg
+                renderer.model->getSkeletonObject(tmp4)->setCurrAnimation(tmp5);
+                renderer.model->getSkeletonObject(tmp4)->startAnimation();
+                lastSklObj = renderer.model->getSkeletonObject(tmp4);
                 lastMeshObj = nullptr;
                 lastSkybox = nullptr;
             }
@@ -336,7 +338,7 @@ public:
                     angle += shift;
                 }
 
-                renderer.addNewInstancedObject(*instBuffers.at(which2), materialLists.at(which1), poses, tmp5);
+                renderer.model->addNewObject(*instBuffers.at(which2), materialLists.at(which1), poses, tmp5);
             }
             if(token == "skybox"){
                 vector<string> skyboxSides;
@@ -358,9 +360,9 @@ public:
                     }
                 }
 
-                renderer.addNewSkybox(skyboxSides, *meshBuffers.at(which), tmp4);
+                renderer.model->addNewSkybox(skyboxSides, *meshBuffers.at(which), tmp4);
 
-                lastSkybox = renderer.getSkyboxObjectByName(tmp4);
+                lastSkybox = renderer.model->getSkyboxObject(tmp4);
                 lastSklObj = nullptr;
                 lastMeshObj = nullptr;
             }

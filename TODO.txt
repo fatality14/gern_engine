@@ -5,7 +5,7 @@ an object of the class should be situated in "*Object", "View", "Perspective" et
 2
 use "InstancedObject" to create custom particle system class
 
-3
+3?
 shader constructor to parse custom shader code into glsl
 
 +4
@@ -131,8 +131,20 @@ make Window proxy pattern
 !39
 make AnimationList and all related
 
+40
+add load check for all loaders to debug if something goes wrong
+
+41
+test object draw in multithreading, might be bad for texture unit sequence
+
+!42
+SceneLoader must have addable modules like as Renderer
+
 lastplan:
-30, 32
+reorganize renderer for gui and other modules
+might make it inheritable to overload draw function
+might choose what modules to use (objects with no materials, no animations etc)
+ADD GUIOBJECT CLASS
 
 
 99?

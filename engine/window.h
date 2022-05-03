@@ -60,7 +60,11 @@ private:
     GLFWwindow* window;
 
     void initGLFW(){
-        glfwInit();
+        if (!glfwInit())
+        {
+            cout << "Cannot initialize glfw" << endl;
+            glfwTerminate();
+        }
 
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -80,7 +84,7 @@ private:
         //init glew
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK){
-            cout << "Im dead" << endl;
+            cout << "Cannot initialize glew" << endl;
             glfwTerminate();
         }
 

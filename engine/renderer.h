@@ -16,7 +16,19 @@
 #include <skeletonobject.h>
 #include <instancedobject.h>
 
-class Renderer{
+class IFrameModel{};
+
+template<class T>
+class IFrameController{
+public:
+    IFrameController(){
+        static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
+    }
+    void frameFunction(T& data);
+};
+
+//move to another file like as FrameController
+class FrameModel : public IFrameModel{
 public:
     //add methods to change exact shader: push uniform to or else
     Window* window;
@@ -33,14 +45,14 @@ public:
 
     float r, g, b, a;
 
-    Renderer(int windowWidth, int windowHeight){
-        window = new Window(windowWidth, windowHeight);
-        perspective = new Perspective(*window);
-        mouse = new MouseListener(*window);
+    FrameModel(Window& window){
+        this->window = &window;
+        perspective = new Perspective(*this->window);
+        mouse = new MouseListener(*this->window);
         camList = new CameraList();
         camList->push(*(new Camera("default")));
         camList->at(0)->location.z += 3;
-        view = new View(*window, *mouse, *camList->at(0));
+        view = new View(*this->window, *mouse, *camList->at(0));
         meshObjects = new MeshObjectList;
         skeletonObjects = new SkeletonObjects;
         instancedObjects = new InstancedObjects;
@@ -52,7 +64,7 @@ public:
         view->selfPushable = false;
         view->setShaderParams("viewMatrix", "cameraPos");
     }
-    ~Renderer(){
+    ~FrameModel(){
         delete perspective;
         delete view;
         delete mouse;
@@ -61,7 +73,6 @@ public:
         delete meshObjects;
         delete skeletonObjects;
         delete instancedObjects;
-        delete window;
     }
 
     //make arguments optional
@@ -70,21 +81,21 @@ public:
         ls->setPosition(x,y,z);
         lightSources->push(*ls);
     }
-    void addNewMeshObject(MeshBuffer& b, MaterialList* ml, string name = "noname"){
+    void addNewObject(MeshBuffer& b, MaterialList* ml, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
         MeshObject* o = new MeshObject(*window, b, *perspective, *view, *lightSources, *ml, name);
         meshObjects->push(*o);
     }
-    void addNewSkeletonObject(SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
+    void addNewObject(SkeletonBuffer& b, MaterialList* ml, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
         SkeletonObject* o = new SkeletonObject(*window, b, *perspective, *view, *lightSources, *ml, name);
         skeletonObjects->push(*o);
     }
-    void addNewInstancedObject(InstancedBuffer& b, MaterialList* ml, vector<Position>& mm, string name = "noname"){
+    void addNewObject(InstancedBuffer& b, MaterialList* ml, vector<Position>& mm, string name = "noname"){
         for(size_t i = 0; i < ml->list.size(); ++i){
             ml->list.at(i)->setShaderParams("material");
         }
@@ -101,76 +112,76 @@ public:
         framebuffers->push(fb);
     }
 
-    MeshObject* getObjectByIndex(size_t index){
+    MeshObject* getMeshObject(size_t index){
         return meshObjects->at(index);
     }
-    MeshObject* getObjectByName(string name){
+    MeshObject* getMeshObject(string name){
         return meshObjects->getByName(name);
     }
-    void popObjectByIndex(size_t index){
+    void popObject(size_t index){
         meshObjects->popByIndex(index);
     }
-    void popObjectByName(string name){
+    void popObject(string name){
         meshObjects->popByName(name);
     }
 
-    SkeletonObject* getSkeletonObjectByIndex(size_t index){
+    SkeletonObject* getSkeletonObject(size_t index){
         return skeletonObjects->at(index);
     }
-    SkeletonObject* getSkeletonObjectByName(string name){
+    SkeletonObject* getSkeletonObject(string name){
         return skeletonObjects->getByName(name);
     }
-    void popSkeletonObjectByIndex(size_t index){
+    void popSkeletonObject(size_t index){
         skeletonObjects->popByIndex(index);
     }
-    void popSkeletonObjectByName(string name){
+    void popSkeletonObject(string name){
         skeletonObjects->popByName(name);
     }
 
-    InstancedObject* getInstancedObjectByIndex(size_t index){
+    InstancedObject* getInstancedObject(size_t index){
         return instancedObjects->at(index);
     }
-    InstancedObject* getInstancedObjectByName(string name){
+    InstancedObject* getInstancedObject(string name){
         return instancedObjects->getByName(name);
     }
-    void popInstancedObjectByIndex(size_t index){
+    void popInstancedObject(size_t index){
         instancedObjects->popByIndex(index);
     }
-    void popInstancedObjectByName(string name){
+    void popInstancedObject(string name){
         instancedObjects->popByName(name);
     }
 
-    SkyboxObject* getSkyboxObjectByIndex(unsigned int index){
+    SkyboxObject* getSkyboxObject(unsigned int index){
         return skyboxes->at(index);
     }
-    SkyboxObject* getSkyboxObjectByName(string name){
+    SkyboxObject* getSkyboxObject(string name){
         return skyboxes->getByName(name);
     }
-    void popSkyboxObjectByIndex(size_t index){
+    void popSkyboxObject(size_t index){
         skyboxes->popByIndex(index);
     }
-    void popSkyboxObjectByName(string name){
+    void popSkyboxObject(string name){
         skyboxes->popByName(name);
     }
 
-    Framebuffer* getFramebufferByIndex(size_t index){
+    Framebuffer* getFramebuffer(size_t index){
         return framebuffers->at(index);
     }
-    Framebuffer* getFramebufferByName(string name){
+    Framebuffer* getFramebuffer(string name){
         return framebuffers->getByName(name);
     }
-    void popFramebufferByIndex(size_t index){
+    void popFramebuffer(size_t index){
         framebuffers->popByIndex(index);
     }
-    void popFramebufferByName(string name){
+    void popFramebuffer(string name){
         framebuffers->popByName(name);
     }
-    void bindFramebufferByIndex(size_t index, GLint attachmentNum = 0){
+    void bindFramebuffer(size_t index, GLint attachmentNum = 0){
         framebuffers->at(index)->bind();
         framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
     }
-    void bindFramebufferByName(string name, GLint attachmentNum = 0){
+    void bindFramebuffer(string name, GLint attachmentNum = 0){
         framebuffers->getByName(name)->bind();
         framebuffers->getByName(name)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
@@ -179,8 +190,159 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         clearBuffers();
     }
+    void clearBuffers(){
+        glClearColor(r, g, b, a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
 
-    void renderLoop(void (*frameFunction)(Renderer&)){
+    void resetObjectShaderLastIds(){
+        MeshObject::currShaderId = -1;
+        SkeletonObject::currShaderId = -1;
+        InstancedObject::currShaderId = -1;
+        SkyboxObject::currShaderId = -1;
+    }
+};
+
+//move to another file like as FrameModel
+class FrameController : public IFrameController<FrameModel>{
+public:
+    FrameController(FrameModel& model) : m(model){}
+
+    FrameModel& m;
+
+    int amount = 2;
+    bool once = true;
+
+    void frameFunction(){
+        static MeshObject* currObj;
+        static SkeletonObject* currSklObj;
+        static InstancedObject* currInstObj;
+        ///////////////////////////////
+
+        //move that in draw function
+        if(once){
+            for(size_t i = 0; i < m.meshObjects->size(); ++i){
+                currObj = m.meshObjects->at(i);
+                currObj->shaderFields.push(*currObj->lightSources->at(0));
+            }
+            for(size_t i = 0; i < m.skeletonObjects->size(); ++i){
+                currSklObj = m.skeletonObjects->at(i);
+                currSklObj->shaderFields.push(*currSklObj->lightSources->at(0));
+            }
+            for(size_t i = 0; i < m.instancedObjects->size(); ++i){
+                currInstObj = m.instancedObjects->at(i);
+                currInstObj->shaderFields.push(*currInstObj->lightSources->at(0));
+            }
+            once = false;
+        }
+        ///////////////////////////////
+        m.bindFramebuffer(0, 1);
+
+        currInstObj = m.getInstancedObject("paimon");
+        currInstObj->draw();
+
+        int am = 30;
+        for(int i = 0; i < am; ++i){
+            currInstObj->rotate(i, 0, 1, 0);
+        }
+
+        currSklObj = m.getSkeletonObject("paimon");
+        currSklObj->draw();
+
+        currObj = m.getMeshObject(1);
+        currObj->position->moveTo((m.view->getCamera().location + m.view->getCamera().front));
+        currObj->draw();
+
+    //    r.skyboxes->at(0)->skyboxTexture->pushToShader(currObj->shader, 0, "skybox");
+        m.skyboxes->at(0)->draw();
+        ///////////////////////////////
+        static unsigned char* image;
+        static Texture* t = m.getFramebuffer("screenbuff")->textureColorBuffers->getByName("textureColorBuffer1");
+
+        m.bindDefaultFramebuffer();
+
+        if(amount != 1){
+            t->setNewTextureData(image);
+        }
+
+        currObj = m.getMeshObject("screen");
+        currObj->draw();
+
+
+        if(amount == 1){
+            image = &t->loadDataFromShader();
+
+            ++amount;
+        }
+
+        ///////////////////////////////
+        m.mouse->update();
+        m.perspective->setDefaultEvents();
+        m.view->setDefaultEvents();
+
+        static float defaultSpeed = m.view->getCamera().movementSpeed;
+
+        bool isShiftPressed = false;
+        setEvent(m.window->getWindowPtr(), LEFT_SHIFT, isShiftPressed = true);
+        if(isShiftPressed){
+            m.view->getCamera().movementSpeed = defaultSpeed * 2;
+        }
+        bool isCtrlPressed = false;
+        setEvent(m.window->getWindowPtr(), LEFT_CONTROL, isCtrlPressed = true);
+        if(isCtrlPressed){
+            m.view->getCamera().movementSpeed = defaultSpeed / 3;
+        }
+        if(!isShiftPressed && !isCtrlPressed){
+            m.view->getCamera().movementSpeed = defaultSpeed;
+        }
+
+        setEvent(m.window->getWindowPtr(), F, m.lightSources->getByName("lightPos0")->lightPos = m.view->getCamera().location);
+
+        setEvent(m.window->getWindowPtr(), J, if(someCounter + 1 <= 19) someCounter += 1.f/10.f; cout << someCounter << endl);
+        setEvent(m.window->getWindowPtr(), K, if(someCounter - 1 >= 0) someCounter -= 1.f/10.f; cout << someCounter << endl);
+
+        glm::vec3 sphereLoc = m.getMeshObject("sphere")->position->getLocation();
+        setEvent(m.window->getWindowPtr(), P, cout << sphereLoc.x << " " << sphereLoc.y << " " << sphereLoc.z << endl);
+
+        setEvent(m.window->getWindowPtr(), 1, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,-1,0));
+        setEvent(m.window->getWindowPtr(), 2, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,1,0));
+        setEvent(m.window->getWindowPtr(), 3, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,0,-1));
+        setEvent(m.window->getWindowPtr(), 4, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(0,0,1));
+        setEvent(m.window->getWindowPtr(), 5, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(-1,0,0));
+        setEvent(m.window->getWindowPtr(), 6, currSklObj->buffer->getMesh().joints.getById(someCounter).rotate(1,0,0));
+
+        setEvent(m.window->getWindowPtr(), I, cout << currSklObj->buffer->getMesh().joints.genPoseInfo() << endl);
+        setEvent(m.window->getWindowPtr(), U, currSklObj->buffer->getMesh().joints.setDafaultPose());
+        setEvent(m.window->getWindowPtr(), Y, currSklObj->buffer->getMesh().joints.at(someCounter)->setDefaultPose());
+
+        m.resetObjectShaderLastIds();
+    }
+};
+
+template<class T, class U = IFrameController<T>>
+class ARenderer{
+public:
+    //add methods to change exact shader: push uniform to or else
+    Window* window;
+    T* model;
+    U* controller;
+
+    float r, g, b, a;
+
+    ARenderer(int windowWidth, int windowHeight){
+        static_assert(std::is_base_of<IFrameController<T>, U>::value,
+                      "Template parameter U must be derived from IFrameController");
+        window = new Window(windowWidth, windowHeight);
+        model = new T(*window);
+        controller = new U(*model);
+    }
+    ~ARenderer(){
+        delete model;
+        delete controller;
+        delete window;
+    }
+
+    void renderLoop(){
         doContinue = true;
         while (!glfwWindowShouldClose(window->getWindowPtr()))
         {
@@ -191,11 +353,7 @@ public:
                 doContinue = false;
             }
 
-            mouse->update();
-            perspective->setDefaultEvents();
-            view->setDefaultEvents();
-
-            frameFunction(*this);
+            controller->frameFunction();
 
             glfwSwapBuffers(window->getWindowPtr());
             glFlush();
@@ -204,11 +362,6 @@ public:
                 glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);
                 break;
             }
-
-            MeshObject::currShaderId = -1;
-            SkeletonObject::currShaderId = -1;
-            InstancedObject::currShaderId = -1;
-            SkyboxObject::currShaderId = -1;
         }
     }
     void setBackgroundColor(float r, float g, float b, float a){
@@ -225,3 +378,5 @@ public:
 private:
     bool doContinue = false;
 };
+
+typedef ARenderer<FrameModel, FrameController> Renderer;

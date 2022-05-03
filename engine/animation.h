@@ -29,6 +29,8 @@ public:
     float animationTime;
     float currAnimationTime;
 
+    string name = "noname";
+
     Animation(JointList& jointsToAnimate, float animationTime = 0){
         joints = &jointsToAnimate;
         startTime = std::chrono::steady_clock::now();
@@ -160,3 +162,5 @@ private:
         }
     }
 };
+
+class AnimationList : public AList<Animation>{};

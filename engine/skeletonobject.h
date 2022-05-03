@@ -8,7 +8,8 @@
 
 class SkeletonObject : public AObject<SkeletonBuffer>{
 public:
-    Animation* animation;
+    Animation* currAnimation;
+    AnimationList animations;
     LightSourceList* lightSources;
     MaterialList* materials;//move to mesh
     TextureList* texList;
@@ -23,7 +24,6 @@ public:
            MaterialList& ml, string name = "noname")
         : AObject(w, b, p, v, name)
     {
-        animation = new Animation(buffer->getMesh().joints);
         lightSources = &lsl;
         materials = &ml;
         texList = materials->textures;
@@ -34,10 +34,28 @@ public:
         shaderFields.push(*view);
     }
 
-    void setAnimation(string animationFilePath, float animationTime){
-        animation->parseKeyPoses(animationFilePath);
-        animation->animationTime = animationTime;
+    void parseAndPushAnimation(string animationFilePath, float animationTime, string name = "noname"){
+        currAnimation = new Animation(buffer->getMesh().joints);
+        currAnimation->parseKeyPoses(animationFilePath);
+        currAnimation->animationTime = animationTime;
+        currAnimation->name = name;
+        animations.push(*currAnimation);
     }
+
+    void popAnimationByIndex(size_t index){
+        animations.popByIndex(index);
+    }
+    void popAnimationByName(string name){
+        animations.popByName(name);
+    }
+
+    void setCurrAnimation(size_t index){
+        currAnimation = animations.at(index);
+    }
+    void setCurrAnimation(string name){
+        currAnimation = animations.getByName(name);
+    }
+
     void stopAnimation(){
         doAnimation = false;
     }
@@ -62,7 +80,7 @@ public:
         shaderFields.pushToShader(*shader);
 
         if(doAnimation){
-            animation->applyCurrPose();
+            currAnimation->applyCurrPose();
         }
 
         buffer->bind();
