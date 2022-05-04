@@ -16,10 +16,12 @@
 #include <skeletonobject.h>
 #include <instancedobject.h>
 
-class IFrameModel{};
+#include <synchapi.h>
+
+class IFrameModel  : public ICommon{};
 
 template<class T>
-class IFrameController{
+class IFrameController : public ICommon{
 public:
     IFrameController(){
         static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
@@ -201,6 +203,12 @@ public:
         InstancedObject::currShaderId = -1;
         SkyboxObject::currShaderId = -1;
     }
+    void updateCommonData(){
+        mouse->update();
+        view->updateCameraPosition();
+        perspective->setDefaultEvents();
+        view->setDefaultEvents();
+    }
 };
 
 //move to another file like as FrameModel
@@ -276,9 +284,7 @@ public:
         }
 
         ///////////////////////////////
-        m.mouse->update();
-        m.perspective->setDefaultEvents();
-        m.view->setDefaultEvents();
+        m.updateCommonData();
 
         static float defaultSpeed = m.view->getCamera().movementSpeed;
 
@@ -320,7 +326,7 @@ public:
 };
 
 template<class T, class U = IFrameController<T>>
-class ARenderer{
+class ARenderer : public ICommon{
 public:
     //add methods to change exact shader: push uniform to or else
     Window* window;

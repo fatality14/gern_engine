@@ -28,41 +28,9 @@ public:
         s.setUniform3fv(cameraName, glm::value_ptr(camera->location));
     }
     void updateMatrices(){
-        updateCameraPosition();
         //camera->position + camera->front is camera direction vector
         viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
-    void setDefaultEvents(){
-        setEvent(window->getWindowPtr(), A, camera->location -= camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), D, camera->location += camera->right * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), Q, camera->location -= camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), E, camera->location += camera->up * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), S, camera->location -= camera->front * camera->movementSpeed * mouse->dt);
-        setEvent(window->getWindowPtr(), W, camera->location += camera->front * camera->movementSpeed * mouse->dt)
-    }
-    void setCamera(Camera& c){
-        camera = &c;
-    }
-    Camera& getCamera(){
-        return *camera;
-    }
-    const GLFWwindow* __getWindowPtr(){
-        return  window->getWindowPtr();
-    }
-    glm::mat4& getViewMatrix(){
-        return viewMatrix;
-    }
-private:
-    Window* window;
-    MouseListener* mouse;
-
-    Camera* camera;
-
-    glm::mat4 viewMatrix;
-    glm::vec3 worldUp;
-
-    string cameraName;
-
     void updateCameraPosition(){
         camera->pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;
         camera->yaw += static_cast<GLfloat>(mouse->mouseOffsetX) * camera->sensitivity * mouse->dt;
@@ -86,4 +54,34 @@ private:
         camera->right = glm::normalize(glm::cross(camera->front, worldUp));
         camera->up = glm::normalize(glm::cross(camera->right, camera->front));
     }
+    void setDefaultEvents(){
+        setEvent(window->getWindowPtr(), A, camera->location -= camera->right * camera->movementSpeed);
+        setEvent(window->getWindowPtr(), D, camera->location += camera->right * camera->movementSpeed);
+        setEvent(window->getWindowPtr(), Q, camera->location -= camera->up * camera->movementSpeed);
+        setEvent(window->getWindowPtr(), E, camera->location += camera->up * camera->movementSpeed);
+        setEvent(window->getWindowPtr(), S, camera->location -= camera->front * camera->movementSpeed);
+        setEvent(window->getWindowPtr(), W, camera->location += camera->front * camera->movementSpeed);
+    }
+    void setCamera(Camera& c){
+        camera = &c;
+    }
+    Camera& getCamera(){
+        return *camera;
+    }
+    const GLFWwindow* __getWindowPtr(){
+        return  window->getWindowPtr();
+    }
+    glm::mat4& getViewMatrix(){
+        return viewMatrix;
+    }
+private:
+    Window* window;
+    MouseListener* mouse;
+
+    Camera* camera;
+
+    glm::mat4 viewMatrix;
+    glm::vec3 worldUp;
+
+    string cameraName;
 };

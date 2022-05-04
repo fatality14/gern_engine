@@ -15,7 +15,7 @@ public:
     GLfloat yaw = -90.f;
     GLfloat roll = 0.f;
 
-    GLfloat movementSpeed = 3.f;
+    GLfloat movementSpeed = 0.1f;
     GLfloat sensitivity = 5.f;
 
     Camera(string name = "noname"){

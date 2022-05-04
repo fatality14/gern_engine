@@ -17,6 +17,7 @@ public:
     }
 
     void pushToShader(Shader& s) override{
+        updateMatrices();
         s.setUniformMatrix4fv(name, glm::value_ptr(modelMatrix));
     }
     void updateMatrices(){
