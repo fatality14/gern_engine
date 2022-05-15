@@ -37,23 +37,18 @@ public:
         this->path = path;
     }
     void loadTexture() override{
-        //load image
         image_width = 0;
         image_height = 0;
 
         image = SOIL_load_image(path.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
-        //init and active texture
         glBindTexture(GL_TEXTURE_2D, textureId);
 
-        //setup texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        //set texture data and mipmap
-        //mipmap is used to compress texture
         if(image){
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -62,7 +57,6 @@ public:
             cout << "Texture loading failed" << endl;
         }
 
-        //free space
         delete[] image;
         image = nullptr;
     }
@@ -113,7 +107,7 @@ private:
 
 };
 
-class TextureList : public AList<Texture>, public IShaderField{
+class TextureList : public AListO<Texture>, public IShaderField{
 private:
     struct TextureLayout{
         void pushTexture(GLint texutreUnit, size_t textureIndex, string uniformName){

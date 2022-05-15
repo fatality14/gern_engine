@@ -3,7 +3,6 @@
 #include <skeletonmesh.h>
 #include <abuffer.h>
 
-//maybe add BufferList
 class SkeletonBuffer : public ABuffer<SkeletonMesh, SkeletonVertex>{
 public:
     SkeletonBuffer(SkeletonMesh& m, Shader& s, string name = "noname") : ABuffer(m, s, name){

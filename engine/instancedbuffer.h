@@ -4,7 +4,6 @@
 #include <position.h>
 #include <abuffer.h>
 
-//maybe add BufferList
 class InstancedBuffer : public ABuffer<Mesh, Vertex>{
 public:
     InstancedBuffer(Mesh& m, Shader& s, string name = "noname")

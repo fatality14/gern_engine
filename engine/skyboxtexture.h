@@ -29,11 +29,9 @@ public:
     }
 
     void loadTexture() override{
-        //load image
         image_width = 0;
         image_height = 0;
 
-        //init and active texture
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 
@@ -48,7 +46,6 @@ public:
             }
         }
 
-        //setup texture
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

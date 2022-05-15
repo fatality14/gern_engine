@@ -5,6 +5,7 @@
 
 class IBuffer : public ICommon{};
 
+//maybe add BufferList
 template <class T, class U>
 class ABuffer : public IBuffer{
 public:
@@ -50,7 +51,6 @@ public:
     }
 
     void genBuffers(){
-        //init and use vao that works just like vbo and ebo buffers wrapper
         glCreateVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 

@@ -64,6 +64,6 @@ public:
 
 GLuint SkyboxObject::currShaderId = -1;
 
-class SkyboxList : public AList<SkyboxObject>{
+class SkyboxList : public AListO<SkyboxObject>{
 
 };

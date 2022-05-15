@@ -81,14 +81,12 @@ private:
     void initGLEW(){
         //glViewport(0 ,0, fbWidth, fbHeight);
 
-        //init glew
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK){
             cout << "Cannot initialize glew" << endl;
             glfwTerminate();
         }
 
-        //setup glew
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);

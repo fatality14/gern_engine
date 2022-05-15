@@ -22,7 +22,7 @@ public:
     }
 };
 
-class LightSourceList : public AList<LightSource>{
+class LightSourceList : public AListO<LightSource>{
 public:
     void pushNew(string name = "noname"){
         push(*(new LightSource(name)));

@@ -14,6 +14,10 @@ int main (){
 
     Renderer renderer(window_width, window_height);
     SceneLoader sl;
+
+    SceneLoaderD sld;
+    sld.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
+
     sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", renderer);
 
     renderer.renderLoop();

@@ -30,7 +30,6 @@ public:
 
     GLuint drawmode = GL_TRIANGLES;
 
-    //make arguments optional
     AObject(Window& w, T& b, Perspective& p,
            View& v, string name = "noname")
     {
@@ -105,6 +104,6 @@ public:
     }
 };
 
-class IObjectList : public AList<IObject>{
+class IObjectList : public AListO<IObject>{
 
 };

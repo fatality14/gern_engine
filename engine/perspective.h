@@ -34,7 +34,7 @@ public:
         return projectionMatrix;
     }
 
-    //TODO: fill with smth later
+    //TODO: fill with smth later or remove
     void setDefaultEvents(){}
 private:
     glm::mat4 projectionMatrix;

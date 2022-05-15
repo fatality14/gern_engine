@@ -28,21 +28,18 @@ public:
 
     template<class T>
     void setFloatAttribPointer(string layoutName, int vecSize, size_t offset){
-        //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
     template<class T>
     void setIntAttribPointer(string layoutName, int vecSize, size_t offset){
-        //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
     template<class T>
     void setMatAttribPointer(string layoutName, int matSize, size_t offset, size_t divisor = 0){
-        //set the format of data reading
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         for(int i = 0; i < matSize; ++i){
             glVertexAttribPointer(attribLoc + i,
@@ -92,7 +89,6 @@ private:
         temp = "";
         src = "";
 
-        //read shader file
         in_file.open(vertexPath);
         if(in_file.is_open()){
             while(getline(in_file, temp))
@@ -104,15 +100,12 @@ private:
         }
         in_file.close();
 
-        //make vertex shader
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         vertSrc = src.c_str();
 
-        //set shader source and compile
         glShaderSource(vertexShader, 1, &vertSrc, NULL);
         glCompileShader(vertexShader);
 
-        //get compile errors if some
         glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isError);
         if(!isError){
             glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
@@ -152,17 +145,13 @@ private:
         }
     }
     void compileProgram(){
-        //init program
         program = glCreateProgram();
 
-        //set compiled shaders to our program
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
 
-        //compile program
         glLinkProgram(program);
 
-        //get compile errors if some
         glGetProgramiv(program, GL_LINK_STATUS, &isError);
         if(!isError){
             glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
@@ -173,6 +162,7 @@ private:
 
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+
         //the program should be set in window while cycle
         unbind();
     }
@@ -182,12 +172,12 @@ private:
         compileProgram();
 
         if (!isCompiled){
-            glfwTerminate(); //TODO: replace with throw exception or else
+            glfwTerminate(); //TODO: replace with throw exception or else?
         }
     }
 };
 
-class ShaderList : public AList<Shader>{
+class ShaderList : public AListO<Shader>{
 public:
     void pushNew(string vertexPath, string fragmentPath, string name = "noname"){
         Shader* shader = new Shader(vertexPath, fragmentPath, name);

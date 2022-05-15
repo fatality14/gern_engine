@@ -8,7 +8,7 @@
 class MeshObject : public AObject<MeshBuffer>{
 public:
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    MaterialList* materials;
     TextureList* texList;
 
     //make arguments optional
@@ -95,6 +95,6 @@ public:
 
 GLuint MeshObject::currShaderId = -1;
 
-class MeshObjectList : public AList<MeshObject>{
+class MeshObjectList : public AListO<MeshObject>{
 
 };

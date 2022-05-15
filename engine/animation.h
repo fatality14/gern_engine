@@ -163,4 +163,4 @@ private:
     }
 };
 
-class AnimationList : public AList<Animation>{};
+class AnimationList : public AListO<Animation>{};

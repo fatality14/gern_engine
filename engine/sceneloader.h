@@ -11,6 +11,96 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <queue>
+
+class IContext : public ICommon{};
+
+template <class T, class U>
+class ICommand : public ICommon{
+public:
+    ICommand(){
+       static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
+       static_assert(std::is_base_of<IContext, U>::value, "Template parameter U must be derived from IContext");
+    }
+    virtual void execute(T& data, U& context) = 0;
+};
+
+template <class T>
+class ISceneLoader : public ICommon{
+public:
+    ISceneLoader(){
+       static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
+    }
+    virtual void load(string path, T& data) = 0;
+};
+
+class SceneLoaderD : private ALoader, public ISceneLoader<FrameModel>, public IContext{
+public:
+    ~SceneLoaderD(){
+        for(size_t i = 0; i < meshBuffers.size(); ++i){
+            delete meshBuffers[i];
+        }
+        for(size_t i = 0; i < sklBuffers.size(); ++i){
+            delete sklBuffers[i];
+        }
+        for(size_t i = 0; i < instBuffers.size(); ++i){
+            delete instBuffers[i];
+        }
+        for(size_t i = 0; i < materialLists.size(); ++i){
+            delete materialLists[i];
+        }
+    }
+
+    void load(string path, FrameModel& data) override {
+        q.push(new ACommand());
+        q.push(new BCommand());
+        q.push(new CCommand());
+
+        while(q.size() != 0){
+            q.front()->execute(data, *this);
+            q.pop();
+        }
+    }
+
+private:
+    class ACommand : public ICommand<FrameModel, SceneLoaderD>{
+        void execute(FrameModel& data, SceneLoaderD& context) override{
+            cout << "a";
+            context.q.pop();
+            context.q.front()->execute(data, context);
+        }
+    };
+
+    class BCommand : public ICommand<FrameModel, SceneLoaderD>{
+        void execute(FrameModel& data, SceneLoaderD& context) override{
+            cout << "b";
+        }
+    };
+
+    class CCommand : public ICommand<FrameModel, SceneLoaderD>{
+        void execute(FrameModel& data, SceneLoaderD& context) override{
+            cout << "c";
+        }
+    };
+
+    queue<ICommand<FrameModel, SceneLoaderD>*> q;
+
+    MeshLoader meshLoader;
+    MeshList meshList;
+    SkeletonMeshList skeletonList;
+    SkeletonLoader skeletizer;
+    MaterialLoader materialLoader;
+    ShaderList shaders;
+    vector<MaterialList*> materialLists;
+
+    MeshObject* lastMeshObj;
+    SkeletonObject* lastSklObj;
+    SkyboxObject* lastSkybox;
+
+    vector<MeshBuffer*> meshBuffers;
+    vector<SkeletonBuffer*> sklBuffers;
+    vector<InstancedBuffer*> instBuffers;
+};
 
 //must be inheritable to support IFrameModel of Renderer
 class SceneLoader : private ALoader{

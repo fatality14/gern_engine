@@ -28,6 +28,6 @@ public:
     }
 };
 
-class CameraList : public AList<Camera>{
+class CameraList : public AListO<Camera>{
 
 };

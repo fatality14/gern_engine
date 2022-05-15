@@ -8,7 +8,7 @@
 class InstancedObject : public AObject<InstancedBuffer>{
 public:
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    MaterialList* materials;
     TextureList* texList;
 
     vector<Position> modelMatrices;
@@ -164,6 +164,6 @@ public:
 
 GLuint InstancedObject::currShaderId = -1;
 
-class InstancedObjects : public AList<InstancedObject>{
+class InstancedObjects : public AListO<InstancedObject>{
 
 };

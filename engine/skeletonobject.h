@@ -11,7 +11,7 @@ public:
     Animation* currAnimation;
     AnimationList animations;
     LightSourceList* lightSources;
-    MaterialList* materials;//move to mesh
+    MaterialList* materials;
     TextureList* texList;
 
     bool doAnimation = false;
@@ -127,6 +127,6 @@ public:
 
 GLuint SkeletonObject::currShaderId = -1;
 
-class SkeletonObjects : public AList<SkeletonObject>{
+class SkeletonObjects : public AListO<SkeletonObject>{
 
 };

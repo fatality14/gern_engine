@@ -82,7 +82,7 @@ private:
     vector<string> textureNames;
 };
 
-class MaterialList : public AList<Material>{
+class MaterialList : public AListO<Material>{
 public:
     void pushNew(string matname = "noname"){
         push(*(new Material(matname)));

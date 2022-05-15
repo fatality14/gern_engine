@@ -45,8 +45,6 @@ private:
     size_t size;
 };
 
-//consider add VBO/VAO id to avoid manual VBO/VAO binding
-//note that buffer data must be added manualy cause of idea of buffer data
 template <class T, class U>
 class ShaderAttrib : public IShaderField{
 public:
@@ -90,13 +88,6 @@ private:
 
 class ShaderFieldList : public AList<IShaderField>{
 public:
-    ShaderFieldList(){
-        owndestructor = true;
-    }
-    ~ShaderFieldList(){
-        //...
-    }
-
     void pushToShader(Shader& shader){
         for(size_t i = 0; i < size(); ++i){
             if(at(i)->selfPushable){

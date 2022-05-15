@@ -18,6 +18,6 @@ public:
     }
 };
 
-class SkeletonMeshList : public AList<SkeletonMesh>{
+class SkeletonMeshList : public AListO<SkeletonMesh>{
 
 };

@@ -80,7 +80,7 @@ public:
     }
 };
 
-class JointList : public AList<Joint>, public IShaderField{
+class JointList : public AListO<Joint>, public IShaderField{
 public:
     JointList(){
         name = "jointTransforms";

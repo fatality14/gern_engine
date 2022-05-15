@@ -3,7 +3,6 @@
 #include <mesh.h>
 #include <abuffer.h>
 
-//maybe add BufferList
 class MeshBuffer : public ABuffer<Mesh, Vertex>{
 public:
     MeshBuffer(Mesh& m, Shader& s, string name = "noname") : ABuffer(m, s, name){

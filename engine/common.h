@@ -33,12 +33,7 @@ float someCounter = 0;
 
 class ICommon{public :virtual ~ICommon(){}};
 
-//TODO: divide some functions to smaller pieces
 //TODO: add notes that camera and mesh classes are just data containers, rename classes or smth else
-//TODO: add shaderlist to renderer, let renderer choose which shader should be applied to object
-//      user should be able to pass objects and skyboxes to shader from drawFunction
-//      might make variable to check current active shader to check if its uniforms are already up-to-date
-//      or make class ShaderUpdater to dinamically push data to shader
 //TODO: make methods to access the objects of built-in classes
 
 //no need for ICommon here cause of offsetof function
@@ -74,22 +69,10 @@ struct IList : public ICommon{};
 
 //T must have "name" field
 //might implement it with sfinae
+//add check for repeating names in list
 template<class T>
 class AList : public IList{
 public:
-    //add check for repeating names in list
-
-    ~AList(){
-        if(owndestructor){
-            return;
-        }
-        else{
-            for(size_t i = 0; i < list.size(); i++){
-                delete list.at(i);
-            }
-        }
-    }
-
     size_t size(){
         return list.size();
     }
@@ -124,9 +107,16 @@ public:
         list.clear();
     }
     vector<T*> list;
-
-    bool owndestructor = false;
 private:
+};
+
+//O stands for owning
+template<class T>
+class AListO : public AList<T>{
+public:
+    ~AListO(){
+        this->wipe();
+    }
 };
 
 

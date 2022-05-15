@@ -5,7 +5,7 @@ an object of the class should be situated in "*Object", "View", "Perspective" et
 2
 use "InstancedObject" to create custom particle system class
 
-3?
+3
 shader constructor to parse custom shader code into glsl
 
 +4
@@ -41,11 +41,11 @@ provide glAttachShader not only for two shaders at a time but multiple in Shader
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
 
 14
-split CMakeList to compile other libraries only once
+split CMakeList to compile other libraries only once?
 +use ccache
 use precompile headers
 
-15
+15?
 make counter instead of noname in object etc names
 
 16
@@ -75,10 +75,10 @@ add material redaction in scene file?
 23
 add possibility to change current camera
 
-24?
++24
 add user function list in renderer
 
-25
+25 (31)
 make pose animation time user defined
 
 26 (11)
@@ -94,16 +94,16 @@ add namespaces
 remove GLfloat etc where it must be just float etc
 
 29?
-a bug in animation while movin bone, it moves according to default object position
+a bug in animation while moving bone, it moves according to default object position
 
 !30
 pass user function in setDefaultEvents
 or which is better make Event class
 
-31?
+31(40)
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
 
-!32
+32?
 do something with *List, IObject and other common cases
 
 +33
@@ -112,15 +112,15 @@ make parameters of pushToShader as fields wherever it needed
 Shader methods should be called mostly in IShaderField childs
 add setShaderParams method to IShaderField?
 
-!34
-remove duplicate name fields in SceneLoader and all related
+34
++remove duplicate name fields in SceneLoader and all related
 names should be splitted from shader fields?
 
 +35
 make all IShaderField attrib in buffer like vmodel in InstancedBuffer
 
-36?
-move load method to ILoader and use it in sceneloader
+36
+move load method to ILoader and override it in loaders
 
 37
 in case of different mesh file formats modify MeshLoader
@@ -128,24 +128,28 @@ in case of different mesh file formats modify MeshLoader
 38
 make Window proxy pattern
 
-!39
-make AnimationList and all related
+!39 (40)
+make AnimationList and all related for SceneLoader
 
-40
+!40 (42)
 add load check for all loaders to debug if something goes wrong
 
-41
++41
 test object draw in multithreading, might be bad for texture unit sequence
+yeah, this is bad
 
-!42
+!42 (40)
 SceneLoader must have addable modules like as Renderer
 
-lastplan:
-reorganize renderer for gui and other modules
-might make it inheritable to overload draw function
-might choose what modules to use (objects with no materials, no animations etc)
-ADD GUIOBJECT CLASS
+43
+add GUIObject
 
+44
+allow to split SceneLoader scene.txt by multiple files
+
+lastplan:
+its only left to move all SceneLoader logic to its commands
+see example in SceneLoaderD
 
 99?
 recorder class to render video

@@ -218,7 +218,7 @@ public:
 
     FrameModel& m;
 
-    int amount = 2;
+    int amount = 1;
     bool once = true;
 
     void frameFunction(){
@@ -270,7 +270,7 @@ public:
         m.bindDefaultFramebuffer();
 
         if(amount != 1){
-            t->setNewTextureData(image);
+//            t->setNewTextureData(image);
         }
 
         currObj = m.getMeshObject("screen");
@@ -278,9 +278,8 @@ public:
 
 
         if(amount == 1){
-            image = &t->loadDataFromShader();
-
-            ++amount;
+//            image = &t->loadDataFromShader();
+//            ++amount;
         }
 
         ///////////////////////////////
