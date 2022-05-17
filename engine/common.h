@@ -122,6 +122,7 @@ public:
 
 struct ILoader : public ICommon{};
 
+//methods should be static
 class ALoader : public ILoader{
 public:
     string token;
@@ -140,7 +141,7 @@ public:
         return numArgs;
     }
 
-    void removeBadSpaces(string& line){
+    static void removeBadSpaces(string& line){
         size_t i = -1;
         while(true){
             ++i;
@@ -167,7 +168,7 @@ public:
                 break;
         }
     }
-    string bite(const string& delimiter, string& line, bool& end){
+    static string bite(const string& delimiter, string& line, bool& end){
         size_t pos = 0;
         string token;
 

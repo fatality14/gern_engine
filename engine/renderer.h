@@ -209,6 +209,13 @@ public:
         perspective->setDefaultEvents();
         view->setDefaultEvents();
     }
+
+    void setBackgroundColor(float r, float g, float b, float a){
+        this->r = r;
+        this->g = g;
+        this->b = b;
+        this->a = a;
+    }
 };
 
 //move to another file like as FrameModel
@@ -368,17 +375,6 @@ public:
                 break;
             }
         }
-    }
-    void setBackgroundColor(float r, float g, float b, float a){
-        this->r = r;
-        this->g = g;
-        this->b = b;
-        this->a = a;
-    }
-
-    void clearBuffers(){
-        glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 private:
     bool doContinue = false;

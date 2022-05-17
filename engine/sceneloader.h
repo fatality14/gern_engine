@@ -15,14 +15,13 @@
 
 class IContext : public ICommon{};
 
-template <class T, class U>
+template <class U>
 class ICommand : public ICommon{
 public:
     ICommand(){
-       static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
        static_assert(std::is_base_of<IContext, U>::value, "Template parameter U must be derived from IContext");
     }
-    virtual void execute(T& data, U& context) = 0;
+    virtual void execute(U& context) = 0;
 };
 
 template <class T>
@@ -34,9 +33,11 @@ public:
     virtual void load(string path, T& data) = 0;
 };
 
-class SceneLoaderD : private ALoader, public ISceneLoader<FrameModel>, public IContext{
+class SceneLoaderD;
+
+class LoaderContext : public IContext{
 public:
-    ~SceneLoaderD(){
+    ~LoaderContext(){
         for(size_t i = 0; i < meshBuffers.size(); ++i){
             delete meshBuffers[i];
         }
@@ -51,39 +52,35 @@ public:
         }
     }
 
-    void load(string path, FrameModel& data) override {
-        q.push(new ACommand());
-        q.push(new BCommand());
-        q.push(new CCommand());
+    bool step(){
+        if(lines.size() != 0){
+            string& currLine = lines.front();
 
-        while(q.size() != 0){
-            q.front()->execute(data, *this);
-            q.pop();
+            ALoader::removeBadSpaces(currLine);
+
+            command = ALoader::bite(" ", currLine, end);
+            args = currLine;
+
+            lines.pop();
+
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
-private:
-    class ACommand : public ICommand<FrameModel, SceneLoaderD>{
-        void execute(FrameModel& data, SceneLoaderD& context) override{
-            cout << "a";
-            context.q.pop();
-            context.q.front()->execute(data, context);
-        }
-    };
+    string getNextCommand(){
+        string nextCommand = lines.front();
+        return ALoader::bite(" ", nextCommand, end);
+    }
 
-    class BCommand : public ICommand<FrameModel, SceneLoaderD>{
-        void execute(FrameModel& data, SceneLoaderD& context) override{
-            cout << "b";
-        }
-    };
+    string cwd;
 
-    class CCommand : public ICommand<FrameModel, SceneLoaderD>{
-        void execute(FrameModel& data, SceneLoaderD& context) override{
-            cout << "c";
-        }
-    };
-
-    queue<ICommand<FrameModel, SceneLoaderD>*> q;
+    FrameModel* model;
+    queue<string> lines;
+    string args;
+    string command;
 
     MeshLoader meshLoader;
     MeshList meshList;
@@ -93,395 +90,596 @@ private:
     ShaderList shaders;
     vector<MaterialList*> materialLists;
 
-    MeshObject* lastMeshObj;
-    SkeletonObject* lastSklObj;
-    SkyboxObject* lastSkybox;
-
     vector<MeshBuffer*> meshBuffers;
     vector<SkeletonBuffer*> sklBuffers;
     vector<InstancedBuffer*> instBuffers;
+
+    bool end;
 };
 
-//must be inheritable to support IFrameModel of Renderer
-class SceneLoader : private ALoader{
-public:
-    ~SceneLoader(){
-        for(size_t i = 0; i < meshBuffers.size(); ++i){
-            delete meshBuffers[i];
-        }
-        for(size_t i = 0; i < sklBuffers.size(); ++i){
-            delete sklBuffers[i];
-        }
-        for(size_t i = 0; i < instBuffers.size(); ++i){
-            delete instBuffers[i];
-        }
-        for(size_t i = 0; i < materialLists.size(); ++i){
-            delete materialLists[i];
-        }
-    }
+typedef ICommand<LoaderContext> Command;
 
-    void load(string path, Renderer& renderer){
+class SceneLoaderD : private ALoader, public ISceneLoader<FrameModel>{
+public:
+    void load(string path, FrameModel& data) override {
+        c.model = &data;
+
         ifstream f;
         f.open(path);
 
         string line;
-        bool end;
-        string cwd;
-
-        getline(f, line);
-        removeBadSpaces(line);
-
-        token = bite(" ", line, end);
-        cwd = line;
-
-        string tmp1, tmp2, tmp3, tmp4, tmp5;
-        size_t itmp1, itmp2, itmp3;
 
         //TODO: check if file is not init to prevent infinie loading
-
         while(!f.eof()){
-
             getline(f, line);
             removeBadSpaces(line);
+            c.lines.push(line);
+        }
 
-            token = bite(" ", line, end);
+        c.step();
+        if(c.command == "cwd"){
+            cwdc.execute(c);
+        }
 
-            if(token == "mesh"){
-                tmp1 = cwd + bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                meshList.push(meshLoader.load(tmp1, tmp2));
+        while(c.step()){
+            if(c.command == "mesh"){
+                meshc.execute(c);
+                continue;
             }
-            if(token == "skl"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = cwd + bite(" ", line, end);
-                skeletonList.push(skeletizer.skeletize(*meshList.getByName(tmp1), tmp2));
+            if(c.command == "skl"){
+                sklc.execute(c);
+                continue;
             }
-            if(token == "shad"){
-                tmp1 = cwd + bite(" ", line, end);
-                tmp2 = cwd + bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                //vertex, fragment, name
-                shaders.pushNew(tmp1, tmp2, tmp3);
+            if(c.command == "shad"){
+                shadc.execute(c);
+                continue;
             }
-            if(token == "meshbuf"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                meshBuffers.push_back(new MeshBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
-                meshBuffers.at(meshBuffers.size() - 1)->genBuffers();
+            if(c.command == "meshbuf"){
+                meshbufc.execute(c);
+                continue;
             }
-            if(token == "sklbuf"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                sklBuffers.push_back(new SkeletonBuffer(*skeletonList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
-                sklBuffers.at(sklBuffers.size() - 1)->genBuffers();
+            if(c.command == "sklbuf"){
+                sklbufc.execute(c);
+                continue;
             }
-            if(token == "instbuf"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                instBuffers.push_back(new InstancedBuffer(*meshList.getByName(tmp1), *shaders.getByName(tmp2), tmp3));
-                instBuffers.at(instBuffers.size() - 1)->genBuffers();
+            if(c.command == "instbuf"){
+                instbufc.execute(c);
+                continue;
             }
-            if(token == "tex"){
-                MaterialList* texbmat = new MaterialList;
-                texbmat->pushNew();
-                texbmat->name = line;
-
-                materialLists.push_back(texbmat);
+            if(c.command == "tex"){
+                texc.execute(c);
+                continue;
             }
-            if(token == "texm"){
-                materialLists.at(materialLists.size()-1)->textures->loadNew(cwd + line);
-            }
-            if(token == "texl"){
-                materialLists.at(materialLists.size()-1)->textures->addLayouts(1);
-
-                itmp1 = stoi(bite(" ", line, end));
-                itmp2 = stoi(bite(" ", line, end));
-                itmp3 = stoi(bite(" ", line, end));
-                tmp1 = bite(" ", line, end);
-
-                materialLists.at(materialLists.size()-1)->textures->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
-            }
-
             //fix to use other textures than map_Kd
-            if(token == "mat"){
-                tmp1 = cwd + bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-
-                materialLoader.load(tmp1);
-                MaterialList* materials = materialLoader.list;
-                TextureList* textures = materials->textures;
-
-                textures->addLayouts(materials->size());//gen layout for each material
-
-                unordered_set<string> loaded;
-                unordered_map<string, size_t> ids;
-                size_t idCounter = 0;
-                for(size_t i = 0; i < materials->size(); ++i){//for every material
-                    string texName = materials->at(i)->getTextureNames().at(0);//texture name
-                    if(loaded.count(texName) == 0){//if not loaded
-                        textures->loadNew(cwd + tmp2 + "\\\\" + texName);//load by path
-                        loaded.emplace(texName);//mark loaded
-                        ids.emplace(pair(texName, idCounter));//map name to id in TextureList
-                        ++idCounter;
-                    }
-                }
-
-                for(size_t i = 0; i < materials->size(); ++i){
-                    string texName = materials->at(i)->getTextureNames().at(0);//texture name
-                    textures->appendTextureToLayout(i, 0, ids.at(texName), "texture0");
-                }
-
-                materials->name = tmp3;
-                materialLists.push_back(materials);
+            if(c.command == "mat"){
+                matc.execute(c);
+                continue;
             }
-            if(token == "light"){
-                float x = stof(bite(" ", line, end));
-                float y = stof(bite(" ", line, end));
-                float z = stof(bite(" ", line, end));
-                tmp1 = bite(" ", line, end);
-
-                //x,y,z,name
-                renderer.model->addNewLightSource(x, y, z, tmp1);
+            if(c.command == "light"){
+                lightc.execute(c);
+                continue;
             }
-            if(token == "frmb"){
-                itmp1 = stoi(bite(" ", line, end));
-                itmp2 = stoi(bite(" ", line, end));
-                itmp3 = stoi(bite(" ", line, end));
-                tmp1 = bite(" ", line, end);
-
-                Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
-                framebuffer->genTextureColorBuffers(itmp3);
-                renderer.model->addFramebuffer(*framebuffer);
-
-                MaterialList* frmbmat = new MaterialList;
-                frmbmat->pushNew();
-
-                frmbmat->name = tmp1;
-                frmbmat->textures = framebuffer->textureColorBuffers;
-                materialLists.push_back(frmbmat);
+            if(c.command == "frmb"){
+                frmbc.execute(c);
+                continue;
             }
-            if(token == "move"){
-                float x = stof(bite(" ", line, end));
-                float y = stof(bite(" ", line, end));
-                float z = stof(bite(" ", line, end));
-
-                if(lastMeshObj != nullptr){
-                    lastMeshObj->move(x,y,z);
-                }
-                if(lastSklObj != nullptr){
-                    lastSklObj->move(x,y,z);
-                }
-                if(lastSkybox != nullptr){
-                    lastSkybox->move(x,y,z);
-                }
+            if(c.command == "meshobj"){
+                meshobjc.execute(c);
+                continue;
             }
-            if(token == "scale"){
-                float x = stof(bite(" ", line, end));
-                float y = stof(bite(" ", line, end));
-                float z = stof(bite(" ", line, end));
-
-                if(lastMeshObj != nullptr){
-                    lastMeshObj->scaleTo(x,y,z);
-                }
-                if(lastSklObj != nullptr){
-                    lastSklObj->scaleTo(x,y,z);
-                }
-                if(lastSkybox != nullptr){
-                    lastSkybox->scaleTo(x,y,z);
-                }
+            if(c.command == "sklobj"){
+                sklobjc.execute(c);
+                continue;
             }
-            if(token == "rot"){
-                float x = stof(bite(" ", line, end));
-                float y = stof(bite(" ", line, end));
-                float z = stof(bite(" ", line, end));
-
-                if(lastMeshObj != nullptr){
-                    lastMeshObj->rotateTo(x,y,z);
-                }
-                if(lastSklObj != nullptr){
-                    lastSklObj->rotateTo(x,y,z);
-                }
-                if(lastSkybox != nullptr){
-                    lastSkybox->rotateTo(x,y,z);
-                }
+            if(c.command == "instobj"){
+                instobjc.execute(c);
+                continue;
             }
-            if(token == "meshobj"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                tmp4 = bite(" ", line, end);
-
-                size_t which1 = 0, which2 = 0;
-
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
-
-                for(size_t i = 0; i < materialLists.size(); ++i){
-                    if(materialLists.at(i)->name == tmp1){
-                        which1 = i;
-                        break;
-                    }
-                }
-
-                for(size_t i = 0; i < meshBuffers.size(); ++i){
-                    if(meshBuffers.at(i)->name == tmp2){
-                        which2 = i;
-                        break;
-                    }
-                }
-                //remove textures from addNewObject cause it moved it Materials
-                renderer.model->addNewObject(*meshBuffers.at(which2),
-                                      materialLists.at(which1), tmp4);
-                lastMeshObj = renderer.model->getMeshObject(tmp4);
-                lastSklObj = nullptr;
-                lastSkybox = nullptr;
+            if(c.command == "skybox"){
+                skyboxc.execute(c);
+                continue;
             }
-            if(token == "sklobj"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                tmp4 = bite(" ", line, end);
-                tmp5 = cwd + bite(" ", line, end);
-                itmp1 = stoi(bite(" ", line, end));
-
-                size_t which1 = 0, which2 = 0;
-
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
-
-                for(size_t i = 0; i < materialLists.size(); ++i){
-                    if(materialLists.at(i)->name == tmp1){
-                        which1 = i;
-                        break;
-                    }
-                }
-
-
-                for(size_t i = 0; i < sklBuffers.size(); ++i){
-                    if(sklBuffers.at(i)->name == tmp2){
-                        which2 = i;
-                        break;
-                    }
-                }
-
-                renderer.model->addNewObject(*sklBuffers.at(which2),
-                                              materialLists.at(which1), tmp4);
-                renderer.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, itmp1, tmp5);//add name instead of last arg
-                renderer.model->getSkeletonObject(tmp4)->setCurrAnimation(tmp5);
-                renderer.model->getSkeletonObject(tmp4)->startAnimation();
-                lastSklObj = renderer.model->getSkeletonObject(tmp4);
-                lastMeshObj = nullptr;
-                lastSkybox = nullptr;
-            }
-            if(token == "instobj"){
-                tmp1 = bite(" ", line, end);
-                tmp2 = bite(" ", line, end);
-                tmp3 = bite(" ", line, end);
-                tmp4 = bite(" ", line, end);
-                tmp5 = bite(" ", line, end);
-
-                size_t which1 = 0, which2 = 0;
-
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
-
-                for(size_t i = 0; i < materialLists.size(); ++i){
-                    if(materialLists.at(i)->name == tmp1){
-                        which1 = i;
-                        break;
-                    }
-                }
-
-                for(size_t i = 0; i < instBuffers.size(); ++i){
-                    if(instBuffers.at(i)->name == tmp2){
-                        which2 = i;
-                        break;
-                    }
-                }
-
-                vector<Position> poses;
-                Position pos;
-                pos.scaleTo(0.1,0.1,0.1);
-                float rad = 5;
-                int am = 30;
-                float shift = 360/am;
-                float angle = 0;
-                for(int i = 0; i < am; ++i){
-                    pos.moveTo(rad*sin(angle),rad*cos(angle),0);
-                    poses.push_back(pos);
-                    angle += shift;
-                }
-
-                renderer.model->addNewObject(*instBuffers.at(which2), materialLists.at(which1), poses, tmp5);
-            }
-            if(token == "skybox"){
-                vector<string> skyboxSides;
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-                skyboxSides.push_back(cwd + bite(" ", line, end));
-
-                tmp4 = bite(" ", line, end);
-
-                size_t which = 0;
-
-                for(size_t i = 0; i < sklBuffers.size(); ++i){
-                    if(sklBuffers.at(i)->name == tmp2){
-                        which = i;
-                        break;
-                    }
-                }
-
-                renderer.model->addNewSkybox(skyboxSides, *meshBuffers.at(which), tmp4);
-
-                lastSkybox = renderer.model->getSkyboxObject(tmp4);
-                lastSklObj = nullptr;
-                lastMeshObj = nullptr;
-            }
-            if(token == "bckcol"){
-                float r, g, b, a;
-
-                r = stof(bite(" ", line, end));
-                g = stof(bite(" ", line, end));
-                b = stof(bite(" ", line, end));
-                a = stof(bite(" ", line, end));
-
-                renderer.setBackgroundColor(r, g, b, a);
+            if(c.command == "bckcol"){
+                bckcolc.execute(c);
+                continue;
             }
         }
     }
-private:
-    MeshLoader meshLoader;
-    MeshList meshList;
-    SkeletonMeshList skeletonList;
-    SkeletonLoader skeletizer;
-    MaterialLoader materialLoader;
-    ShaderList shaders;
-    vector<MaterialList*> materialLists;
 
-    MeshObject* lastMeshObj;
-    SkeletonObject* lastSklObj;
-    SkyboxObject* lastSkybox;
+    LoaderContext c;
+private:    
+    class CwdCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            c.cwd = c.args;
+        }
+    };
 
-    vector<MeshBuffer*> meshBuffers;
-    vector<SkeletonBuffer*> sklBuffers;
-    vector<InstancedBuffer*> instBuffers;
+    class MeshCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = c.cwd + bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            c.meshList.push(c.meshLoader.load(tmp1, tmp2));
+        }
+    };
+
+    class SklCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = c.cwd + bite(" ", c.args, c.end);
+            c.skeletonList.push(c.skeletizer.skeletize(*(c.meshList).getByName(tmp1), tmp2));
+        }
+    };
+
+    class ShadCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = c.cwd + bite(" ", c.args, c.end);
+            string tmp2 = c.cwd + bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            //vertex, fragment, name
+            c.shaders.pushNew(tmp1, tmp2, tmp3);
+        }
+    };
+
+    class MeshBufCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            c.meshBuffers.push_back(new MeshBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+            c.meshBuffers.at(c.meshBuffers.size() - 1)->genBuffers();
+        }
+    };
+
+    class SklBufCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            c.sklBuffers.push_back(new SkeletonBuffer(*(c.skeletonList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+            c.sklBuffers.at(c.sklBuffers.size() - 1)->genBuffers();
+        }
+    };
+
+    class InstBufCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            c.instBuffers.push_back(new InstancedBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+            c.instBuffers.at(c.instBuffers.size() - 1)->genBuffers();
+        }
+    };
+
+    class TexLCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            c.materialLists.at(c.materialLists.size()-1)->textures->addLayouts(1);
+
+            size_t itmp1 = stoi(bite(" ", c.args, c.end));
+            size_t itmp2 = stoi(bite(" ", c.args, c.end));
+            size_t itmp3 = stoi(bite(" ", c.args, c.end));
+            string tmp1 = bite(" ", c.args, c.end);
+
+            c.materialLists.at(c.materialLists.size()-1)->textures->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "texl"){
+                c.step();
+                texlc.execute(c);
+            }
+        }
+    };
+
+    class TexMCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            c.materialLists.at(c.materialLists.size()-1)->textures->loadNew(c.cwd + c.args);
+
+            c.step();
+            if(c.command == "texm"){
+                texmc.execute(c);
+            }
+            else if(c.command == "texl"){
+                texlc.execute(c);
+            }
+            else{
+                throw "there must be a texl command after texm block in scene";
+            }
+        }
+    };
+
+    class TexCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            MaterialList* texbmat = new MaterialList;
+            texbmat->pushNew();
+            texbmat->name = c.args;
+
+            c.materialLists.push_back(texbmat);
+
+            c.step();
+            if(c.command == "texm"){
+                texmc.execute(c);
+            }
+            else{
+                throw "there must be a texm command after tex in scene";
+            }
+        }
+    };
+
+    class MatCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = c.cwd + bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+
+            c.materialLoader.load(tmp1);
+            MaterialList* materials = c.materialLoader.list;
+            TextureList* textures = materials->textures;
+
+            textures->addLayouts(materials->size());//gen layout for each material
+
+            unordered_set<string> loaded;
+            unordered_map<string, size_t> ids;
+            size_t idCounter = 0;
+            for(size_t i = 0; i < materials->size(); ++i){//for every material
+                string texName = materials->at(i)->getTextureNames().at(0);//texture name
+                if(loaded.count(texName) == 0){//if not loaded
+                    textures->loadNew(c.cwd + tmp2 + "\\\\" + texName);//load by path
+                    loaded.emplace(texName);//mark loaded
+                    ids.emplace(pair(texName, idCounter));//map name to id in TextureList
+                    ++idCounter;
+                }
+            }
+
+            for(size_t i = 0; i < materials->size(); ++i){
+                string texName = materials->at(i)->getTextureNames().at(0);//texture name
+                textures->appendTextureToLayout(i, 0, ids.at(texName), "texture0");
+            }
+
+            materials->name = tmp3;
+            c.materialLists.push_back(materials);
+        }
+    };
+
+    class LightCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            float x = stof(bite(" ", c.args, c.end));
+            float y = stof(bite(" ", c.args, c.end));
+            float z = stof(bite(" ", c.args, c.end));
+            string tmp1 = bite(" ", c.args, c.end);
+
+            //x,y,z,name
+            c.model->addNewLightSource(x, y, z, tmp1);
+        }
+    };
+
+    class FrmbCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            size_t itmp1 = stoi(bite(" ", c.args, c.end));
+            size_t itmp2 = stoi(bite(" ", c.args, c.end));
+            size_t itmp3 = stoi(bite(" ", c.args, c.end));
+            string tmp1 = bite(" ", c.args, c.end);
+
+            Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
+            framebuffer->genTextureColorBuffers(itmp3);
+            c.model->addFramebuffer(*framebuffer);
+
+            MaterialList* frmbmat = new MaterialList;
+            frmbmat->pushNew();
+
+            frmbmat->name = tmp1;
+            frmbmat->textures = framebuffer->textureColorBuffers;
+            c.materialLists.push_back(frmbmat);
+        }
+    };
+
+    template<class T>
+    class ObjMoveCommand : public ICommand<LoaderContext>{
+    public:
+        ObjMoveCommand(T& o)
+            : o(o)
+        {
+            static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
+        }
+
+        void execute(LoaderContext& c) override{
+            float x = stof(bite(" ", c.args, c.end));
+            float y = stof(bite(" ", c.args, c.end));
+            float z = stof(bite(" ", c.args, c.end));
+
+            o.move(x,y,z);
+        }
+        T& o;
+    };
+
+    template<class T>
+    class ObjScaleCommand : public ICommand<LoaderContext>{
+    public:
+        ObjScaleCommand(T& o)
+            : o(o)
+        {
+            static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
+        }
+
+        void execute(LoaderContext& c) override{
+            float x = stof(bite(" ", c.args, c.end));
+            float y = stof(bite(" ", c.args, c.end));
+            float z = stof(bite(" ", c.args, c.end));
+
+            o.scaleTo(x,y,z);
+        }
+        T& o;
+    };
+
+    template<class T>
+    class ObjRotCommand : public ICommand<LoaderContext>{
+    public:
+        ObjRotCommand(T& o)
+            : o(o)
+        {
+            static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
+        }
+
+        void execute(LoaderContext& c) override{
+            float x = stof(bite(" ", c.args, c.end));
+            float y = stof(bite(" ", c.args, c.end));
+            float z = stof(bite(" ", c.args, c.end));
+
+            o.rotateTo(x,y,z);
+        }
+        T& o;
+    };
+
+    class MeshObjCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            string tmp4 = bite(" ", c.args, c.end);
+
+            size_t which1 = 0, which2 = 0;
+
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+            for(size_t i = 0; i < c.materialLists.size(); ++i){
+                if(c.materialLists.at(i)->name == tmp1){
+                    which1 = i;
+                    break;
+                }
+            }
+
+            for(size_t i = 0; i < c.meshBuffers.size(); ++i){
+                if(c.meshBuffers.at(i)->name == tmp2){
+                    which2 = i;
+                    break;
+                }
+            }
+            //remove textures from addNewObject cause it moved it Materials
+            c.model->addNewObject(*(c.meshBuffers).at(which2),
+                                  c.materialLists.at(which1), tmp4);
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "move"){
+                c.step();
+                ObjMoveCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "scale"){
+                c.step();
+                ObjScaleCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "rot"){
+                c.step();
+                ObjRotCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+            }
+        }
+    };
+
+    class SklObjCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            string tmp4 = bite(" ", c.args, c.end);
+            string tmp5 = c.cwd + bite(" ", c.args, c.end);
+            size_t itmp1 = stoi(bite(" ", c.args, c.end));
+
+            size_t which1 = 0, which2 = 0;
+
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+            for(size_t i = 0; i < c.materialLists.size(); ++i){
+                if(c.materialLists.at(i)->name == tmp1){
+                    which1 = i;
+                    break;
+                }
+            }
+
+
+            for(size_t i = 0; i < c.sklBuffers.size(); ++i){
+                if(c.sklBuffers.at(i)->name == tmp2){
+                    which2 = i;
+                    break;
+                }
+            }
+
+            c.model->addNewObject(*c.sklBuffers.at(which2),
+                                   c.materialLists.at(which1), tmp4);
+            c.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, itmp1, tmp5);//add name instead of last arg
+            c.model->getSkeletonObject(tmp4)->setCurrAnimation(tmp5);
+            c.model->getSkeletonObject(tmp4)->startAnimation();
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "move"){
+                c.step();
+                ObjMoveCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "scale"){
+                c.step();
+                ObjScaleCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "rot"){
+                c.step();
+                ObjRotCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+            }
+        }
+    };
+
+    class InstObjCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp1 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args, c.end);
+            string tmp3 = bite(" ", c.args, c.end);
+            string tmp4 = bite(" ", c.args, c.end);
+            string tmp5 = bite(" ", c.args, c.end);
+
+            size_t which1 = 0, which2 = 0;
+
+//                for(size_t i = 0; i < texes.size(); ++i){
+//                    if(texes.at(i)->name == tmp1){
+//                        which1 = i;
+//                        break;
+//                    }
+//                }
+
+            for(size_t i = 0; i < c.materialLists.size(); ++i){
+                if(c.materialLists.at(i)->name == tmp1){
+                    which1 = i;
+                    break;
+                }
+            }
+
+            for(size_t i = 0; i < c.instBuffers.size(); ++i){
+                if(c.instBuffers.at(i)->name == tmp2){
+                    which2 = i;
+                    break;
+                }
+            }
+
+            vector<Position> poses;
+            Position pos;
+            pos.scaleTo(0.1,0.1,0.1);
+            float rad = 5;
+            int am = 30;
+            float shift = 360/am;
+            float angle = 0;
+            for(int i = 0; i < am; ++i){
+                pos.moveTo(rad*sin(angle),rad*cos(angle),0);
+                poses.push_back(pos);
+                angle += shift;
+            }
+
+            c.model->addNewObject(*c.instBuffers.at(which2), c.materialLists.at(which1), poses, tmp5);
+        }
+    };
+
+    class SkyboxCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            string tmp2 = bite(" ", c.args, c.end);
+
+            vector<string> skyboxSides;
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+
+            string tmp4 = bite(" ", c.args, c.end);
+
+            size_t which = 0;
+
+            for(size_t i = 0; i < c.meshBuffers.size(); ++i){
+                if(c.meshBuffers.at(i)->name == tmp2){
+                    which = i;
+                    break;
+                }
+            }
+
+            c.model->addNewSkybox(skyboxSides, *c.meshBuffers.at(which), tmp4);
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "move"){
+                c.step();
+                ObjMoveCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "scale"){
+                c.step();
+                ObjScaleCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+            }
+            if(nextCommand == "rot"){
+                c.step();
+                ObjRotCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+            }
+        }
+    };
+
+    class BckColCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            float r, g, b, a;
+
+            r = stof(bite(" ", c.args, c.end));
+            g = stof(bite(" ", c.args, c.end));
+            b = stof(bite(" ", c.args, c.end));
+            a = stof(bite(" ", c.args, c.end));
+
+            c.model->setBackgroundColor(r, g, b, a);
+        }
+    };
+
+    static CwdCommand cwdc;
+    static MeshCommand meshc;
+    static SklCommand sklc;
+    static ShadCommand shadc;
+    static MeshBufCommand meshbufc;
+    static SklBufCommand sklbufc;
+    static InstBufCommand instbufc;
+    static TexLCommand texlc;
+    static TexMCommand texmc;
+    static TexCommand texc;
+    static MatCommand matc;
+    static LightCommand lightc;
+    static FrmbCommand frmbc;
+    static ObjMoveCommand<MeshObject> momovec;
+    static ObjMoveCommand<SkeletonObject> somovec;
+    static ObjMoveCommand<SkyboxObject> skmovec;
+    static ObjScaleCommand<MeshObject> moscalec;
+    static ObjScaleCommand<SkeletonObject> soscalec;
+    static ObjScaleCommand<SkyboxObject> skscalec;
+    static ObjRotCommand<MeshObject> morotec;
+    static ObjRotCommand<SkeletonObject> sorotec;
+    static ObjRotCommand<SkyboxObject> skrotec;
+    static MeshObjCommand meshobjc;
+    static SklObjCommand sklobjc;
+    static InstObjCommand instobjc;
+    static SkyboxCommand skyboxc;
+    static BckColCommand bckcolc;
+
+
+    bool end;
 };

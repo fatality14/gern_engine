@@ -147,6 +147,9 @@ add GUIObject
 44
 allow to split SceneLoader scene.txt by multiple files
 
+45
+consider add material manual properties command for SceneLoader tex* commands
+
 lastplan:
 its only left to move all SceneLoader logic to its commands
 see example in SceneLoaderD
