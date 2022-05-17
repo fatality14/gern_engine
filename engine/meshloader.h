@@ -3,7 +3,7 @@
 #include <common.h>
 #include <mesh.h>
 
-class MeshLoader : private ALoader{
+class MeshLoader : private ULoader{
 public:
     MeshLoader(){
         allPolyIndexes = new vector<vector<uintvec3>>;
@@ -149,6 +149,8 @@ public:
         return *mesh;
     }
 private:
+    string token;
+
     Mesh* mesh;
 
     vector<glm::vec3> poses;

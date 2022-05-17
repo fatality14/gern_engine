@@ -16,10 +16,10 @@ int main (){
     Renderer renderer(window_width, window_height);
 //    SceneLoader sl;
 
-    SceneLoaderD sld;
+    SceneLoader sl;
 
 //    auto start = std::chrono::steady_clock::now();
-    sld.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
+    sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
 //    auto end = std::chrono::steady_clock::now();
 //    std::chrono::duration<double> elapsed_seconds = end-start;
 //    std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed_seconds).count() << "s\n";

@@ -122,12 +122,10 @@ public:
 
 struct ILoader : public ICommon{};
 
-//methods should be static
-class ALoader : public ILoader{
+//U stands for utility
+class ULoader : public ILoader{
 public:
-    string token;
-
-    int calcNumArgsDividedBy(string delimiter, string line){
+    static int calcNumArgsDividedBy(string delimiter, string line){
         int numArgs = 0;
         string token;
         bool end;
@@ -185,14 +183,14 @@ public:
         }
         return token;
     }
-    glm::vec3 parseVec3(string& line){
+    static glm::vec3 parseVec3(string& line){
         float norm[3];
         int i = -1;
         bool end;
 
         while (true){
             ++i;
-            token = bite(" ", line, end);
+            string token = bite(" ", line, end);
             if(i < 3)
                 norm[i] = stof(token);
             if(end)
@@ -202,14 +200,14 @@ public:
         glm::vec3 ret = glm::vec3(norm[0], norm[1], norm[2]);
         return ret;
     }
-    glm::vec2 parseVec2(string& line){
+    static glm::vec2 parseVec2(string& line){
         float norm[2];
         int i = -1;
         bool end;
 
         while (true){
             ++i;
-            token = bite(" ", line, end);
+            string token = bite(" ", line, end);
             if(i < 2)
                 norm[i] = stof(token);
             if(end)

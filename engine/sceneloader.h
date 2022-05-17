@@ -33,7 +33,7 @@ public:
     virtual void load(string path, T& data) = 0;
 };
 
-class SceneLoaderD;
+class SceneLoader;
 
 class LoaderContext : public IContext{
 public:
@@ -56,9 +56,9 @@ public:
         if(lines.size() != 0){
             string& currLine = lines.front();
 
-            ALoader::removeBadSpaces(currLine);
+            ULoader::removeBadSpaces(currLine);
 
-            command = ALoader::bite(" ", currLine, end);
+            command = ULoader::bite(" ", currLine, end);
             args = currLine;
 
             lines.pop();
@@ -72,7 +72,7 @@ public:
 
     string getNextCommand(){
         string nextCommand = lines.front();
-        return ALoader::bite(" ", nextCommand, end);
+        return ULoader::bite(" ", nextCommand, end);
     }
 
     string cwd;
@@ -99,7 +99,7 @@ public:
 
 typedef ICommand<LoaderContext> Command;
 
-class SceneLoaderD : private ALoader, public ISceneLoader<FrameModel>{
+class SceneLoader : private ULoader, public ISceneLoader<FrameModel>{
 public:
     void load(string path, FrameModel& data) override {
         c.model = &data;
@@ -387,9 +387,7 @@ private:
     template<class T>
     class ObjMoveCommand : public ICommand<LoaderContext>{
     public:
-        ObjMoveCommand(T& o)
-            : o(o)
-        {
+        ObjMoveCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
@@ -398,17 +396,15 @@ private:
             float y = stof(bite(" ", c.args, c.end));
             float z = stof(bite(" ", c.args, c.end));
 
-            o.move(x,y,z);
+            o->move(x,y,z);
         }
-        T& o;
+        T* o;
     };
 
     template<class T>
     class ObjScaleCommand : public ICommand<LoaderContext>{
     public:
-        ObjScaleCommand(T& o)
-            : o(o)
-        {
+        ObjScaleCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
@@ -417,17 +413,15 @@ private:
             float y = stof(bite(" ", c.args, c.end));
             float z = stof(bite(" ", c.args, c.end));
 
-            o.scaleTo(x,y,z);
+            o->scaleTo(x,y,z);
         }
-        T& o;
+        T* o;
     };
 
     template<class T>
     class ObjRotCommand : public ICommand<LoaderContext>{
     public:
-        ObjRotCommand(T& o)
-            : o(o)
-        {
+        ObjRotCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
@@ -436,9 +430,9 @@ private:
             float y = stof(bite(" ", c.args, c.end));
             float z = stof(bite(" ", c.args, c.end));
 
-            o.rotateTo(x,y,z);
+            o->rotateTo(x,y,z);
         }
-        T& o;
+        T* o;
     };
 
     class MeshObjCommand : public ICommand<LoaderContext>{
@@ -478,15 +472,18 @@ private:
             string nextCommand = c.getNextCommand();
             if(nextCommand == "move"){
                 c.step();
-                ObjMoveCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+                momovec.o = c.model->getMeshObject(tmp4);
+                momovec.execute(c);
             }
             if(nextCommand == "scale"){
                 c.step();
-                ObjScaleCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+                moscalec.o = c.model->getMeshObject(tmp4);
+                moscalec.execute(c);
             }
             if(nextCommand == "rot"){
                 c.step();
-                ObjRotCommand<MeshObject>(*c.model->getMeshObject(tmp4)).execute(c);
+                morotc.o = c.model->getMeshObject(tmp4);
+                morotc.execute(c);
             }
         }
     };
@@ -534,15 +531,18 @@ private:
             string nextCommand = c.getNextCommand();
             if(nextCommand == "move"){
                 c.step();
-                ObjMoveCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+                somovec.o = c.model->getSkeletonObject(tmp4);
+                somovec.execute(c);
             }
             if(nextCommand == "scale"){
                 c.step();
-                ObjScaleCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+                soscalec.o = c.model->getSkeletonObject(tmp4);
+                soscalec.execute(c);
             }
             if(nextCommand == "rot"){
                 c.step();
-                ObjRotCommand<SkeletonObject>(*c.model->getSkeletonObject(tmp4)).execute(c);
+                sorotc.o = c.model->getSkeletonObject(tmp4);
+                sorotc.execute(c);
             }
         }
     };
@@ -625,15 +625,18 @@ private:
             string nextCommand = c.getNextCommand();
             if(nextCommand == "move"){
                 c.step();
-                ObjMoveCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+                skmovec.o = c.model->getSkyboxObject(tmp4);
+                skmovec.execute(c);
             }
             if(nextCommand == "scale"){
                 c.step();
-                ObjScaleCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+                skscalec.o = c.model->getSkyboxObject(tmp4);
+                skscalec.execute(c);
             }
             if(nextCommand == "rot"){
                 c.step();
-                ObjRotCommand<SkyboxObject>(*c.model->getSkyboxObject(tmp4)).execute(c);
+                skrotc.o = c.model->getSkyboxObject(tmp4);
+                skrotc.execute(c);
             }
         }
     };
@@ -671,15 +674,42 @@ private:
     static ObjScaleCommand<MeshObject> moscalec;
     static ObjScaleCommand<SkeletonObject> soscalec;
     static ObjScaleCommand<SkyboxObject> skscalec;
-    static ObjRotCommand<MeshObject> morotec;
-    static ObjRotCommand<SkeletonObject> sorotec;
-    static ObjRotCommand<SkyboxObject> skrotec;
+    static ObjRotCommand<MeshObject> morotc;
+    static ObjRotCommand<SkeletonObject> sorotc;
+    static ObjRotCommand<SkyboxObject> skrotc;
     static MeshObjCommand meshobjc;
     static SklObjCommand sklobjc;
     static InstObjCommand instobjc;
     static SkyboxCommand skyboxc;
     static BckColCommand bckcolc;
 
-
     bool end;
 };
+
+SceneLoader::CwdCommand SceneLoader::cwdc;
+SceneLoader::MeshCommand SceneLoader::meshc;
+SceneLoader::SklCommand SceneLoader::sklc;
+SceneLoader::ShadCommand SceneLoader::shadc;
+SceneLoader::MeshBufCommand SceneLoader::meshbufc;
+SceneLoader::SklBufCommand SceneLoader::sklbufc;
+SceneLoader::InstBufCommand SceneLoader::instbufc;
+SceneLoader::TexLCommand SceneLoader::texlc;
+SceneLoader::TexMCommand SceneLoader::texmc;
+SceneLoader::TexCommand SceneLoader::texc;
+SceneLoader::MatCommand SceneLoader::matc;
+SceneLoader::LightCommand SceneLoader::lightc;
+SceneLoader::FrmbCommand SceneLoader::frmbc;
+SceneLoader::ObjMoveCommand<MeshObject> SceneLoader::momovec;
+SceneLoader::ObjMoveCommand<SkeletonObject> SceneLoader::somovec;
+SceneLoader::ObjMoveCommand<SkyboxObject> SceneLoader::skmovec;
+SceneLoader::ObjScaleCommand<MeshObject> SceneLoader::moscalec;
+SceneLoader::ObjScaleCommand<SkeletonObject> SceneLoader::soscalec;
+SceneLoader::ObjScaleCommand<SkyboxObject> SceneLoader::skscalec;
+SceneLoader::ObjRotCommand<MeshObject> SceneLoader::morotc;
+SceneLoader::ObjRotCommand<SkeletonObject> SceneLoader::sorotc;
+SceneLoader::ObjRotCommand<SkyboxObject> SceneLoader::skrotc;
+SceneLoader::MeshObjCommand SceneLoader::meshobjc;
+SceneLoader::SklObjCommand SceneLoader::sklobjc;
+SceneLoader::InstObjCommand SceneLoader::instobjc;
+SceneLoader::SkyboxCommand SceneLoader::skyboxc;
+SceneLoader::BckColCommand SceneLoader::bckcolc;

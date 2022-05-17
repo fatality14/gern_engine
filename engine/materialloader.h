@@ -3,7 +3,7 @@
 #include <common.h>
 #include <material.h>
 
-class MaterialLoader : private ALoader{
+class MaterialLoader : private ULoader{
 public:
     MaterialList* list;
 
@@ -19,7 +19,7 @@ public:
         getline(f, line);
         removeBadSpaces(line);
 
-        token = bite(" ", line, end);
+        string token = bite(" ", line, end);
 
         string tmp;
         float ftmp1, ftmp2, ftmp3;

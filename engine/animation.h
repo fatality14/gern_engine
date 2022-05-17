@@ -24,7 +24,7 @@ public:
 };
 
 
-class Animation : private ALoader{
+class Animation : private ULoader{
 public:
     float animationTime;
     float currAnimationTime;
@@ -51,6 +51,8 @@ public:
         int switchCase;
         bool end;
         size_t pAmount = -1;
+
+        string token;
 
         while(!f.eof()){
             switchCase = -1;

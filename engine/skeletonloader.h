@@ -5,7 +5,7 @@
 #include <skeletonmesh.h>
 #include <algorithm>
 
-class SkeletonLoader : private ALoader{
+class SkeletonLoader : private ULoader{
 public:
     SkeletonMesh& skeletize(Mesh& mesh, string skeletonPath){
         skeletonMesh = new SkeletonMesh;
@@ -34,6 +34,8 @@ private:
         bool end;
         vector<pair<int, int>> childTree;
         size_t jAmount = -1;
+
+        string token;
 
         while(!f.eof()){
             switchCase = -1;
