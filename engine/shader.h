@@ -90,14 +90,14 @@ private:
         src = "";
 
         in_file.open(vertexPath);
-        if(in_file.is_open()){
-            while(getline(in_file, temp))
-                src += temp + "\n";
+
+        if(in_file.fail()){
+            throw string("Cannot open file: ") + vertexPath;
         }
-        else {
-            cout << "Error reading vertex shader, file not exist" << endl;
-            isCompiled = false;
-        }
+
+        while(getline(in_file, temp))
+            src += temp + "\n";
+
         in_file.close();
 
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -120,14 +120,14 @@ private:
         src = "";
 
         in_file.open(fragmentPath);
-        if(in_file.is_open()){
-            while(getline(in_file, temp))
-                src += temp + "\n";
+
+        if(in_file.fail()){
+            throw string("Cannot open file: ") + vertexPath;
         }
-        else {
-            cout << "Error reading vertex shader, file not exist" << endl;
-            isCompiled = false;
-        }
+
+        while(getline(in_file, temp))
+            src += temp + "\n";
+
         in_file.close();
 
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);

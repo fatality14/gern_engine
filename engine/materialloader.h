@@ -13,6 +13,10 @@ public:
         ifstream f;
         f.open(path);
 
+        if(f.fail()){
+            throw string("Cannot open file: ") + path;
+        }
+
         string line;
         bool end;
 

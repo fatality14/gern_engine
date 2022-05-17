@@ -54,7 +54,7 @@ public:
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else{
-            cout << "Texture loading failed" << endl;
+            throw string("Texture ") + path + " loading failed";
         }
 
         delete[] image;

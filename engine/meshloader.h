@@ -16,8 +16,7 @@ public:
         f.open(path);
 
         if(f.fail()){
-            cout << "Cannot open file: " << path << ", set empty mesh instead of" << endl;
-            return *mesh;
+            throw string("Cannot open file: ") + path;
         }
 
         string line;

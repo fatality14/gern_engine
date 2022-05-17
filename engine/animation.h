@@ -47,6 +47,10 @@ public:
         ifstream f;
         f.open(filePath);
 
+        if(f.fail()){
+            throw string("Cannot open file: ") + filePath;
+        }
+
         string line;
         int switchCase;
         bool end;

@@ -42,7 +42,7 @@ public:
                 SOIL_free_image_data(image);
             }
             else{
-                cout << "Texture loading failed" << endl;
+                throw string("Texture ") + facePaths.at(i) + " loading failed";
             }
         }
 

@@ -19,7 +19,7 @@ renderer should parse .txt with loader class and then render everything in decla
 make WindowManager class from Window class and make the draw sequence for every window in Renderer
 
 7
-rename some classes to fit their names (like Skybox in Cubemap)
+rename some classes to fit their names
 move every class to its header and move headers to its folders
 
 8
@@ -55,7 +55,7 @@ hide window pointers etc in *Object classes
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
 or just let texture hot change
 
-18
+18 (46)
 catch if exceed index of vectors
 
 +19
@@ -150,9 +150,20 @@ allow to split SceneLoader scene.txt by multiple files
 45
 consider add material manual properties command for SceneLoader tex* commands
 
+46 (47)
+add type check for all loaders
+
+47 (18)
+add opengl debug mode
+
+48
+refactor other loaders
+
+49
+add functionality for framebuffer, mouselistener, shader, texture, windows
+
 lastplan:
-its only left to move all SceneLoader logic to its commands
-see example in SceneLoaderD
+46, 47
 
 99?
 recorder class to render video

@@ -29,13 +29,17 @@ private:
         ifstream f;
         f.open(filePath);
 
+        if(f.fail()){
+            throw string("Cannot open file: ") + filePath;
+        }
+
         string line;
         int switchCase;
         bool end;
         vector<pair<int, int>> childTree;
         size_t jAmount = -1;
 
-        string token;
+        string token;        
 
         while(!f.eof()){
             switchCase = -1;

@@ -109,7 +109,10 @@ public:
 
         string line;
 
-        //TODO: check if file is not init to prevent infinie loading
+        if(f.fail()){
+            throw string("Cannot open file: ") + path;
+        }
+
         while(!f.eof()){
             getline(f, line);
             removeBadSpaces(line);
@@ -290,7 +293,7 @@ private:
                 texlc.execute(c);
             }
             else{
-                throw "there must be a texl command after texm block in scene";
+                throw string("there must be a texl command after texm block in scene");
             }
         }
     };
@@ -309,7 +312,7 @@ private:
                 texmc.execute(c);
             }
             else{
-                throw "there must be a texm command after tex in scene";
+                throw string("there must be a texm command after tex in scene");
             }
         }
     };

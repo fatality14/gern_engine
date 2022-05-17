@@ -110,6 +110,7 @@ public:
             if(at(i)->id == id)
                 return *at(i);
         }
+        throw string("joint of index range in joint list");
     }
     string genPoseInfo(){
         string res = "p ";
