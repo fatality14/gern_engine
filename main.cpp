@@ -1,12 +1,5 @@
-#include <common.h>
-#include <renderer.h>
-#include <meshloader.h>
-#include <skeletonobject.h>
-#include <skeletonloader.h>
-#include <shaderfield.h>
-#include <instancedobject.h>
-#include <sceneloader.h>
-#include <materialloader.h>
+#include <render/renderer.h>
+#include <render/sceneloader.h>
 #include <chrono>
 
 int main (){

@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.5)
 
 project(ogl LANGUAGES CXX)
 
-find_program(CCACHE_FOUND ccache D:/AYNP/ccache46_64)
+set(CCACHE_PATH D:/AYNP/ccache46_64)
+set(CCACHE_EXE ccache.exe)
+
+find_program(CCACHE_FOUND ccache ${CCACHE_PATH})
 if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "D:/AYNP/ccache46_64/ccache.exe")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PATH}/${CCACHE_EXE}")
     message("using ccache")
 endif(CCACHE_FOUND)
 
@@ -20,7 +23,13 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll" ".a")
 add_executable(ogl main.cpp)
 
 target_compile_options(ogl PRIVATE -Wall -Wextra -pedantic)
-target_include_directories(ogl PRIVATE engine/ thirdparty/GL_H/ thirdparty/GLFW/ thirdparty/SOIL2/ thirdparty/glm/ libs/)
+target_include_directories(ogl PRIVATE
+    engine/
+    thirdparty/GL_H/
+    thirdparty/GLFW/
+    thirdparty/SOIL2/
+    thirdparty/glm/
+    libs/)
 
 find_library(GLEW32 glew32 libs)
 find_library(GLFW3 glfw3 libs)
