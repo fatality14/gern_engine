@@ -24,8 +24,6 @@ int main (){
 //    std::chrono::duration<double> elapsed_seconds = end-start;
 //    std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed_seconds).count() << "s\n";
 
-//    sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", renderer);
-
     renderer.renderLoop();
 
     return 0;
