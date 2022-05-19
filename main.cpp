@@ -16,6 +16,7 @@ int main (){
         sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
     }
     catch(string e){
+        int a;
         cout << e << endl;
         return -1;
     }

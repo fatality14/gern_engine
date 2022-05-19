@@ -5,22 +5,21 @@ an object of the class should be situated in "*Object", "View", "Perspective" et
 2
 use "InstancedObject" to create custom particle system class
 
-3
+3?
 shader constructor to parse custom shader code into glsl
 
 +4
 make universal *Buffer class with a template not to copypaste code
 
-!5
++5
 +move all main() loading strings to file and make loader class
-renderer should parse .txt with loader class and then render everything in declared sequence
 
 !6
 make WindowManager class from Window class and make the draw sequence for every window in Renderer
 
 7
 rename some classes to fit their names
-move every class to its header and move headers to its folders
++move every class to its header and move headers to its folders
 
 8
 add const qualifiers where it need to be
@@ -36,6 +35,7 @@ rename some GL_* definitions to own enums
 
 !12
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
+split shad to two commands in SceneLoader
 
 13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
@@ -78,7 +78,7 @@ add possibility to change current camera
 +24
 add user function list in renderer
 
-25 (31)
++25
 make pose animation time user defined
 
 26 (11)
@@ -119,7 +119,7 @@ names should be splitted from shader fields?
 +35
 make all IShaderField attrib in buffer like vmodel in InstancedBuffer
 
-36
+36?
 move load method to ILoader and override it in loaders
 
 37
@@ -128,17 +128,17 @@ in case of different mesh file formats modify MeshLoader
 38
 make Window proxy pattern
 
-!39 (40)
+!39
 make AnimationList and all related for SceneLoader
 
-!40 (42)
+!40 (46)
 add load check for all loaders to debug if something goes wrong
 
 +41
 test object draw in multithreading, might be bad for texture unit sequence
 yeah, this is bad
 
-!42 (40)
++42
 SceneLoader must have addable modules like as Renderer
 
 43
@@ -161,6 +161,11 @@ refactor other loaders
 
 49
 add functionality for framebuffer, mouselistener, shader, texture, windows
+
+50
+renderer should parse .txt with loader class and then render everything in declared sequence
+this is the only way to reduce compile time, but slowdown render
+this code must be compiled in executable not to slowdown render
 
 lastplan:
 46, 47

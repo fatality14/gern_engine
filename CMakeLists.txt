@@ -31,6 +31,29 @@ target_include_directories(ogl PRIVATE
     thirdparty/glm/
     libs/)
 
+#[[ use on your own risk
+file(GLOB ALL_HEADERS
+     "engine/animation/*.h"
+     "engine/buffer/*.h"
+     "engine/common/*.h"
+     "engine/mesh/*.h"
+     "engine/object/*.h"
+     "engine/shader/*.h"
+     "engine/texture/*.h"
+)
+
+target_precompile_headers(ogl PRIVATE
+    <chrono>
+    <type_traits>
+    <unordered_set>
+    <unordered_map>
+    <queue>
+    <iostream>
+    <fstream>
+    <vector>
+    ${ALL_HEADERS})
+]]
+
 find_library(GLEW32 glew32 libs)
 find_library(GLFW3 glfw3 libs)
 find_library(SOIL libsoil2 libs)

@@ -34,10 +34,10 @@ public:
         shaderFields.push(*view);
     }
 
-    void parseAndPushAnimation(string animationFilePath, float animationTime, string name = "noname"){
+    void parseAndPushAnimation(string animationFilePath, float animationTimeMult, string name = "noname"){
         currAnimation = new Animation(buffer->getMesh().joints);
         currAnimation->parseKeyPoses(animationFilePath);
-        currAnimation->animationTime = animationTime;
+        currAnimation->animationTimeMult = animationTimeMult;
         currAnimation->name = name;
         animations.push(*currAnimation);
     }
@@ -76,8 +76,9 @@ public:
 
             currShaderId = shader->program;            
         }
-
-        shaderFields.pushToShader(*shader);
+        if(flags == 0){
+            shaderFields.pushToShader(*shader);
+        }
 
         if(doAnimation){
             currAnimation->applyCurrPose();
