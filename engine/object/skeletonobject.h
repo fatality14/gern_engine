@@ -89,7 +89,7 @@ public:
             glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
         else{
             //cout << "Draw mesh: " << currMesh->name << endl;
-            uint startFrom = 0;
+            GLint startFrom = 0;
             size_t textureI = 0;
             size_t materialI = 0;
 

@@ -11,10 +11,10 @@ public:
 
     string name;
 
-    int width;
-    int height;
+    GLsizei width;
+    GLsizei height;
 
-    Framebuffer(int width, int height, string name = "noname"){
+    Framebuffer(GLsizei width, GLsizei height, string name = "noname"){
         this->width = width;
         this->height = height;
         this->textureColorBuffers = new TextureList;
@@ -52,7 +52,7 @@ public:
     void unbind(){
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    void bindTextureColorBuffer(size_t attachmentNum){
+    void bindTextureColorBuffer(GLuint attachmentNum){
         glDrawBuffer(GL_COLOR_ATTACHMENT0 + attachmentNum);
     }
 private:

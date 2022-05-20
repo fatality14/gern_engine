@@ -56,7 +56,7 @@ public:
         else{
             Mesh* currMesh = &buffer->getMesh();
             //cout << "Draw mesh: " << currMesh->name << endl;
-            uint startFrom = 0;
+            GLint startFrom = 0;
             size_t textureI = 0;
             size_t materialI = 0;
 

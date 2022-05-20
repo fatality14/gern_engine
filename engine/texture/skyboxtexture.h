@@ -18,14 +18,14 @@ public:
         glDeleteTextures(1, &textureId);
     }
 
-    void setShaderParams(GLint n, string uniformName){
-        this->n = n;
+    void setShaderParams(GLuint textureUnit, string uniformName){
+        this->textureUnit = textureUnit;
         this->name = uniformName;
     }
     void pushToShader(Shader& shader) override{
-        shader.setUniform1i(name, n);
+        shader.setUniform1i(name, textureUnit);
 
-        glActiveTexture(GL_TEXTURE0 + n);
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
     }
 
@@ -54,10 +54,10 @@ public:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
 private:
-    int image_width;
-    int image_height;
+    GLsizei image_width;
+    GLsizei image_height;
 
-    GLint n = 0;
+    GLuint textureUnit = 0;
 
     unsigned char* image;
 };

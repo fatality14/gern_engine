@@ -99,7 +99,7 @@ a bug in animation while moving bone, it moves according to default object posit
 pass user function in setDefaultEvents
 or which is better make Event class
 
-31(40)
+31
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
 
 32?
@@ -111,7 +111,7 @@ make parameters of pushToShader as fields wherever it needed
 Shader methods should be called mostly in IShaderField childs
 add setShaderParams method to IShaderField?
 
-34
++34?
 +remove duplicate name fields in SceneLoader and all related
 names should be splitted from shader fields?
 

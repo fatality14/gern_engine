@@ -148,7 +148,7 @@ public:
         instancedObjects->popByName(name);
     }
 
-    SkyboxObject* getSkyboxObject(unsigned int index){
+    SkyboxObject* getSkyboxObject(size_t index){
         return skyboxes->at(index);
     }
     SkyboxObject* getSkyboxObject(string name){
@@ -174,12 +174,12 @@ public:
         framebuffers->popByName(name);
     }
 
-    void bindFramebuffer(size_t index, GLint attachmentNum = 0){
+    void bindFramebuffer(size_t index, GLuint attachmentNum = 0){
         framebuffers->at(index)->bind();
         framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
     }
-    void bindFramebuffer(string name, GLint attachmentNum = 0){
+    void bindFramebuffer(string name, GLuint attachmentNum = 0){
         framebuffers->getByName(name)->bind();
         framebuffers->getByName(name)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();

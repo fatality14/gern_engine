@@ -98,7 +98,7 @@ private:
         }
     }
     void addWeights(Mesh& mesh){
-        for(size_t i = 0; i < mesh.nVertices; i++){
+        for(GLint i = 0; i < mesh.nVertices; i++){
             SkeletonVertex v;
             v.position = mesh.vertices->at(i).position;
             v.normal = mesh.vertices->at(i).normal;

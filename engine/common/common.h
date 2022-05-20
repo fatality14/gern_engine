@@ -11,8 +11,6 @@
 
 using namespace std;
 
-typedef unsigned int uint;
-
 float someCounter = 0;
 
 

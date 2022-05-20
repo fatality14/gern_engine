@@ -33,8 +33,8 @@ public:
         viewMatrix = glm::lookAt(camera->location, camera->location + camera->front, camera->up);
     }
     void updateCameraPosition(){
-        camera->pitch += static_cast<GLfloat>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;
-        camera->yaw += static_cast<GLfloat>(mouse->mouseOffsetX) * camera->sensitivity * mouse->dt;
+        camera->pitch += static_cast<float>(mouse->mouseOffsetY) * camera->sensitivity * mouse->dt;
+        camera->yaw += static_cast<float>(mouse->mouseOffsetX) * camera->sensitivity * mouse->dt;
 
         if(camera->pitch > 80.f)
             camera->pitch = 80.f;

@@ -8,7 +8,7 @@ class Joint : public ICommon{
 public:
     vector<Joint*> childs;
     JointPosition* position;
-    uint id;
+    size_t id;
     string name;
 
     Joint(string name = "noname"){
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    Joint& getById(uint id){
+    Joint& getById(size_t id){
         for(size_t i = 0; i < size(); ++i){
             if(at(i)->id == id)
                 return *at(i);

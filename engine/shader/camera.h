@@ -12,12 +12,12 @@ public:
     glm::vec3 front;
     glm::vec3 right;
 
-    GLfloat pitch = 0.f;
-    GLfloat yaw = -90.f;
-    GLfloat roll = 0.f;
+    float pitch = 0.f;
+    float yaw = -90.f;
+    float roll = 0.f;
 
-    GLfloat movementSpeed = 0.1f;
-    GLfloat sensitivity = 5.f;
+    float movementSpeed = 0.1f;
+    float sensitivity = 5.f;
 
     Camera(glm::vec3 location, float movementSpeed = 0.1, float sensitivity = 5, string name = "noname"){
         this->name = name;

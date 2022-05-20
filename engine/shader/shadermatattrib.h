@@ -5,7 +5,7 @@
 template <class U>
 class ShaderMatAttrib : public IShaderField{
 public:
-    ShaderMatAttrib(string layoutName, int matSize, size_t offset, size_t divisor = 0){
+    ShaderMatAttrib(string layoutName, GLint matSize, size_t offset, GLuint divisor = 0){
         this->name = layoutName;
         this->matSize = matSize;
         this->offset = offset;
@@ -16,7 +16,7 @@ public:
         shader.setMatAttribPointer<U>(name, matSize, offset, divisor);
     }
 private:
-    int matSize;
+    GLint matSize;
     size_t offset;
-    size_t divisor;
+    GLuint divisor;
 };

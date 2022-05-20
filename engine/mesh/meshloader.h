@@ -3,13 +3,13 @@
 #include <common/common.h>
 #include <common/loader.h>
 #include <common/loader.h>
-#include <common/uintvec3.h>
+#include <common/glintvec3.h>
 #include <mesh/mesh.h>
 
 class MeshLoader : private ULoader{
 public:
     MeshLoader(){
-        allPolyIndexes = new vector<vector<uintvec3>>;
+        allPolyIndexes = new vector<vector<GLintvec3>>;
     }
 
     Mesh& load(string path, string meshName = "noname"){
@@ -28,7 +28,7 @@ public:
 
         bool nextPart = false;
         bool nextMtl = false;
-        uint lastPolyId = -1;
+        GLint lastPolyId = -1;
 
         while(!f.eof()){
             switchCase = -1;
@@ -54,7 +54,7 @@ public:
             }
             if(token == "f"){
                 if(nextMtl){
-                    if(lastPolyId != (uint)-1)
+                    if(lastPolyId != (GLint)-1)
                         lastMtlIds.push_back(lastPolyId);
                     nextMtl = false;
                 }
@@ -97,25 +97,25 @@ public:
 
         dividePolygonsToTriangles();
 
-        uint startFrom = 0;
-        for(uint i = 0; i < lastPolyIds.size(); ++i){
+        GLint startFrom = 0;
+        for(size_t i = 0; i < lastPolyIds.size(); ++i){
             if(mesh->partEndVertexIds.size() > 0)
                 mesh->partEndVertexIds.push_back(mesh->partEndVertexIds.at(i-1));
             else
                 mesh->partEndVertexIds.push_back(0);
-            for(uint j = startFrom; j < lastPolyIds.at(i)+1; ++j){
+            for(GLint j = startFrom; j < lastPolyIds.at(i)+1; ++j){
                 mesh->partEndVertexIds.at(i) += allPolyIndexes->at(j).size();
             }
             startFrom = lastPolyIds.at(i)+1;
         }
 
         startFrom = 0;
-        for(uint i = 0; i < lastMtlIds.size(); ++i){
+        for(size_t i = 0; i < lastMtlIds.size(); ++i){
             if(mesh->partEndMtlIds.size() > 0)
                 mesh->partEndMtlIds.push_back(mesh->partEndMtlIds.at(i-1));
             else
                 mesh->partEndMtlIds.push_back(0);
-            for(uint j = startFrom; j < lastMtlIds.at(i)+1; ++j){
+            for(GLint j = startFrom; j < lastMtlIds.at(i)+1; ++j){
                 mesh->partEndMtlIds.at(i) += allPolyIndexes->at(j).size();
             }
             startFrom = lastMtlIds.at(i)+1;
@@ -158,18 +158,18 @@ private:
     vector<glm::vec3> norms;
     vector<glm::vec2> texes;
 
-    vector<uintvec3> indexes;
-    vector<vector<uintvec3>>* allPolyIndexes;
+    vector<GLintvec3> indexes;
+    vector<vector<GLintvec3>>* allPolyIndexes;
 
-    vector<uint> lastPolyIds;
-    vector<uint> lastMtlIds;
+    vector<GLint> lastPolyIds;
+    vector<GLint> lastMtlIds;
 
-    vector<uintvec3> parseIndexes(string& line, int numArgsF){
-        uint ind[3];
+    vector<GLintvec3> parseIndexes(string& line, int numArgsF){
+        GLint ind[3];
         string copyLine = line;
-        int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine));
+        size_t numInd = calcNumArgsDividedBy("/", bite(" ", copyLine));
 
-        vector<uintvec3> indexes;
+        vector<GLintvec3> indexes;
 
         //cout << token << " ";
         while (true){
@@ -206,7 +206,7 @@ private:
             }
 
             --numArgsF;
-            indexes.push_back(uintvec3(ind[0], ind[1], ind[2]));
+            indexes.push_back(GLintvec3(ind[0], ind[1], ind[2]));
 
             if(numArgsF == 0){
                 break;
@@ -228,10 +228,10 @@ private:
         }
     }
     void dividePolygonsToTriangles(){
-        vector<uintvec3> newPolyIndexes;
-        vector<vector<uintvec3>>* newAllPolyIndexes = new vector<vector<uintvec3>>;
-        uint i;
-        uint count = 0;
+        vector<GLintvec3> newPolyIndexes;
+        vector<vector<GLintvec3>>* newAllPolyIndexes = new vector<vector<GLintvec3>>;
+        size_t i;
+        size_t count = 0;
         for(auto& currPolyIndexes : *allPolyIndexes){
             newPolyIndexes.clear();
             if(currPolyIndexes.size() > 3){

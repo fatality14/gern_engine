@@ -28,21 +28,21 @@ public:
     }
 
     template<class T>
-    void setFloatAttribPointer(string layoutName, int vecSize, size_t offset){
+    void setFloatAttribPointer(string layoutName, GLint vecSize, size_t offset){
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
     template<class T>
-    void setIntAttribPointer(string layoutName, int vecSize, size_t offset){
+    void setIntAttribPointer(string layoutName, GLint vecSize, size_t offset){
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
         glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset);
         glEnableVertexAttribArray(attribLoc);
     }
     template<class T>
-    void setMatAttribPointer(string layoutName, int matSize, size_t offset, size_t divisor = 0){
+    void setMatAttribPointer(string layoutName, GLint matSize, size_t offset, GLuint divisor = 0){
         GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        for(int i = 0; i < matSize; ++i){
+        for(GLint i = 0; i < matSize; ++i){
             glVertexAttribPointer(attribLoc + i,
                                   matSize,
                                   GL_FLOAT,
@@ -54,16 +54,16 @@ public:
 
         //the divisor by default is set by 0 by ogl
         if(divisor != 0){
-            for(int i = 0; i < matSize; ++i){
+            for(GLint i = 0; i < matSize; ++i){
                 glVertexAttribDivisor(attribLoc + i, divisor);
             }
         }
     }
 
-    void setUniformMatrix4fv(string uniformName, const GLfloat* value, size_t size = 1){
+    void setUniformMatrix4fv(string uniformName, const GLfloat* value, GLuint size = 1){
         glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);
     }
-    void setUniform3fv(string uniformName, const GLfloat* value, size_t size = 1){
+    void setUniform3fv(string uniformName, const GLfloat* value, GLuint size = 1){
         glUniform3fv(glGetUniformLocation(program, uniformName.data()), size, value);
     }
     void setUniform1i(string uniformName, GLint value){
