@@ -58,7 +58,7 @@ public:
 
             ULoader::removeBadSpaces(currLine);
 
-            command = ULoader::bite(" ", currLine, end);
+            command = ULoader::bite(" ", currLine);
             args = currLine;
 
             lines.pop();
@@ -72,7 +72,7 @@ public:
 
     string getNextCommand(){
         string nextCommand = lines.front();
-        return ULoader::bite(" ", nextCommand, end);
+        return ULoader::bite(" ", nextCommand);
     }
 
     string cwd;
@@ -93,8 +93,6 @@ public:
     vector<MeshBuffer*> meshBuffers;
     vector<SkeletonBuffer*> sklBuffers;
     vector<InstancedBuffer*> instBuffers;
-
-    bool end;
 };
 
 typedef ICommand<LoaderContext> Command;
@@ -205,8 +203,8 @@ private:
     class MeshCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
+            string tmp1 = c.cwd + bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
             c.meshList.push(c.meshLoader.load(tmp1, tmp2));
         }
     };
@@ -214,8 +212,8 @@ private:
     class SklCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = c.cwd + bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = c.cwd + bite(" ", c.args);
             c.skeletonList.push(c.skeletizer.skeletize(*(c.meshList).getByName(tmp1), tmp2));
         }
     };
@@ -223,9 +221,9 @@ private:
     class ShadCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args, c.end);
-            string tmp2 = c.cwd + bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
+            string tmp1 = c.cwd + bite(" ", c.args);
+            string tmp2 = c.cwd + bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
             //vertex, fragment, name
             c.shaders.pushNew(tmp1, tmp2, tmp3);
         }
@@ -234,9 +232,9 @@ private:
     class MeshBufCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
             c.meshBuffers.push_back(new MeshBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
             c.meshBuffers.at(c.meshBuffers.size() - 1)->genBuffers();
         }
@@ -245,9 +243,9 @@ private:
     class SklBufCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
             c.sklBuffers.push_back(new SkeletonBuffer(*(c.skeletonList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
             c.sklBuffers.at(c.sklBuffers.size() - 1)->genBuffers();
         }
@@ -256,9 +254,9 @@ private:
     class InstBufCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
             c.instBuffers.push_back(new InstancedBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
             c.instBuffers.at(c.instBuffers.size() - 1)->genBuffers();
         }
@@ -269,10 +267,10 @@ private:
         void execute(LoaderContext& c) override{
             c.materialLists.at(c.materialLists.size()-1)->textures->addLayouts(1);
 
-            size_t itmp1 = stoi(bite(" ", c.args, c.end));
-            size_t itmp2 = stoi(bite(" ", c.args, c.end));
-            size_t itmp3 = stoi(bite(" ", c.args, c.end));
-            string tmp1 = bite(" ", c.args, c.end);
+            size_t itmp1 = biteInt(" ", c.args);
+            size_t itmp2 = biteInt(" ", c.args);
+            size_t itmp3 = biteInt(" ", c.args);
+            string tmp1 = bite(" ", c.args);
 
             c.materialLists.at(c.materialLists.size()-1)->textures->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
 
@@ -324,9 +322,9 @@ private:
     class MatCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
+            string tmp1 = c.cwd + bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
 
             c.materialLoader.load(tmp1);
             MaterialList* materials = c.materialLoader.list;
@@ -360,10 +358,10 @@ private:
     class LightCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            float x = stof(bite(" ", c.args, c.end));
-            float y = stof(bite(" ", c.args, c.end));
-            float z = stof(bite(" ", c.args, c.end));
-            string tmp1 = bite(" ", c.args, c.end);
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
+            string tmp1 = bite(" ", c.args);
 
             //x,y,z,name
             c.model->addNewLightSource(x, y, z, tmp1);
@@ -372,12 +370,12 @@ private:
     class CamCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            float x = stof(bite(" ", c.args, c.end));
-            float y = stof(bite(" ", c.args, c.end));
-            float z = stof(bite(" ", c.args, c.end));
-            float movementSpeed = stof(bite(" ", c.args, c.end));
-            float sensitivity = stof(bite(" ", c.args, c.end));
-            string tmp1 = bite(" ", c.args, c.end);
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
+            float movementSpeed = biteFloat(" ", c.args);
+            float sensitivity = biteFloat(" ", c.args);
+            string tmp1 = bite(" ", c.args);
 
             //x,y,z,name
             c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, tmp1);
@@ -387,10 +385,10 @@ private:
     class FrmbCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            size_t itmp1 = stoi(bite(" ", c.args, c.end));
-            size_t itmp2 = stoi(bite(" ", c.args, c.end));
-            size_t itmp3 = stoi(bite(" ", c.args, c.end));
-            string tmp1 = bite(" ", c.args, c.end);
+            size_t itmp1 = biteInt(" ", c.args);
+            size_t itmp2 = biteInt(" ", c.args);
+            size_t itmp3 = biteInt(" ", c.args);
+            string tmp1 = bite(" ", c.args);
 
             Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
             framebuffer->genTextureColorBuffers(itmp3);
@@ -406,16 +404,16 @@ private:
     };
 
     template<class T>
-    class ObjMoveCommand : public ICommand<LoaderContext>{
+    class MoveCommand : public ICommand<LoaderContext>{
     public:
-        ObjMoveCommand(){
+        MoveCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
         void execute(LoaderContext& c) override{
-            float x = stof(bite(" ", c.args, c.end));
-            float y = stof(bite(" ", c.args, c.end));
-            float z = stof(bite(" ", c.args, c.end));
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
 
             o->move(x,y,z);
         }
@@ -423,16 +421,16 @@ private:
     };
 
     template<class T>
-    class ObjScaleCommand : public ICommand<LoaderContext>{
+    class ScaleCommand : public ICommand<LoaderContext>{
     public:
-        ObjScaleCommand(){
+        ScaleCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
         void execute(LoaderContext& c) override{
-            float x = stof(bite(" ", c.args, c.end));
-            float y = stof(bite(" ", c.args, c.end));
-            float z = stof(bite(" ", c.args, c.end));
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
 
             o->scaleTo(x,y,z);
         }
@@ -440,16 +438,16 @@ private:
     };
 
     template<class T>
-    class ObjRotCommand : public ICommand<LoaderContext>{
+    class RotCommand : public ICommand<LoaderContext>{
     public:
-        ObjRotCommand(){
+        RotCommand(){
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
         void execute(LoaderContext& c) override{
-            float x = stof(bite(" ", c.args, c.end));
-            float y = stof(bite(" ", c.args, c.end));
-            float z = stof(bite(" ", c.args, c.end));
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
 
             o->rotateTo(x,y,z);
         }
@@ -459,10 +457,10 @@ private:
     class MeshObjCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
-            string tmp4 = bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp3 = bite(" ", c.args);
+            string tmp4 = bite(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -491,20 +489,23 @@ private:
                                   c.materialLists.at(which1), tmp4);
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "move"){
-                c.step();
-                momovec.o = c.model->getMeshObject(tmp4);
-                momovec.execute(c);
-            }
-            if(nextCommand == "scale"){
-                c.step();
-                moscalec.o = c.model->getMeshObject(tmp4);
-                moscalec.execute(c);
-            }
-            if(nextCommand == "rot"){
-                c.step();
-                morotc.o = c.model->getMeshObject(tmp4);
-                morotc.execute(c);
+            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
+                if(nextCommand == "move"){
+                    c.step();
+                    momovec.o = c.model->getMeshObject(tmp4);
+                    momovec.execute(c);
+                }
+                if(nextCommand == "scale"){
+                    c.step();
+                    moscalec.o = c.model->getMeshObject(tmp4);
+                    moscalec.execute(c);
+                }
+                if(nextCommand == "rot"){
+                    c.step();
+                    morotc.o = c.model->getMeshObject(tmp4);
+                    morotc.execute(c);
+                }
+                nextCommand = c.getNextCommand();
             }
         }
     };
@@ -512,12 +513,12 @@ private:
     class SklObjCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp4 = bite(" ", c.args, c.end);
-            string tmp5 = c.cwd + bite(" ", c.args, c.end);
-            float ftmp1 = stof(bite(" ", c.args, c.end));
-            float ftmp2 = stof(bite(" ", c.args, c.end));
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp4 = bite(" ", c.args);
+            string tmp5 = c.cwd + bite(" ", c.args);
+            float ftmp1 = biteFloat(" ", c.args);
+            float ftmp2 = biteFloat(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -550,30 +551,33 @@ private:
             c.model->getSkeletonObject(tmp4)->startAnimation();
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "move"){
-                c.step();
-                somovec.o = c.model->getSkeletonObject(tmp4);
-                somovec.execute(c);
+            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
+                if(nextCommand == "move"){
+                    c.step();
+                    somovec.o = c.model->getSkeletonObject(tmp4);
+                    somovec.execute(c);
+                }
+                if(nextCommand == "scale"){
+                    c.step();
+                    soscalec.o = c.model->getSkeletonObject(tmp4);
+                    soscalec.execute(c);
+                }
+                if(nextCommand == "rot"){
+                    c.step();
+                    sorotc.o = c.model->getSkeletonObject(tmp4);
+                    sorotc.execute(c);
+                }
             }
-            if(nextCommand == "scale"){
-                c.step();
-                soscalec.o = c.model->getSkeletonObject(tmp4);
-                soscalec.execute(c);
-            }
-            if(nextCommand == "rot"){
-                c.step();
-                sorotc.o = c.model->getSkeletonObject(tmp4);
-                sorotc.execute(c);
-            }
+            nextCommand = c.getNextCommand();
         }
     };
 
     class InstObjCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args, c.end);
-            string tmp2 = bite(" ", c.args, c.end);
-            string tmp5 = bite(" ", c.args, c.end);
+            string tmp1 = bite(" ", c.args);
+            string tmp2 = bite(" ", c.args);
+            string tmp5 = bite(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -599,36 +603,74 @@ private:
             }
 
             vector<Position> poses;
-            Position pos;
-            pos.scaleTo(0.1,0.1,0.1);
-            float rad = 5;
-            int am = 30;
-            float shift = 360/am;
-            float angle = 0;
-            for(int i = 0; i < am; ++i){
-                pos.moveTo(rad*sin(angle),rad*cos(angle),0);
-                poses.push_back(pos);
-                angle += shift;
-            }
+//            Position pos;
+//            pos.scaleTo(0.1,0.1,0.1);
+//            float rad = 5;
+//            int am = 30;
+//            float shift = 360/am;
+//            float angle = 0;
+//            for(int i = 0; i < am; ++i){
+//                pos.moveTo(rad*sin(angle),rad*cos(angle),0);
+//                poses.push_back(pos);
+//                angle += shift;
+//            }
 
             c.model->addNewObject(*c.instBuffers.at(which2), c.materialLists.at(which1), poses, tmp5);
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "instel"){
+                c.step();
+                instelc.execute(c);
+            }
+        }
+    };
+
+    class InstElCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            InstancedObject* lastInstObj = c.model->getInstancedObject(c.model->instancedObjects->size()-1);
+            lastInstObj->modelMatrices.push_back(Position());
+
+            float x = biteFloat(" ", c.args);
+            float y = biteFloat(" ", c.args);
+            float z = biteFloat(" ", c.args);
+
+            lastInstObj->moveTo(lastInstObj->modelMatrices.size() - 1, x, y, z);
+
+            x = biteFloat(" ", c.args);
+            y = biteFloat(" ", c.args);
+            z = biteFloat(" ", c.args);
+
+            lastInstObj->rotateTo(lastInstObj->modelMatrices.size() - 1, x, y, z);
+
+            x = biteFloat(" ", c.args);
+            y = biteFloat(" ", c.args);
+            z = biteFloat(" ", c.args);
+
+            lastInstObj->scaleTo(lastInstObj->modelMatrices.size() - 1, x, y, z);
+
+            string nextCommand = c.getNextCommand();
+            if(nextCommand == "instel"){
+                c.step();
+                instelc.execute(c);
+            }
         }
     };
 
     class SkyboxCommand : public ICommand<LoaderContext>{
     public:
         void execute(LoaderContext& c) override{
-            string tmp2 = bite(" ", c.args, c.end);
+            string tmp2 = bite(" ", c.args);
 
             vector<string> skyboxSides;
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args, c.end));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            skyboxSides.push_back(c.cwd + bite(" ", c.args));
 
-            string tmp4 = bite(" ", c.args, c.end);
+            string tmp4 = bite(" ", c.args);
 
             size_t which = 0;
 
@@ -642,20 +684,23 @@ private:
             c.model->addNewSkybox(skyboxSides, *c.meshBuffers.at(which), tmp4);
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "move"){
-                c.step();
-                skmovec.o = c.model->getSkyboxObject(tmp4);
-                skmovec.execute(c);
-            }
-            if(nextCommand == "scale"){
-                c.step();
-                skscalec.o = c.model->getSkyboxObject(tmp4);
-                skscalec.execute(c);
-            }
-            if(nextCommand == "rot"){
-                c.step();
-                skrotc.o = c.model->getSkyboxObject(tmp4);
-                skrotc.execute(c);
+            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
+                if(nextCommand == "move"){
+                    c.step();
+                    skmovec.o = c.model->getSkyboxObject(tmp4);
+                    skmovec.execute(c);
+                }
+                if(nextCommand == "scale"){
+                    c.step();
+                    skscalec.o = c.model->getSkyboxObject(tmp4);
+                    skscalec.execute(c);
+                }
+                if(nextCommand == "rot"){
+                    c.step();
+                    skrotc.o = c.model->getSkyboxObject(tmp4);
+                    skrotc.execute(c);
+                }
+                nextCommand = c.getNextCommand();
             }
         }
     };
@@ -665,10 +710,10 @@ private:
         void execute(LoaderContext& c) override{
             float r, g, b, a;
 
-            r = stof(bite(" ", c.args, c.end));
-            g = stof(bite(" ", c.args, c.end));
-            b = stof(bite(" ", c.args, c.end));
-            a = stof(bite(" ", c.args, c.end));
+            r = biteFloat(" ", c.args);
+            g = biteFloat(" ", c.args);
+            b = biteFloat(" ", c.args);
+            a = biteFloat(" ", c.args);
 
             c.model->setBackgroundColor(r, g, b, a);
         }
@@ -688,22 +733,21 @@ private:
     static LightCommand lightc;
     static CamCommand camc;
     static FrmbCommand frmbc;
-    static ObjMoveCommand<MeshObject> momovec;
-    static ObjMoveCommand<SkeletonObject> somovec;
-    static ObjMoveCommand<SkyboxObject> skmovec;
-    static ObjScaleCommand<MeshObject> moscalec;
-    static ObjScaleCommand<SkeletonObject> soscalec;
-    static ObjScaleCommand<SkyboxObject> skscalec;
-    static ObjRotCommand<MeshObject> morotc;
-    static ObjRotCommand<SkeletonObject> sorotc;
-    static ObjRotCommand<SkyboxObject> skrotc;
+    static MoveCommand<MeshObject> momovec;
+    static MoveCommand<SkeletonObject> somovec;
+    static MoveCommand<SkyboxObject> skmovec;
+    static ScaleCommand<MeshObject> moscalec;
+    static ScaleCommand<SkeletonObject> soscalec;
+    static ScaleCommand<SkyboxObject> skscalec;
+    static RotCommand<MeshObject> morotc;
+    static RotCommand<SkeletonObject> sorotc;
+    static RotCommand<SkyboxObject> skrotc;
     static MeshObjCommand meshobjc;
     static SklObjCommand sklobjc;
     static InstObjCommand instobjc;
+    static InstElCommand instelc;
     static SkyboxCommand skyboxc;
     static BckColCommand bckcolc;
-
-    bool end;
 };
 
 SceneLoader::CwdCommand SceneLoader::cwdc;
@@ -720,17 +764,18 @@ SceneLoader::MatCommand SceneLoader::matc;
 SceneLoader::LightCommand SceneLoader::lightc;
 SceneLoader::CamCommand SceneLoader::camc;
 SceneLoader::FrmbCommand SceneLoader::frmbc;
-SceneLoader::ObjMoveCommand<MeshObject> SceneLoader::momovec;
-SceneLoader::ObjMoveCommand<SkeletonObject> SceneLoader::somovec;
-SceneLoader::ObjMoveCommand<SkyboxObject> SceneLoader::skmovec;
-SceneLoader::ObjScaleCommand<MeshObject> SceneLoader::moscalec;
-SceneLoader::ObjScaleCommand<SkeletonObject> SceneLoader::soscalec;
-SceneLoader::ObjScaleCommand<SkyboxObject> SceneLoader::skscalec;
-SceneLoader::ObjRotCommand<MeshObject> SceneLoader::morotc;
-SceneLoader::ObjRotCommand<SkeletonObject> SceneLoader::sorotc;
-SceneLoader::ObjRotCommand<SkyboxObject> SceneLoader::skrotc;
+SceneLoader::MoveCommand<MeshObject> SceneLoader::momovec;
+SceneLoader::MoveCommand<SkeletonObject> SceneLoader::somovec;
+SceneLoader::MoveCommand<SkyboxObject> SceneLoader::skmovec;
+SceneLoader::ScaleCommand<MeshObject> SceneLoader::moscalec;
+SceneLoader::ScaleCommand<SkeletonObject> SceneLoader::soscalec;
+SceneLoader::ScaleCommand<SkyboxObject> SceneLoader::skscalec;
+SceneLoader::RotCommand<MeshObject> SceneLoader::morotc;
+SceneLoader::RotCommand<SkeletonObject> SceneLoader::sorotc;
+SceneLoader::RotCommand<SkyboxObject> SceneLoader::skrotc;
 SceneLoader::MeshObjCommand SceneLoader::meshobjc;
 SceneLoader::SklObjCommand SceneLoader::sklobjc;
 SceneLoader::InstObjCommand SceneLoader::instobjc;
+SceneLoader::InstElCommand SceneLoader::instelc;
 SceneLoader::SkyboxCommand SceneLoader::skyboxc;
 SceneLoader::BckColCommand SceneLoader::bckcolc;

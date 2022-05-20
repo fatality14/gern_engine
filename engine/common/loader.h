@@ -65,6 +65,36 @@ public:
         }
         return token;
     }
+    static string bite(const string& delimiter, string& line){
+        size_t pos = 0;
+        string token;
+
+        pos = line.find(delimiter);
+
+        if(pos != string::npos){
+            token = line.substr(0, pos);
+            line.erase(0, pos + delimiter.length());
+        }
+        else{
+            token = line;
+        }
+        return token;
+    }
+
+    static float biteFloat(const string& delimiter, string& line, bool& end){
+        return stof(bite(delimiter, line, end));
+    }
+    static float biteFloat(const string& delimiter, string& line){
+        return stof(bite(delimiter, line));
+    }
+
+    static int biteInt(const string& delimiter, string& line, bool& end){
+        return stoi(bite(delimiter, line, end));
+    }
+    static float biteInt(const string& delimiter, string& line){
+        return stoi(bite(delimiter, line));
+    }
+
     static glm::vec3 parseVec3(string& line){
         float norm[3];
         int i = -1;

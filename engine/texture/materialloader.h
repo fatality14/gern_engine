@@ -19,12 +19,11 @@ public:
         }
 
         string line;
-        bool end;
 
         getline(f, line);
         removeBadSpaces(line);
 
-        string token = bite(" ", line, end);
+        string token = bite(" ", line);
 
         string tmp;
         float ftmp1, ftmp2, ftmp3;
@@ -37,51 +36,51 @@ public:
             getline(f, line);
             removeBadSpaces(line);
 
-            token = bite(" ", line, end);
+            token = bite(" ", line);
 
 
             if(token == "#"){
                 continue;
             }
             if(token == "newmtl"){
-                m = new Material(bite(" ", line, end));
+                m = new Material(bite(" ", line));
                 list->push(*m);
             }
             if(token == "Ka"){
-                ftmp1 = stof(bite(" ", line, end));
-                ftmp2 = stof(bite(" ", line, end));
-                ftmp3 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
+                ftmp2 = biteFloat(" ", line);
+                ftmp3 = biteFloat(" ", line);
                 m->setAmbientColor(ftmp1, ftmp2, ftmp3);
             }
             if(token == "Kd"){
-                ftmp1 = stof(bite(" ", line, end));
-                ftmp2 = stof(bite(" ", line, end));
-                ftmp3 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
+                ftmp2 = biteFloat(" ", line);
+                ftmp3 = biteFloat(" ", line);
                 m->setDiffuseColor(ftmp1, ftmp2, ftmp3);
             }
             if(token == "Ks"){
-                ftmp1 = stof(bite(" ", line, end));
-                ftmp2 = stof(bite(" ", line, end));
-                ftmp3 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
+                ftmp2 = biteFloat(" ", line);
+                ftmp3 = biteFloat(" ", line);
                 m->setSpecularColor(ftmp1, ftmp2, ftmp3);
             }
             if(token == "Ns"){
-                ftmp1 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
                 m->setSpecularHighlights(ftmp1);
             }
             if(token == "Ni"){
-                ftmp1 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
                 m->setOpticalDensity(ftmp1);
             }
             if(token == "d"){
-                ftmp1 = stof(bite(" ", line, end));
+                ftmp1 = biteFloat(" ", line);
                 m->setDissolve(ftmp1);
             }
             if(token == "map_Kd"){
-                m->pushTextureName(bite(" ", line, end));
+                m->pushTextureName(bite(" ", line));
             }
             if(token == "map_Ka"){
-                m->pushTextureName(bite(" ", line, end));
+                m->pushTextureName(bite(" ", line));
             }
             //...other maps
         }

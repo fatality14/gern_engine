@@ -58,7 +58,6 @@ public:
 
         string line;
         int switchCase;
-        bool end;
 
         string token;
         size_t pAmount = -1;
@@ -71,7 +70,7 @@ public:
             getline(f, line);
             removeBadSpaces(line);
 
-            token = bite(" ", line, end);
+            token = bite(" ", line);
 
             if(token == "p"){
                 switchCase = 0;
@@ -98,8 +97,7 @@ public:
 
                 bool end;
                 while (true){
-                    token = bite(" ", line, end);
-                    keyPoses.at(pAmount).ids.push_back(stoi(token));
+                    keyPoses.at(pAmount).ids.push_back(biteInt(" ", line, end));
                     if(end)
                         break;
                 }
@@ -115,14 +113,14 @@ public:
                 break;
             case 4:
                 //this is an example of how this should work, need to add more dependences
-                if(bite(" ", line, end) == "default"){
+                if(bite(" ", line) == "default"){
                     //keyPoses.at(pAmount).timingFunction = [](float a) -> float {return a;};
                 }
-                if(bite(" ", line, end) == "exp"){
+                if(bite(" ", line) == "exp"){
                     keyPoses.at(pAmount).timingFunction = [](float a) -> float {return glm::exp(-a*5);};
                 }
 
-                float poseTime = stof(bite(" ", line, end));
+                float poseTime = biteFloat(" ", line);
                 keyPoses.at(pAmount).poseTime = poseTime;
                 animationTime += poseTime;
                 break;

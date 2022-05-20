@@ -25,7 +25,6 @@ public:
         string line;
 
         int switchCase;
-        bool end;
 
         bool nextPart = false;
         bool nextMtl = false;
@@ -37,7 +36,7 @@ public:
             getline(f, line);
             removeBadSpaces(line);
 
-            token = bite(" ", line, end);
+            token = bite(" ", line);
 
             if(token == "v"){
                 if(nextPart){
@@ -168,22 +167,21 @@ private:
     vector<uintvec3> parseIndexes(string& line, int numArgsF){
         uint ind[3];
         string copyLine = line;
-        bool end;
-        int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine, end));
+        int numInd = calcNumArgsDividedBy("/", bite(" ", copyLine));
 
         vector<uintvec3> indexes;
 
         //cout << token << " ";
         while (true){
             if(numInd == 1){
-                token = bite(" ", line, end);
+                token = bite(" ", line);
                 ind[0] = stoul(token);
                 ind[1] = ind[2] = 1;//very important to set 1
             }
             if(numInd == 2){
-                token = bite("/", line, end);
+                token = bite("/", line);
                 ind[0] = stoul(token);
-                token = bite(" ", line, end);
+                token = bite(" ", line);
                 if(token != "")
                     ind[1] = stoul(token);
                 else
@@ -191,16 +189,16 @@ private:
                 ind[2] = 1;
             }
             if(numInd == 3){
-                token = bite("/", line, end);
+                token = bite("/", line);
                 ind[0] = stoul(token);
 
-                token = bite("/", line, end);
+                token = bite("/", line);
                 if(token != "")
                     ind[1] = stoul(token);
                 else
                     ind[1] = 1;
 
-                token = bite(" ", line, end);
+                token = bite(" ", line);
                 if(token != "")
                     ind[2] = stoul(token);
                 else

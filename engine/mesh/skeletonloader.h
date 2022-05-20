@@ -36,7 +36,6 @@ private:
 
         string line;
         int switchCase;
-        bool end;
         vector<pair<int, int>> childTree;
         size_t jAmount = -1;
 
@@ -48,7 +47,7 @@ private:
             getline(f, line);
             removeBadSpaces(line);
 
-            token = bite(" ", line, end);
+            token = bite(" ", line);
 
             if(token == "j"){
                 switchCase = 0;
