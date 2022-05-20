@@ -162,6 +162,10 @@ public:
                 lightc.execute(c);
                 continue;
             }
+            if(c.command == "cam"){
+                camc.execute(c);
+                continue;
+            }
             if(c.command == "frmb"){
                 frmbc.execute(c);
                 continue;
@@ -363,6 +367,20 @@ private:
 
             //x,y,z,name
             c.model->addNewLightSource(x, y, z, tmp1);
+        }
+    };
+    class CamCommand : public ICommand<LoaderContext>{
+    public:
+        void execute(LoaderContext& c) override{
+            float x = stof(bite(" ", c.args, c.end));
+            float y = stof(bite(" ", c.args, c.end));
+            float z = stof(bite(" ", c.args, c.end));
+            float movementSpeed = stof(bite(" ", c.args, c.end));
+            float sensitivity = stof(bite(" ", c.args, c.end));
+            string tmp1 = bite(" ", c.args, c.end);
+
+            //x,y,z,name
+            c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, tmp1);
         }
     };
 
@@ -668,6 +686,7 @@ private:
     static TexCommand texc;
     static MatCommand matc;
     static LightCommand lightc;
+    static CamCommand camc;
     static FrmbCommand frmbc;
     static ObjMoveCommand<MeshObject> momovec;
     static ObjMoveCommand<SkeletonObject> somovec;
@@ -699,6 +718,7 @@ SceneLoader::TexMCommand SceneLoader::texmc;
 SceneLoader::TexCommand SceneLoader::texc;
 SceneLoader::MatCommand SceneLoader::matc;
 SceneLoader::LightCommand SceneLoader::lightc;
+SceneLoader::CamCommand SceneLoader::camc;
 SceneLoader::FrmbCommand SceneLoader::frmbc;
 SceneLoader::ObjMoveCommand<MeshObject> SceneLoader::momovec;
 SceneLoader::ObjMoveCommand<SkeletonObject> SceneLoader::somovec;

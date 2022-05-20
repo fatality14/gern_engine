@@ -19,6 +19,7 @@ sklbuf paimon skeleton paimonskl
 instbuf paimon instanced paimoninst
 mat resources\\models\\GenshinImpactPack\\paimon\\paimon.mtl resources\\models\\GenshinImpactPack\\paimon\\Texture paimonmat
 light 0 0 2 lightPos0
+cam 0 0 10 0.1 5 mycam
 frmb 1366 768 2 screenbuff
 meshobj screenbuff quad screen
 rot 0 180 0

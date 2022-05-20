@@ -178,7 +178,7 @@ private:
         keyPoseTime = keyPoses.at(currPoseIndex).poseTime * animationTimeMult;
         interpolationCoef = (currAnimationTime-timePassed)/keyPoseTime;
         interpolationCoef = keyPoses[currPoseIndex].timingFunction(interpolationCoef);
-        cout << currAnimationTime << " " << interpolationCoef << " " << currPoseIndex << endl;
+//        cout << currAnimationTime << " " << interpolationCoef << " " << currPoseIndex << endl;
         if(interpolationCoef > 1){
             while(interpolationCoef > 1){
                 ++currPoseIndex;

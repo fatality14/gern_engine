@@ -19,10 +19,13 @@ public:
     GLfloat movementSpeed = 0.1f;
     GLfloat sensitivity = 5.f;
 
-    Camera(string name = "noname"){
+    Camera(glm::vec3 location, float movementSpeed = 0.1, float sensitivity = 5, string name = "noname"){
         this->name = name;
 
-        location = glm::vec3(0.f, 0.f, 1.f);
+        this->movementSpeed = movementSpeed;
+        this->sensitivity = sensitivity;
+
+        this->location = location;
         up = glm::vec3(0.f, 1.f, 0.f);
         front = glm::vec3(0.f, 0.f, -1.f);
         right = glm::vec3(0.f);

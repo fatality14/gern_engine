@@ -41,7 +41,7 @@ public:
         perspective = new Perspective(*this->window);
         mouse = new MouseListener(*this->window);
         camList = new CameraList();
-        camList->push(*(new Camera("default")));
+        camList->push(*(new Camera(glm::vec3(0, 0, 1), 0.1, 5, "default")));
         camList->at(0)->location.z += 3;
         view = new View(*this->window, *mouse, *camList->at(0));
         meshObjects = new MeshObjectList;
@@ -101,6 +101,12 @@ public:
     }
     void addFramebuffer(Framebuffer& fb){
         framebuffers->push(fb);
+    }
+    void addNewCamera(glm::vec3 location, float movementSpeed, float sensitivity, string name = "noname"){
+        camList->push(*(new Camera(location, movementSpeed, sensitivity, name)));
+    }
+    void addNewCamera(float x, float y, float z, float movementSpeed, float sensitivity, string name = "noname"){
+        camList->push(*(new Camera(glm::vec3(x,y,z), movementSpeed, sensitivity, name)));
     }
 
     MeshObject* getMeshObject(size_t index){
@@ -167,6 +173,7 @@ public:
     void popFramebuffer(string name){
         framebuffers->popByName(name);
     }
+
     void bindFramebuffer(size_t index, GLint attachmentNum = 0){
         framebuffers->at(index)->bind();
         framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
@@ -181,6 +188,27 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         clearBuffers();
     }
+
+    Camera* getCamera(size_t index){
+        return camList->at(index);
+    }
+    Camera* getCamera(string name){
+        return camList->getByName(name);
+    }
+    void popCamera(size_t index){
+        camList->popByIndex(index);
+    }
+    void popCamera(string name){
+        camList->popByName(name);
+    }
+
+    void setCamera(size_t index){
+        view->setCamera(*getCamera(index));
+    }
+    void setCamera(string name){
+        view->setCamera(*getCamera(name));
+    }
+
     void clearBuffers(){
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

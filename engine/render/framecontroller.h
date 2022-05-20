@@ -112,7 +112,9 @@ public:
         setEvent(m.window->getWindowPtr(), Y, currSklObj->buffer->getMesh().joints.at(someCounter)->setDefaultPose());
 
         setEvent(m.window->getWindowPtr(), T, currSklObj->currAnimation->setStartTime(10); currSklObj->currAnimation->reset());
-//        setEvent(m.window->getWindowPtr(), G, currSklObj->startAnimation());
+
+        setEvent(m.window->getWindowPtr(), B, m.setCamera(0));
+        setEvent(m.window->getWindowPtr(), G, m.setCamera(1));
 
         m.resetObjectShaderLastIds();
     }
