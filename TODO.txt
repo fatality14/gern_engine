@@ -89,8 +89,10 @@ or make interface for a lot of different cases instead
 27
 add namespaces
 
-28 (26)
-remove GLfloat etc where it must be just float etc
+28
++remove GLfloat etc where it must be just float etc
+check types in SceneLoader, they must be equal to what constructors get
+e.g. FrmbCommand variables for Framebuffer
 
 29?
 a bug in animation while moving bone, it moves according to default object position

@@ -60,10 +60,10 @@ public:
         }
     }
 
-    void setUniformMatrix4fv(string uniformName, const GLfloat* value, GLuint size = 1){
+    void setUniformMatrix4fv(string uniformName, const GLfloat* value, GLsizei size = 1){
         glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);
     }
-    void setUniform3fv(string uniformName, const GLfloat* value, GLuint size = 1){
+    void setUniform3fv(string uniformName, const GLfloat* value, GLsizei size = 1){
         glUniform3fv(glGetUniformLocation(program, uniformName.data()), size, value);
     }
     void setUniform1i(string uniformName, GLint value){
