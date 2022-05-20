@@ -40,10 +40,9 @@ split shad to two commands in SceneLoader
 13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
 
-14
-split CMakeList to compile other libraries only once?
++14
 +use ccache
-use precompile headers
++use precompile headers
 
 15?
 make counter instead of noname in object etc names
@@ -166,6 +165,9 @@ add functionality for framebuffer, mouselistener, shader, texture, windows
 renderer should parse .txt with loader class and then render everything in declared sequence
 this is the only way to reduce compile time, but slowdown render
 this code must be compiled in executable not to slowdown render
+
+51
+add CMakeList to compile other libraries
 
 lastplan:
 46, 47

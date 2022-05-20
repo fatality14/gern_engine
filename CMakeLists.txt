@@ -7,7 +7,7 @@ set(CCACHE_EXE ccache.exe)
 
 find_program(CCACHE_FOUND ccache ${CCACHE_PATH})
 if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PATH}/${CCACHE_EXE}")
+    #set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PATH}/${CCACHE_EXE}")
     message("using ccache")
 endif(CCACHE_FOUND)
 

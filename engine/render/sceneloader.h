@@ -496,10 +496,10 @@ private:
         void execute(LoaderContext& c) override{
             string tmp1 = bite(" ", c.args, c.end);
             string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
             string tmp4 = bite(" ", c.args, c.end);
             string tmp5 = c.cwd + bite(" ", c.args, c.end);
-            size_t itmp1 = stoi(bite(" ", c.args, c.end));
+            float ftmp1 = stof(bite(" ", c.args, c.end));
+            float ftmp2 = stof(bite(" ", c.args, c.end));
 
             size_t which1 = 0, which2 = 0;
 
@@ -527,7 +527,7 @@ private:
 
             c.model->addNewObject(*c.sklBuffers.at(which2),
                                    c.materialLists.at(which1), tmp4);
-            c.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, itmp1, tmp5);//add name instead of last arg
+            c.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, ftmp1, ftmp2, tmp5);//add name instead of last arg
             c.model->getSkeletonObject(tmp4)->setCurrAnimation(tmp5);
             c.model->getSkeletonObject(tmp4)->startAnimation();
 
@@ -555,8 +555,6 @@ private:
         void execute(LoaderContext& c) override{
             string tmp1 = bite(" ", c.args, c.end);
             string tmp2 = bite(" ", c.args, c.end);
-            string tmp3 = bite(" ", c.args, c.end);
-            string tmp4 = bite(" ", c.args, c.end);
             string tmp5 = bite(" ", c.args, c.end);
 
             size_t which1 = 0, which2 = 0;

@@ -111,6 +111,9 @@ public:
         setEvent(m.window->getWindowPtr(), U, currSklObj->buffer->getMesh().joints.setDafaultPose());
         setEvent(m.window->getWindowPtr(), Y, currSklObj->buffer->getMesh().joints.at(someCounter)->setDefaultPose());
 
+        setEvent(m.window->getWindowPtr(), T, currSklObj->currAnimation->setStartTime(10); currSklObj->currAnimation->reset());
+//        setEvent(m.window->getWindowPtr(), G, currSklObj->startAnimation());
+
         m.resetObjectShaderLastIds();
     }
 };

@@ -34,11 +34,9 @@ public:
         shaderFields.push(*view);
     }
 
-    void parseAndPushAnimation(string animationFilePath, float animationTimeMult, string name = "noname"){
-        currAnimation = new Animation(buffer->getMesh().joints);
+    void parseAndPushAnimation(string animationFilePath, float animationTimeMult = 1, float startTime = 0, string name = "noname"){
+        currAnimation = new Animation(buffer->getMesh().joints, animationTimeMult, startTime, name);
         currAnimation->parseKeyPoses(animationFilePath);
-        currAnimation->animationTimeMult = animationTimeMult;
-        currAnimation->name = name;
         animations.push(*currAnimation);
     }
 

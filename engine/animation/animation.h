@@ -12,7 +12,7 @@ public:
     vector<glm::vec3> rotations;
     vector<glm::vec3> scales;
     vector<uint> ids;
-    float timer;
+    float poseTime;
     float(*timingFunction)(float) = [](float a) -> float {return a;};
 
     void appendPosition(glm::vec3 location, glm::vec3 rotation, glm::vec3 scale, uint id){
@@ -32,14 +32,15 @@ public:
     float animationTimeMult;
     float currAnimationTime;
 
-    string name = "noname";
+    string name;
 
-    Animation(JointList& jointsToAnimate, float animationTimeMult = 0){
+    Animation(JointList& jointsToAnimate, float animationTimeMult = 1, float startTime = 0, string name = "noname"){
         joints = &jointsToAnimate;
-        startTime = std::chrono::steady_clock::now();
+        this->startTime = startTime;
+        reset();
         this->animationTimeMult = animationTimeMult;
         currAnimationTime = 0;
-
+        this->name = name;
     }
     void applyCurrPose(){
         calcCurrPose();
@@ -58,11 +59,13 @@ public:
         string line;
         int switchCase;
         bool end;
-        size_t pAmount = -1;
 
         string token;
+        size_t pAmount = -1;
 
         while(!f.eof()){
+            AnimationPose newPose;
+
             switchCase = -1;
 
             getline(f, line);
@@ -110,7 +113,7 @@ public:
             case 3:
                 keyPoses.at(pAmount).scales.push_back(parseVec3(line));
                 break;
-            case 4:                
+            case 4:
                 //this is an example of how this should work, need to add more dependences
                 if(bite(" ", line, end) == "default"){
                     //keyPoses.at(pAmount).timingFunction = [](float a) -> float {return a;};
@@ -119,19 +122,46 @@ public:
                     keyPoses.at(pAmount).timingFunction = [](float a) -> float {return glm::exp(-a*5);};
                 }
 
-                float timer = stof(bite(" ", line, end));
-                keyPoses.at(pAmount).timer = timer;
+                float poseTime = stof(bite(" ", line, end));
+                keyPoses.at(pAmount).poseTime = poseTime;
+                animationTime += poseTime;
                 break;
             }
+
+        }
+        if(startTime > animationTime){
+            throw string("animation start time is higher than animation time");
         }
     }
     void addPose(AnimationPose& p){
         keyPoses.push_back(p);
+        animationTime += p.poseTime;
+    }
+    void setStartTime(float time){
+        startTime = time;
+    }
+    void reset(){
+        auto additionalTime = std::chrono::milliseconds((long long)startTime * 1000);
+        startTimeTimer = std::chrono::steady_clock::now() - additionalTime;
+
+        timePassed = 0;
+        currPoseIndex = 0;
+    }
+    float getAnimationTime(){
+        return animationTime;
+    }
+    float getCurrTime(){
+        return currAnimationTime;
     }
 
 private:
-    std::chrono::steady_clock::time_point startTime;
-    std::chrono::steady_clock::time_point currTime;
+    float animationTime = 0;
+    float startTime = 0;
+
+//    std::chrono::duration<long long, std::ratio<1, 1000000000>> snapTime;
+
+    std::chrono::steady_clock::time_point startTimeTimer;
+    std::chrono::steady_clock::time_point currTimeTimer;
     vector<AnimationPose> keyPoses;
     AnimationPose currPose;
     JointList* joints;
@@ -142,36 +172,29 @@ private:
     size_t currPoseIndex = 0;
 
     void calcCurrPose(){
-        currTime = std::chrono::steady_clock::now();
-        currAnimationTime = (float)std::chrono::duration_cast<std::chrono::milliseconds>(currTime - startTime).count()/1000;
+        currTimeTimer = std::chrono::steady_clock::now();
+        currAnimationTime = (float)std::chrono::duration_cast<std::chrono::milliseconds>(currTimeTimer - startTimeTimer).count()/1000;
 
-        keyPoseTime = keyPoses.at(currPoseIndex).timer * animationTimeMult;
+        keyPoseTime = keyPoses.at(currPoseIndex).poseTime * animationTimeMult;
         interpolationCoef = (currAnimationTime-timePassed)/keyPoseTime;
         interpolationCoef = keyPoses[currPoseIndex].timingFunction(interpolationCoef);
-//        cout << currAnimationTime << " " << interpolationCoef << " " << currPoseIndex << endl;
+        cout << currAnimationTime << " " << interpolationCoef << " " << currPoseIndex << endl;
         if(interpolationCoef > 1){
-            ++currPoseIndex;
-            timePassed += keyPoseTime;
+            while(interpolationCoef > 1){
+                ++currPoseIndex;
+                timePassed += keyPoseTime;
+                --interpolationCoef;
+            }
         }
         else if(currPoseIndex + 1 < keyPoses.size()){
             currPose = interpolatePoses(keyPoses[currPoseIndex], keyPoses[currPoseIndex+1], interpolationCoef);
         }
         else{
-            currPoseIndex = 0;
+            startTimeTimer = std::chrono::steady_clock::now();
 
-            startTime = std::chrono::steady_clock::now();
             timePassed = 0;
-            currAnimationTime = 0;
+            currPoseIndex = 0;
         }
-
-//        keyPoseTime = animationTimeMult/(keyPoses.size()-1);
-//        uint keyPoseIndex = currAnimationTime/keyPoseTime;
-//        interpolationCoef = currAnimationTime/keyPoseTime - keyPoseIndex;
-//        //keyPoses[keyPoseIndex].timingFunction = [](float a) -> float {return glm::exp(-a*9);};
-//        interpolationCoef = keyPoses[keyPoseIndex].timingFunction(interpolationCoef);
-//        //cout << currAnimationTime << " " << interpolationCoef << " " << keyPoseIndex << endl;
-//        if(keyPoseIndex + 1 < keyPoses.size())
-//            currPose = interpolatePoses(keyPoses[keyPoseIndex], keyPoses[keyPoseIndex+1], interpolationCoef);
     }
     void applyPose(AnimationPose& p){
         for(size_t i = 0; i < p.getPositionsAmount(); ++i){
