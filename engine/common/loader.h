@@ -82,17 +82,37 @@ public:
     }
 
     static float biteFloat(const string& delimiter, string& line, bool& end){
-        return stof(bite(delimiter, line, end));
+        try{
+            return stof(bite(delimiter, line, end));
+        }
+        catch(...){
+            throw string("wrong float format while parsing file");
+        }
     }
     static float biteFloat(const string& delimiter, string& line){
-        return stof(bite(delimiter, line));
+        try{
+            return stof(bite(delimiter, line));
+        }
+        catch(...){
+            throw string("wrong float format while parsing file");
+        }
     }
 
     static int biteInt(const string& delimiter, string& line, bool& end){
-        return stoi(bite(delimiter, line, end));
+        try{
+            return stoi(bite(delimiter, line, end));
+        }
+        catch(...){
+            throw string("wrong int format while parsing file");
+        }
     }
     static float biteInt(const string& delimiter, string& line){
-        return stoi(bite(delimiter, line));
+        try{
+            return stoi(bite(delimiter, line));
+        }
+        catch(...){
+            throw string("wrong int format while parsing file");
+        }
     }
 
     static glm::vec3 parseVec3(string& line){
@@ -102,9 +122,10 @@ public:
 
         while (true){
             ++i;
-            string token = bite(" ", line, end);
+
+            float v = biteFloat(" ", line, end);
             if(i < 3)
-                norm[i] = stof(token);
+                norm[i] = v;
             if(end)
                 break;
         }
@@ -119,9 +140,10 @@ public:
 
         while (true){
             ++i;
-            string token = bite(" ", line, end);
+
+            float v = biteFloat(" ", line, end);
             if(i < 2)
-                norm[i] = stof(token);
+                norm[i] = v;
             if(end)
                 break;
         }

@@ -54,7 +54,7 @@ hide window pointers etc in *Object classes
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
 or just let texture hot change
 
-18 (46)
+18 (47)
 catch if exceed index of vectors
 
 +19
@@ -130,7 +130,7 @@ make Window proxy pattern
 !39
 make AnimationList and all related for SceneLoader
 
-!40 (46)
++40
 add load check for all loaders to debug if something goes wrong
 
 +41
@@ -141,7 +141,7 @@ yeah, this is bad
 SceneLoader must have addable modules like as Renderer
 
 43
-add GUIObject
+add GUIObject and 2d object
 
 44
 allow to split SceneLoader scene.txt by multiple files
@@ -149,7 +149,7 @@ allow to split SceneLoader scene.txt by multiple files
 45
 consider add material manual properties command for SceneLoader tex* commands
 
-46 (47)
++46
 add type check for all loaders
 
 47 (18)

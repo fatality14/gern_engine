@@ -464,13 +464,6 @@ private:
 
             size_t which1 = 0, which2 = 0;
 
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
-
             for(size_t i = 0; i < c.materialLists.size(); ++i){
                 if(c.materialLists.at(i)->name == tmp1){
                     which1 = i;
@@ -521,13 +514,6 @@ private:
             float ftmp2 = biteFloat(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
-
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
 
             for(size_t i = 0; i < c.materialLists.size(); ++i){
                 if(c.materialLists.at(i)->name == tmp1){
@@ -581,13 +567,6 @@ private:
 
             size_t which1 = 0, which2 = 0;
 
-//                for(size_t i = 0; i < texes.size(); ++i){
-//                    if(texes.at(i)->name == tmp1){
-//                        which1 = i;
-//                        break;
-//                    }
-//                }
-
             for(size_t i = 0; i < c.materialLists.size(); ++i){
                 if(c.materialLists.at(i)->name == tmp1){
                     which1 = i;
@@ -603,17 +582,6 @@ private:
             }
 
             vector<Position> poses;
-//            Position pos;
-//            pos.scaleTo(0.1,0.1,0.1);
-//            float rad = 5;
-//            int am = 30;
-//            float shift = 360/am;
-//            float angle = 0;
-//            for(int i = 0; i < am; ++i){
-//                pos.moveTo(rad*sin(angle),rad*cos(angle),0);
-//                poses.push_back(pos);
-//                angle += shift;
-//            }
 
             c.model->addNewObject(*c.instBuffers.at(which2), c.materialLists.at(which1), poses, tmp5);
 

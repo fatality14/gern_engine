@@ -27,9 +27,9 @@ meshobj blank sphere sphere
 scale 0.01 0.01 0.01
 sklobj paimonmat paimonskl paimon resources\\models\\GenshinImpactPack\\paimon\\paimon.anm 1 10
 instobj paimonmat paimoninst paimon
-instel 5 0 0 90 0 0 0.2 0.2 0.2
-instel -5 0 0 90 0 0 0.2 0.2 0.2
-instel 0 -5 0 90 0 0 0.2 0.2 0.2
+instel 5 0 0  90 0 0  1 0.2 0.2
+instel -5 0 0  90 0 0  0.2 0.2 0.2
+instel 0 -5 0  90 0 0  0.2 0.2 0.2
 skybox skybox resources\\skybox\\right.jpg resources\\skybox\\left.jpg resources\\skybox\\top.jpg resources\\skybox\\bottom.jpg resources\\skybox\\front.jpg resources\\skybox\\back.jpg
 scale 10 10 10
 bckcol 0.5 0 0 0.99
