@@ -138,6 +138,7 @@ private:
     float keyPoseTime;
     float interpolationCoef;
 
+    float timePassed = 0;
     size_t currPoseIndex = 0;
 
     void calcCurrPose(){
@@ -145,11 +146,12 @@ private:
         currAnimationTime = (float)std::chrono::duration_cast<std::chrono::milliseconds>(currTime - startTime).count()/1000;
 
         keyPoseTime = keyPoses.at(currPoseIndex).timer * animationTimeMult;
-        interpolationCoef = currAnimationTime/keyPoseTime - currPoseIndex;
+        interpolationCoef = (currAnimationTime-timePassed)/keyPoseTime;
         interpolationCoef = keyPoses[currPoseIndex].timingFunction(interpolationCoef);
 //        cout << currAnimationTime << " " << interpolationCoef << " " << currPoseIndex << endl;
         if(interpolationCoef > 1){
             ++currPoseIndex;
+            timePassed += keyPoseTime;
         }
         else if(currPoseIndex + 1 < keyPoses.size()){
             currPose = interpolatePoses(keyPoses[currPoseIndex], keyPoses[currPoseIndex+1], interpolationCoef);
@@ -158,6 +160,7 @@ private:
             currPoseIndex = 0;
 
             startTime = std::chrono::steady_clock::now();
+            timePassed = 0;
             currAnimationTime = 0;
         }
 
