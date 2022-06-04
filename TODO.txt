@@ -52,7 +52,7 @@ hide window pointers etc in *Object classes
 
 17
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
-or just let texture hot change
+or just let hot change
 
 18 (47)
 catch if exceed index of vectors
@@ -71,7 +71,7 @@ add list of user timing functions in animation
 for every model part fill its own material, make common material to multiuse
 add material redaction in scene file?
 
-23
++23
 add possibility to change current camera
 
 +24
@@ -171,8 +171,14 @@ this code must be compiled in executable not to slowdown render
 51
 add CMakeList to compile other libraries
 
+52
+check every refrence and pointer for null after loading
+
+56
+also check if the sufficient num args provided while parsing files
+
 lastplan:
-46, 47
+
 
 99?
 recorder class to render video

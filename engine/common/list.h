@@ -4,8 +4,6 @@
 
 struct IList : public ICommon{};
 
-//T must have "name" field
-//might implement it with sfinae
 //add check for repeating names in list
 template<class T>
 class AList : public IList{

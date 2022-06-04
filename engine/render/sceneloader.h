@@ -8,32 +8,11 @@
 #include <mesh/skeletonloader.h>
 #include <object/instancedobject.h>
 #include <texture/materialloader.h>
+#include <render/isceneloader.h>
 
 #include <unordered_set>
 #include <unordered_map>
 #include <queue>
-
-class IContext : public ICommon{};
-
-template <class U>
-class ICommand : public ICommon{
-public:
-    ICommand(){
-       static_assert(std::is_base_of<IContext, U>::value, "Template parameter U must be derived from IContext");
-    }
-    virtual void execute(U& context) = 0;
-};
-
-template <class T>
-class ISceneLoader : public ICommon{
-public:
-    ISceneLoader(){
-       static_assert(std::is_base_of<IFrameModel, T>::value, "Template parameter T must be derived from IFrameModel");
-    }
-    virtual void load(string path, T& data) = 0;
-};
-
-class SceneLoader;
 
 class LoaderContext : public IContext{
 public:
@@ -391,7 +370,7 @@ private:
             string tmp1 = bite(" ", c.args);
 
             Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
-            framebuffer->genTextureColorBuffers(itmp3);
+            framebuffer->appendTextureColorBuffers(itmp3);
             c.model->addFramebuffer(*framebuffer);
 
             MaterialList* frmbmat = new MaterialList;

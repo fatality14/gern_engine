@@ -32,8 +32,9 @@ public:
         glDeleteBuffers(1, &RBO);
     }
 
-    void genTextureColorBuffers(size_t amount){
-        for(size_t i = 0; i < amount; i++){
+    void appendTextureColorBuffers(size_t amount){
+        size_t tcbSize = textureColorBuffers->size();
+        for(size_t i = tcbSize; i < tcbSize + amount; i++){
             Texture* t = new Texture;
 
             t->setUniformName("textureColorBuffer"+to_string(i));
