@@ -1,18 +1,8 @@
-+1
-class containing arraylist of mat4, vec4 etc and method to pass them in shader
-an object of the class should be situated in "*Object", "View", "Perspective" etc classes to pass everything to shader
-
 2
 use "InstancedObject" to create custom particle system class
 
 3?
 shader constructor to parse custom shader code into glsl
-
-+4
-make universal *Buffer class with a template not to copypaste code
-
-+5
-+move all main() loading strings to file and make loader class
 
 !6
 make WindowManager class from Window class and make the draw sequence for every window in Renderer
@@ -24,12 +14,6 @@ rename some classes to fit their names
 8
 add const qualifiers where it need to be
 
-+9
-parse materials from the .mtl, MaterialList must be in Mesh class instead of Object class?
-
-+10
-make Object interface class and move some common logic to it
-
 11
 rename some GL_* definitions to own enums
 
@@ -39,10 +23,6 @@ split shad to two commands in SceneLoader
 
 13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
-
-+14
-+use ccache
-+use precompile headers
 
 15?
 make counter instead of noname in object etc names
@@ -57,28 +37,11 @@ or just let hot change
 18 (47)
 catch if exceed index of vectors
 
-+19
-do something with "ns" in texture layouts
-
-+20
-test ShaderUniform in shaderObjectFunc, or even use it without it, might move user logic in ShaderUniform
-also could use ShaderUniform in *Object draw function to maintain uniforms that must be updated
-
-21
+!21
 add list of user timing functions in animation
 
-+22 (9)
-for every model part fill its own material, make common material to multiuse
-add material redaction in scene file?
-
-+23
-add possibility to change current camera
-
-+24
-add user function list in renderer
-
-+25
-make pose animation time user defined
+?22
+add material redaction in scene file
 
 26 (11)
 map all opengl logic and enums to samecalled functions in its own class to make multiplatform and multiversional code
@@ -107,18 +70,11 @@ split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple ti
 32?
 do something with *List, IObject and other common cases
 
-+33
-add IShaderField interface to textures and all other classes
-make parameters of pushToShader as fields wherever it needed
-Shader methods should be called mostly in IShaderField childs
-add setShaderParams method to IShaderField?
+33
+consider change setShaderParams method in IShaderField
 
-+34?
-+remove duplicate name fields in SceneLoader and all related
-names should be splitted from shader fields?
-
-+35
-make all IShaderField attrib in buffer like vmodel in InstancedBuffer
+34
+do something with name field, it should display field usage
 
 36?
 move load method to ILoader and override it in loaders
@@ -132,15 +88,9 @@ make Window proxy pattern
 !39
 make AnimationList and all related for SceneLoader
 
-+40
-add load check for all loaders to debug if something goes wrong
-
 +41
 test object draw in multithreading, might be bad for texture unit sequence
 yeah, this is bad
-
-+42
-SceneLoader must have addable modules like as Renderer
 
 43
 add GUIObject and 2d object
@@ -150,9 +100,6 @@ allow to split SceneLoader scene.txt by multiple files
 
 45
 consider add material manual properties command for SceneLoader tex* commands
-
-+46
-add type check for all loaders
 
 47 (18)
 add opengl debug mode
