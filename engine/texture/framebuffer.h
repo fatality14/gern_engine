@@ -51,7 +51,7 @@ public:
         GLDB(glBindFramebuffer(GL_FRAMEBUFFER, FBO));
     }
     void unbind(){
-        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void bindTextureColorBuffer(GLuint attachmentNum){
         GLDB(glDrawBuffer(GL_COLOR_ATTACHMENT0 + attachmentNum));
@@ -82,7 +82,7 @@ private:
         GLDBR(checkComplete, glCheckFramebufferStatus(GL_FRAMEBUFFER));
         if (checkComplete!= GL_FRAMEBUFFER_COMPLETE)
             cout << "Framebuffer is not complete!" << endl;
-        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        unbind();
     }
 };
 

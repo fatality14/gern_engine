@@ -31,7 +31,7 @@ public:
         GLDB(glBindVertexArray(VAO));
     }
     void unbind(){
-        GLDB(glBindVertexArray(0));
+        glBindVertexArray(0);
     }
     const string& getMeshName(){
         return mesh->name;
