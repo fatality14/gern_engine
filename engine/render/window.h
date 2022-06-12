@@ -43,14 +43,14 @@ public:
     }
 
     void setPolygonMode(GLenum face = GL_FRONT_AND_BACK, GLenum mode = GL_FILL){
-        glPolygonMode(face, mode);
+        GLDB(glPolygonMode(face, mode));
     }
     void setDrawOrder(bool isCounterclockwise){
         if(isCounterclockwise){
-            glFrontFace(GL_CCW);
+            GLDB(glFrontFace(GL_CCW));
         }
         else{
-            glFrontFace(GL_CW);
+            GLDB(glFrontFace(GL_CW));
         }
     }
     GLFWwindow* getWindowPtr(){
@@ -87,12 +87,12 @@ private:
             glfwTerminate();
         }
 
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GLDB(glEnable(GL_DEPTH_TEST));
+        GLDB(glEnable(GL_CULL_FACE));
+        GLDB(glCullFace(GL_BACK));
+        GLDB(glFrontFace(GL_CCW));
+        GLDB(glEnable(GL_BLEND));
+        GLDB(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
@@ -103,7 +103,7 @@ private:
     }
 
     static void framebufferResizeCallback(GLFWwindow* window, int fbW, int fbH){
-        glViewport(0, 0, fbW, fbH);
+        GLDB(glViewport(0, 0, fbW, fbH));
     }
 };
 

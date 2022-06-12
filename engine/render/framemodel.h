@@ -185,7 +185,7 @@ public:
         clearBuffers();
     }
     void bindDefaultFramebuffer(){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, 0));
         clearBuffers();
     }
 
@@ -210,8 +210,8 @@ public:
     }
 
     void clearBuffers(){
-        glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        GLDB(glClearColor(r, g, b, a));
+        GLDB(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
     }
 
     void resetObjectShaderLastIds(){

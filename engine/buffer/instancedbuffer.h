@@ -17,7 +17,7 @@ public:
         shaderfields.push(vnorm);
     }
     ~InstancedBuffer(){
-        glDeleteBuffers(1, &VBO1);
+        GLDB(glDeleteBuffers(1, &VBO1));
     }
 
     void setModelMatrices(vector<Position>& modelMatrices){
@@ -26,9 +26,10 @@ public:
             this->modelMatrices.push_back(modelMatrices[i].getModelMatrix());
         }
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * this->modelMatrices.size(), this->modelMatrices.data(), GL_STATIC_DRAW);
+        GLDB(glBindVertexArray(VAO));
+        GLDB(glBindBuffer(GL_ARRAY_BUFFER, VBO1));
+        GLDB(glBufferData(GL_ARRAY_BUFFER,
+                          sizeof(glm::mat4) * this->modelMatrices.size(), this->modelMatrices.data(), GL_STATIC_DRAW));
 
         vmodel.pushToShader(*shader);
     }
@@ -37,7 +38,7 @@ public:
 
         bind();
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+        GLDB(glBindBuffer(GL_ARRAY_BUFFER, VBO1));
 
         vmodel.pushToShader(*shader);
 
@@ -49,7 +50,7 @@ public:
 
         bind();
 
-        glGenBuffers(1, &VBO1);
+        GLDB(glGenBuffers(1, &VBO1));
 
         //current vao should be set in while window loop
         unbind();

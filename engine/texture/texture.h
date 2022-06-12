@@ -11,11 +11,11 @@ public:
     GLuint textureUnit;
 
     Texture(){
-        glGenTextures(1, &textureId);
+        GLDB(glGenTextures(1, &textureId));
     }
     Texture(Texture& t) = delete;
     ~Texture(){
-        glDeleteTextures(1, &textureId);
+        GLDB(glDeleteTextures(1, &textureId));
     }
 
     void setUniformName(string uniformName){
@@ -28,11 +28,11 @@ public:
     void pushToShader(Shader& shader) override{
         shader.setUniform1i(name, textureUnit);
 
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        GLDB(glActiveTexture(GL_TEXTURE0 + textureUnit));
         bind();
     }
     void bind(){
-        glBindTexture(GL_TEXTURE_2D, textureId);
+        GLDB(glBindTexture(GL_TEXTURE_2D, textureId));
     }
 
     void setLoadParams(string path){
@@ -44,16 +44,16 @@ public:
 
         image = SOIL_load_image(path.data(), &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
 
-        glBindTexture(GL_TEXTURE_2D, textureId);
+        GLDB(glBindTexture(GL_TEXTURE_2D, textureId));
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 
         if(image){
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-            glGenerateMipmap(GL_TEXTURE_2D);
+            GLDB(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
+            GLDB(glGenerateMipmap(GL_TEXTURE_2D));
         }
         else{
             throw string("Texture ") + path + " loading failed";
@@ -76,8 +76,8 @@ public:
 
     void setNewTextureData(unsigned char* data){
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        GLDB(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+        GLDB(glGenerateMipmap(GL_TEXTURE_2D));
     }
 
     unsigned char& loadDataFromShader(){
@@ -88,7 +88,7 @@ public:
 
         image = new unsigned char[image_width * image_height * 4];
         bind();
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        GLDB(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
 
 //        int save_result = SOIL_save_image
 //            (
@@ -147,6 +147,7 @@ public:
         unbindTextures();
     }
     void unbindTextures(){
+        //no need for GLDB here, cause unbind is undefined in GL specs
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }

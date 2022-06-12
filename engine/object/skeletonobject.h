@@ -86,7 +86,8 @@ public:
 
 
         if (buffer->getMesh().nIndices != 0)
-            glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+//            glDrawElements(drawmode, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+            exit(0);
         else{
             //cout << "Draw mesh: " << currMesh->name << endl;
             GLint startFrom = 0;
@@ -108,11 +109,11 @@ public:
                 ++materialI;
 
                 if(j == 0){
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j));
+                    GLDB(glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j)));
                     startFrom = currMesh->partEndMtlIds.at(j);
                 }
                 else{
-                    glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j) - currMesh->partEndMtlIds.at(j-1));
+                    GLDB(glDrawArrays(drawmode, startFrom, currMesh->partEndMtlIds.at(j) - currMesh->partEndMtlIds.at(j-1)));
                     startFrom = currMesh->partEndMtlIds.at(j);
                 }
             }

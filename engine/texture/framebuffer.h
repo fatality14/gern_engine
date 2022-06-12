@@ -23,13 +23,13 @@ public:
         this->name = name;
         textureColorBuffers->name = name;
 
-        glGenFramebuffers(1, &FBO);
-        glGenRenderbuffers(1, &RBO);
+        GLDB(glGenFramebuffers(1, &FBO));
+        GLDB(glGenRenderbuffers(1, &RBO));
     }
     ~Framebuffer(){
         delete textureColorBuffers;//a bug if someone takes TextureList control and clear it
-        glDeleteBuffers(1, &FBO);
-        glDeleteBuffers(1, &RBO);
+        GLDB(glDeleteBuffers(1, &FBO));
+        GLDB(glDeleteBuffers(1, &RBO));
     }
 
     void appendTextureColorBuffers(size_t amount){
@@ -48,39 +48,41 @@ public:
         attachRenderBuffer();
     }
     void bind(){
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, FBO));
     }
     void unbind(){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }
     void bindTextureColorBuffer(GLuint attachmentNum){
-        glDrawBuffer(GL_COLOR_ATTACHMENT0 + attachmentNum);
+        GLDB(glDrawBuffer(GL_COLOR_ATTACHMENT0 + attachmentNum));
     }
 private:
     void genColorAttachmentFramebuffer(GLuint attachmentNum){
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, FBO));
 
         textureColorBuffers->at(attachmentNum)->bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        GLDB(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GLDB(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER,
+        GLDB(glFramebufferTexture2D(GL_FRAMEBUFFER,
                                GL_COLOR_ATTACHMENT0 + attachmentNum,
                                GL_TEXTURE_2D,
                                textureColorBuffers->at(attachmentNum)->textureId,
-                               0);
+                               0));
     }
     void attachRenderBuffer(){
-        glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+        GLDB(glBindRenderbuffer(GL_RENDERBUFFER, RBO));
+        GLDB(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height));
 
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+        GLDB(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO));
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        GLenum checkComplete;
+        GLDBR(checkComplete, glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        if (checkComplete!= GL_FRAMEBUFFER_COMPLETE)
             cout << "Framebuffer is not complete!" << endl;
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GLDB(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }
 };
 

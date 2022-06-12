@@ -23,15 +23,15 @@ public:
     }
     ABuffer(ABuffer& b) = delete;
     virtual ~ABuffer(){
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        glDeleteVertexArrays(1, &VAO);
+        GLDB(glDeleteBuffers(1, &VBO));
+        GLDB(glDeleteBuffers(1, &EBO));
+        GLDB(glDeleteVertexArrays(1, &VAO));
     }
     void bind(){
-        glBindVertexArray(VAO);
+        GLDB(glBindVertexArray(VAO));
     }
     void unbind(){
-        glBindVertexArray(0);
+        GLDB(glBindVertexArray(0));
     }
     const string& getMeshName(){
         return mesh->name;
@@ -45,25 +45,26 @@ public:
     void setShader(Shader* s){
         shader = s;
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        GLDB(glBindVertexArray(VAO));
+        GLDB(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+        GLDB(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
 
         shaderfields.pushToShader(*shader);
         unbind();
     }
 
     void genBuffers(){
-        glCreateVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
+        GLDB(glCreateVertexArrays(1, &VAO));
+        GLDB(glBindVertexArray(VAO));
 
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(U) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW);
+        GLDB(glGenBuffers(1, &VBO));
+        GLDB(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+        GLDB(glBufferData(GL_ARRAY_BUFFER, sizeof(U) * mesh->vertices->size(), mesh->vertices->data(), GL_STATIC_DRAW));
 
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW);
+        GLDB(glGenBuffers(1, &EBO));
+        GLDB(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
+        GLDB(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                          sizeof(GLuint) * mesh->indices->size(), mesh->indices->data(), GL_STATIC_DRAW));
 
         shaderfields.pushToShader(*shader);
 

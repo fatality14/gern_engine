@@ -45,9 +45,10 @@ public:
         buffer->bind();
 
         if (buffer->getMesh().nIndices != 0)
-            glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+            //glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices, GL_UNSIGNED_INT, (void*)0);
+            exit(0);
         else
-            glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices);
+            GLDB(glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices));
 
         buffer->unbind();
         shader->unbind();

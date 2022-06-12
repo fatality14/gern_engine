@@ -19,6 +19,10 @@ int main (){
         cout << e << endl;
         return -1;
     }
+    catch(...){
+        cout << "Unresolved error caught\n";
+        return -1;
+    }
 
 //    auto end = std::chrono::steady_clock::now();
 //    std::chrono::duration<double> elapsed_seconds = end-start;

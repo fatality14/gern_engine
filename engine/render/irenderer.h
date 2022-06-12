@@ -40,7 +40,7 @@ public:
             controller->frameFunction();
 
             glfwSwapBuffers(window->getWindowPtr());
-            glFlush();
+            GLDB(glFlush());
 
             if(!doContinue){
                 glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);

@@ -15,7 +15,7 @@ public:
     }
     SkyboxTexture(SkyboxTexture& st) = delete;
     ~SkyboxTexture(){
-        glDeleteTextures(1, &textureId);
+        GLDB(glDeleteTextures(1, &textureId));
     }
 
     void setShaderParams(GLuint textureUnit, string uniformName){
@@ -25,21 +25,22 @@ public:
     void pushToShader(Shader& shader) override{
         shader.setUniform1i(name, textureUnit);
 
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+        GLDB(glActiveTexture(GL_TEXTURE0 + textureUnit));
+        GLDB(glBindTexture(GL_TEXTURE_CUBE_MAP, textureId));
     }
 
     void loadTexture() override{
         image_width = 0;
         image_height = 0;
 
-        glGenTextures(1, &textureId);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+        GLDB(glGenTextures(1, &textureId));
+        GLDB(glBindTexture(GL_TEXTURE_CUBE_MAP, textureId));
 
         for(size_t i = 0; i < facePaths.size(); i++){
             image = SOIL_load_image(facePaths.at(i).data(), &image_width, &image_height, NULL, SOIL_LOAD_RGB);
             if(image){
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+                GLDB(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                                  0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image));
                 SOIL_free_image_data(image);
             }
             else{
@@ -47,11 +48,11 @@ public:
             }
         }
 
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        GLDB(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GLDB(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        GLDB(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        GLDB(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GLDB(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
     }
 private:
     GLsizei image_width;

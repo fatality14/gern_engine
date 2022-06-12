@@ -9,7 +9,6 @@ make WindowManager class from Window class and make the draw sequence for every 
 
 7
 rename some classes to fit their names
-+move every class to its header and move headers to its folders
 
 8
 add const qualifiers where it need to be
@@ -98,8 +97,8 @@ add GUIObject and 2d object
 44
 allow to split SceneLoader scene.txt by multiple files
 
-45
-consider add material manual properties command for SceneLoader tex* commands
+!45
+add material manual properties command for SceneLoader tex* commands
 
 47 (18)
 add opengl debug mode

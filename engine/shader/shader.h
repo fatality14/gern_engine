@@ -17,60 +17,83 @@ public:
     }
     Shader(Shader& s) = delete;
     ~Shader(){
-        glDeleteProgram(program);
+        GLDB(glDeleteProgram(program));
     }
 
     void bind(){
-        glUseProgram(program);
+        GLDB(glUseProgram(program));
     }
     void unbind(){
+        //no need for GLDB here, cause unbind is undefined in GL specs
         glUseProgram(0);
     }
 
     template<class T>
     void setFloatAttribPointer(string layoutName, GLint vecSize, size_t offset){
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(T), (GLvoid*)offset);
-        glEnableVertexAttribArray(attribLoc);
+        GLuint attribLoc;
+        GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
+        if(attribLoc == (GLuint)-1){
+            cout << "Warning: attribute location in shader " << name << " starts with gl_ or undefined, "
+                 << "layout is not set\n";
+            return;
+        }
+
+        GLDB(glVertexAttribPointer(attribLoc, vecSize, GL_FLOAT, GL_FALSE, sizeof(T), (GLvoid*)offset));
+        GLDB(glEnableVertexAttribArray(attribLoc));
     }
     template<class T>
     void setIntAttribPointer(string layoutName, GLint vecSize, size_t offset){
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
-        glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset);
-        glEnableVertexAttribArray(attribLoc);
+        GLuint attribLoc;
+        GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
+        if(attribLoc == (GLuint)-1){
+            cout << "Warning: attribute location in shader " << name << " starts with gl_ or undefined, "
+                 << "layout is not set\n";
+            return;
+        }
+
+        GLDB(glVertexAttribPointer(attribLoc, vecSize, GL_INT, GL_FALSE, sizeof(T), (GLvoid*)offset));
+        GLDB(glEnableVertexAttribArray(attribLoc));
     }
     template<class T>
     void setMatAttribPointer(string layoutName, GLint matSize, size_t offset, GLuint divisor = 0){
-        GLuint attribLoc = glGetAttribLocation(program, layoutName.data());
+        GLuint attribLoc;
+        GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
+
+        if(attribLoc == (GLuint)-1){
+            cout << "Warning: attribute location in shader " << name << " starts with gl_ or undefined, "
+                 << "layout is not set\n";
+            return;
+        }
+
         for(GLint i = 0; i < matSize; ++i){
-            glVertexAttribPointer(attribLoc + i,
+            GLDB(glVertexAttribPointer(attribLoc + i,
                                   matSize,
                                   GL_FLOAT,
                                   GL_FALSE,
                                   sizeof(T),
-                                  (GLvoid*)(offset + sizeof(GLfloat) * matSize * i));
-            glEnableVertexAttribArray(attribLoc + i);
+                                  (GLvoid*)(offset + sizeof(GLfloat) * matSize * i)));
+            GLDB(glEnableVertexAttribArray(attribLoc + i));
         }
 
         //the divisor by default is set by 0 by ogl
         if(divisor != 0){
             for(GLint i = 0; i < matSize; ++i){
-                glVertexAttribDivisor(attribLoc + i, divisor);
+                GLDB(glVertexAttribDivisor(attribLoc + i, divisor));
             }
         }
     }
 
     void setUniformMatrix4fv(string uniformName, const GLfloat* value, GLsizei size = 1){
-        glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value);
+        GLDB(glUniformMatrix4fv(glGetUniformLocation(program, uniformName.data()), size, GL_FALSE, value));
     }
     void setUniform3fv(string uniformName, const GLfloat* value, GLsizei size = 1){
-        glUniform3fv(glGetUniformLocation(program, uniformName.data()), size, value);
+        GLDB(glUniform3fv(glGetUniformLocation(program, uniformName.data()), size, value));
     }
     void setUniform1i(string uniformName, GLint value){
-        glUniform1i(glGetUniformLocation(program, uniformName.data()), value);
+        GLDB(glUniform1i(glGetUniformLocation(program, uniformName.data()), value));
     }
     void setUniform1f(string uniformName, GLfloat value){
-        glUniform1f(glGetUniformLocation(program, uniformName.data()), value);
+        GLDB(glUniform1f(glGetUniformLocation(program, uniformName.data()), value));
     }
 private:
     GLuint vertexShader;
@@ -101,15 +124,15 @@ private:
 
         in_file.close();
 
-        vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        GLDBR(vertexShader, glCreateShader(GL_VERTEX_SHADER));
         vertSrc = src.c_str();
 
-        glShaderSource(vertexShader, 1, &vertSrc, NULL);
-        glCompileShader(vertexShader);
+        GLDB(glShaderSource(vertexShader, 1, &vertSrc, NULL));
+        GLDB(glCompileShader(vertexShader));
 
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isError);
+        GLDB(glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isError));
         if(!isError){
-            glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+            GLDB(glGetShaderInfoLog(vertexShader, 512, NULL, infoLog));
             cout << "Error compiling vertex shader" << endl;
             cout << infoLog << endl;
             isCompiled = false;
@@ -131,38 +154,38 @@ private:
 
         in_file.close();
 
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        GLDBR(fragmentShader, glCreateShader(GL_FRAGMENT_SHADER));
         fragSrc = src.c_str();
 
-        glShaderSource(fragmentShader, 1, &fragSrc, NULL);
-        glCompileShader(fragmentShader);
+        GLDB(glShaderSource(fragmentShader, 1, &fragSrc, NULL));
+        GLDB(glCompileShader(fragmentShader));
 
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isError);
+        GLDB(glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isError));
         if(!isError){
-            glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+            GLDB(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
             cout << "Error compiling vertex shader" << endl;
             cout << infoLog << endl;
             isCompiled = false;
         }
     }
     void compileProgram(){
-        program = glCreateProgram();
+        GLDBR(program, glCreateProgram());
 
-        glAttachShader(program, vertexShader);
-        glAttachShader(program, fragmentShader);
+        GLDB(glAttachShader(program, vertexShader));
+        GLDB(glAttachShader(program, fragmentShader));
 
-        glLinkProgram(program);
+        GLDB(glLinkProgram(program));
 
-        glGetProgramiv(program, GL_LINK_STATUS, &isError);
+        GLDB(glGetProgramiv(program, GL_LINK_STATUS, &isError));
         if(!isError){
-            glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
+            GLDB(glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog));
             cout << "Error linking program" << endl;
             cout << infoLog << endl;
             isCompiled = false;
         }
 
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
+        GLDB(glDeleteShader(vertexShader));
+        GLDB(glDeleteShader(fragmentShader));
 
         //the program should be set in window while cycle
         unbind();
