@@ -23,7 +23,7 @@ TODO: add more explanations here
 * glm
 
 ### Compiling
-Current build was compiled using:
+Current build compilation was performed using:
 * MinGW 7.3 x64
 * CMake 3.5
 * ccache 4.6 (optional, *might be enabled in CMakeLists*)
