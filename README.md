@@ -88,4 +88,4 @@ Autor have no enough time to fix all bugs or provide guaranteed linux compatibil
 Autor know about most bugs and defect (such as user defined exceptions in place of string exceptions)
 in the program but he's too busy to spend lotta time fixing them.
 
-If you stumbled upon this project and this .md line by accident, the autor is sorry for his laziness.
+If you stumbled upon this project and this .md line by accident, autor is sorry for his laziness.
