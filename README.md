@@ -2,6 +2,7 @@
 ## OpenGL rendering engine. <br> A wrapper around the standart OpenGL API designed to simplify custom C++ code embedding.
 
 ### Project structure
+Root folder:
 * `engine` folder - contains a source code of the program
 * `libs` folder - contains third party libraries
 * `resources` folder - contains user resource files like .obj or .png
@@ -10,6 +11,18 @@
 * `SOIL2GUIDE` file - recomendations how to compile soil with cmake
 * `TODO` file - list of tasks
 * `main.cpp` - main executable file with minimal sample program
+
+`engine/render` folder contains classes to specify the user's render logic.
+
+It is written in MVC pattern, where:
+* `framecontroller.h` - has a controller class with sample frame draw logic
+* `framemodel.h` - has a model class with interface to get stored data and e.g. draw it in the specified order using controller class
+* view is represented with `renderer.h` and `irenderer.h` files which in its turn performs system calls to GLFW and OpenGL
+* you could add your own logic in scene loading classes (`sceneloader.h` file) with the common command interface
+* `window.h` - contains a wrapper to GLFW and OpenGL properties setup interface
+* `mouselistener.h` - is used to detect mouse position
+
+Other source code folders contains OOP wrapper of common OpenGL capabilities like framebuffers, cubemaps, shaders, meshes and most of related concepts eventually used in `*Object` classes. E.g. you could add yet another shader uniform if call `shaderFields.push()` method of samecalled `*Object` class field.
 
 ```
 TODO: add more explanations here
