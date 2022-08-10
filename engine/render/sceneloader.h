@@ -317,7 +317,7 @@ private:
             for(size_t i = 0; i < materials->size(); ++i){//for every material
                 string texName = materials->at(i)->getTextureNames().at(0);//texture name
                 if(loaded.count(texName) == 0){//if not loaded
-                    textures->loadNew(c.cwd + tmp2 + "\\\\" + texName);//load by path
+                    textures->loadNew(c.cwd + tmp2 + "/" + texName);//load by path
                     loaded.emplace(texName);//mark loaded
                     ids.emplace(pair(texName, idCounter));//map name to id in TextureList
                     ++idCounter;

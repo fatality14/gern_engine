@@ -1,6 +1,7 @@
 #include <render/renderer.h>
 #include <render/sceneloader.h>
 #include <chrono>
+#include <filesystem>
 
 int main (){
     int window_width = 1366;
@@ -13,7 +14,7 @@ int main (){
 
 //    auto start = std::chrono::steady_clock::now();
     try{
-        sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
+        sl.load("/home/fatality14/Downloads/gern_engine/resources/scenes/test.txt", *renderer.model);
     }
     catch(string e){
         cout << e << endl;
