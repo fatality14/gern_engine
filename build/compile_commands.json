@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/fatality14/Downloads/gern_engine/build",
-  "command": "/usr/bin/g++   -I../engine -I../thirdparty/GL_H -I../thirdparty/GLFW -I../thirdparty/SOIL2 -I../thirdparty/glm -I../libs  -g -O0   -Wall -Wextra -pedantic -std=gnu++17 -o CMakeFiles/ogl.dir/main.cpp.o -c /home/fatality14/Downloads/gern_engine/main.cpp",
-  "file": "/home/fatality14/Downloads/gern_engine/main.cpp"
-}
-]

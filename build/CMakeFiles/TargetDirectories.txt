@@ -1,3 +1,0 @@
-/home/fatality14/Downloads/gern_engine/build/CMakeFiles/rebuild_cache.dir
-/home/fatality14/Downloads/gern_engine/build/CMakeFiles/edit_cache.dir
-/home/fatality14/Downloads/gern_engine/build/CMakeFiles/ogl.dir
