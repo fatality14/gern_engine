@@ -76,9 +76,10 @@ build CMakeFiles/ogl.dir/main.cpp.o: CXX_COMPILER__ogl ../main.cpp || cmake_obje
 #############################################
 # Link the executable ogl
 
-build ogl: CXX_EXECUTABLE_LINKER__ogl CMakeFiles/ogl.dir/main.cpp.o | ../libs/linux/libopengl.so ../libs/linux/libsoil2.a ../libs/linux/libglew.so ../libs/linux/libglfw3.so
+build ogl: CXX_EXECUTABLE_LINKER__ogl CMakeFiles/ogl.dir/main.cpp.o | ../libs/linux/libopengl.so ../libs/linux/libsoil2.a ../libs/linux/libGLEW.so.2.2 ../libs/linux/libglfw3.so
   FLAGS = -g -O0
-  LINK_LIBRARIES = -Wl,-rpath,/home/fatality14/Downloads/gern_engine/libs/linux  ../libs/linux/libopengl.so  ../libs/linux/libsoil2.a  ../libs/linux/libglew.so  ../libs/linux/libglfw3.so
+  LINK_LIBRARIES = -Wl,-rpath,/home/fatality14/Downloads/gern_engine/libs/linux  ../libs/linux/libopengl.so  ../libs/linux/libsoil2.a  -lglew  ../libs/linux/libglfw3.so
+  LINK_PATH = -L/home/fatality14/Downloads/gern_engine/libs/linux
   OBJECT_DIR = CMakeFiles/ogl.dir
   POST_BUILD = :
   PRE_LINK = :

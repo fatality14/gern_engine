@@ -54,10 +54,20 @@ target_precompile_headers(ogl PRIVATE
     ${ALL_HEADERS})
 ]]
 
-find_library(GLEW32 glew libs/linux)
-find_library(GLFW3 glfw3 libs/linux)
-find_library(SOIL libsoil2 libs/linux)
-find_library(OGL opengl libs/linux)
+message(${CMAKE_SYSTEM_NAME})
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    find_library(GLEW32 libGLEW.so.2.2 libs/linux)
+    find_library(GLFW3 glfw3 libs/linux)
+    find_library(SOIL libsoil2 libs/linux)
+    find_library(OGL opengl libs/linux)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_library(GLEW32 glew32 libs)
+    find_library(GLFW3 glfw3 libs)
+    find_library(SOIL libsoil2 libs)
+    find_library(OGL opengl32 libs)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
 
 #find_package(OpenGL REQUIRED)
 
