@@ -106,7 +106,7 @@ public:
             throw string("wrong int format while parsing file");
         }
     }
-    static float biteInt(const string& delimiter, string& line){
+    static int biteInt(const string& delimiter, string& line){
         try{
             return stoi(bite(delimiter, line));
         }

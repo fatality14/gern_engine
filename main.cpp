@@ -3,18 +3,24 @@
 #include <chrono>
 #include <filesystem>
 
-int main (){
+int main (int argc, char *argv[]){
     int window_width = 1366;
     int window_height = 768;
 
     Renderer renderer(window_width, window_height);
-//    SceneLoader sl;
-
     SceneLoader sl;
 
 //    auto start = std::chrono::steady_clock::now();
     try{
-        sl.load("/home/fatality14/Downloads/gern_engine/resources/scenes/test.txt", *renderer.model);
+        if(argc == 2){
+            const string path = argv[1];
+            if(path.size() != 0){
+                sl.load(path, *renderer.model);
+            }
+        }
+        else{
+            throw string("You must specify scene file path as a first argument.");
+        }
     }
     catch(string e){
         cout << e << endl;

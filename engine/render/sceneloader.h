@@ -14,26 +14,34 @@
 #include <unordered_map>
 #include <queue>
 
-class LoaderContext : public IContext{
+class LoaderContext : public IContext
+{
 public:
-    ~LoaderContext(){
-        for(size_t i = 0; i < meshBuffers.size(); ++i){
+    ~LoaderContext()
+    {
+        for (size_t i = 0; i < meshBuffers.size(); ++i)
+        {
             delete meshBuffers[i];
         }
-        for(size_t i = 0; i < sklBuffers.size(); ++i){
+        for (size_t i = 0; i < sklBuffers.size(); ++i)
+        {
             delete sklBuffers[i];
         }
-        for(size_t i = 0; i < instBuffers.size(); ++i){
+        for (size_t i = 0; i < instBuffers.size(); ++i)
+        {
             delete instBuffers[i];
         }
-        for(size_t i = 0; i < materialLists.size(); ++i){
+        for (size_t i = 0; i < materialLists.size(); ++i)
+        {
             delete materialLists[i];
         }
     }
 
-    bool step(){
-        if(lines.size() != 0){
-            string& currLine = lines.front();
+    bool step()
+    {
+        if (lines.size() != 0)
+        {
+            string &currLine = lines.front();
 
             ULoader::removeBadSpaces(currLine);
 
@@ -44,19 +52,21 @@ public:
 
             return true;
         }
-        else{
+        else
+        {
             return false;
         }
     }
 
-    string getNextCommand(){
+    string getNextCommand()
+    {
         string nextCommand = lines.front();
         return ULoader::bite(" ", nextCommand);
     }
 
     string cwd;
 
-    FrameModel* model;
+    FrameModel *model;
     queue<string> lines;
     string args;
     string command;
@@ -67,18 +77,20 @@ public:
     SkeletonLoader skeletizer;
     MaterialLoader materialLoader;
     ShaderList shaders;
-    vector<MaterialList*> materialLists;
+    vector<MaterialList *> materialLists;
 
-    vector<MeshBuffer*> meshBuffers;
-    vector<SkeletonBuffer*> sklBuffers;
-    vector<InstancedBuffer*> instBuffers;
+    vector<MeshBuffer *> meshBuffers;
+    vector<SkeletonBuffer *> sklBuffers;
+    vector<InstancedBuffer *> instBuffers;
 };
 
 typedef ICommand<LoaderContext> Command;
 
-class SceneLoader : private ULoader, public ISceneLoader<FrameModel>{
+class SceneLoader : private ULoader, public ISceneLoader<FrameModel>
+{
 public:
-    void load(string path, FrameModel& data) override {
+    void load(string path, FrameModel &data) override
+    {
         c.model = &data;
 
         ifstream f;
@@ -86,84 +98,103 @@ public:
 
         string line;
 
-        if(f.fail()){
+        if (f.fail())
+        {
             throw string("Cannot open file: ") + path;
         }
 
-        while(!f.eof()){
+        while (!f.eof())
+        {
             getline(f, line);
             removeBadSpaces(line);
             c.lines.push(line);
         }
 
         c.step();
-        if(c.command == "cwd"){
+        if (c.command == "cwd")
+        {
             cwdc.execute(c);
         }
 
-        while(c.step()){
-            if(c.command == "mesh"){
+        while (c.step())
+        {
+            if (c.command == "mesh")
+            {
                 meshc.execute(c);
                 continue;
             }
-            if(c.command == "skl"){
+            if (c.command == "skl")
+            {
                 sklc.execute(c);
                 continue;
             }
-            if(c.command == "shad"){
+            if (c.command == "shad")
+            {
                 shadc.execute(c);
                 continue;
             }
-            if(c.command == "meshbuf"){
+            if (c.command == "meshbuf")
+            {
                 meshbufc.execute(c);
                 continue;
             }
-            if(c.command == "sklbuf"){
+            if (c.command == "sklbuf")
+            {
                 sklbufc.execute(c);
                 continue;
             }
-            if(c.command == "instbuf"){
+            if (c.command == "instbuf")
+            {
                 instbufc.execute(c);
                 continue;
             }
-            if(c.command == "tex"){
+            if (c.command == "tex")
+            {
                 texc.execute(c);
                 continue;
             }
-            //fix to use other textures than map_Kd
-            if(c.command == "mat"){
+            if (c.command == "mat")
+            {
                 matc.execute(c);
                 continue;
             }
-            if(c.command == "light"){
+            if (c.command == "light")
+            {
                 lightc.execute(c);
                 continue;
             }
-            if(c.command == "cam"){
+            if (c.command == "cam")
+            {
                 camc.execute(c);
                 continue;
             }
-            if(c.command == "frmb"){
+            if (c.command == "frmb")
+            {
                 frmbc.execute(c);
                 continue;
             }
-            if(c.command == "meshobj"){
+            if (c.command == "meshobj")
+            {
                 meshobjc.execute(c);
                 continue;
             }
-            if(c.command == "sklobj"){
+            if (c.command == "sklobj")
+            {
                 sklobjc.execute(c);
                 continue;
             }
-            if(c.command == "instobj"){
+            if (c.command == "instobj")
+            {
                 instobjc.execute(c);
                 continue;
             }
-            if(c.command == "skybox"){
+            if (c.command == "skybox")
+            {
                 skyboxc.execute(c);
                 continue;
             }
-            if(c.command == "bckcol"){
+            if (c.command == "bckcol")
+            {
                 bckcolc.execute(c);
                 continue;
             }
@@ -171,184 +202,231 @@ public:
     }
 
     LoaderContext c;
-private:    
-    class CwdCommand : public ICommand<LoaderContext>{
+
+private:
+    class CwdCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            c.cwd = c.args;
+        void execute(LoaderContext &c) override
+        {
+            c.cwd = bite(" ", c.args);
         }
     };
 
-    class MeshCommand : public ICommand<LoaderContext>{
+    class MeshCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            c.meshList.push(c.meshLoader.load(tmp1, tmp2));
+        void execute(LoaderContext &c) override
+        {
+            string path = c.cwd + bite(" ", c.args);
+            string meshName = bite(" ", c.args);
+            c.meshList.push(c.meshLoader.load(path, meshName));
         }
     };
 
-    class SklCommand : public ICommand<LoaderContext>{
+    class SklCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = c.cwd + bite(" ", c.args);
-            c.skeletonList.push(c.skeletizer.skeletize(*(c.meshList).getByName(tmp1), tmp2));
+        void execute(LoaderContext &c) override
+        {
+            string meshName = bite(" ", c.args);
+            string skeletonPath = c.cwd + bite(" ", c.args);
+            c.skeletonList.push(c.skeletizer.skeletize(*(c.meshList).getByName(meshName), skeletonPath));
         }
     };
 
-    class ShadCommand : public ICommand<LoaderContext>{
+    class ShadCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args);
-            string tmp2 = c.cwd + bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
-            //vertex, fragment, name
-            c.shaders.pushNew(tmp1, tmp2, tmp3);
+        void execute(LoaderContext &c) override
+        {
+            string vertexPath = c.cwd + bite(" ", c.args);
+            string fragmentPath = c.cwd + bite(" ", c.args);
+            string shaderName = bite(" ", c.args);
+            // vertex, fragment, name
+            c.shaders.pushNew(vertexPath, fragmentPath, shaderName);
         }
     };
 
-    class MeshBufCommand : public ICommand<LoaderContext>{
+    class MeshBufCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
-            c.meshBuffers.push_back(new MeshBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+        void execute(LoaderContext &c) override
+        {
+            string meshName = bite(" ", c.args);
+            string shaderName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            c.meshBuffers.push_back(new MeshBuffer(*(c.meshList).getByName(meshName),
+                                                   *(c.shaders).getByName(shaderName),
+                                                   bufferName));
             c.meshBuffers.at(c.meshBuffers.size() - 1)->genBuffers();
         }
     };
 
-    class SklBufCommand : public ICommand<LoaderContext>{
+    class SklBufCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
-            c.sklBuffers.push_back(new SkeletonBuffer(*(c.skeletonList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+        void execute(LoaderContext &c) override
+        {
+            string meshName = bite(" ", c.args);
+            string shaderName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            c.sklBuffers.push_back(new SkeletonBuffer(*(c.skeletonList).getByName(meshName),
+                                                      *(c.shaders).getByName(shaderName),
+                                                      bufferName));
             c.sklBuffers.at(c.sklBuffers.size() - 1)->genBuffers();
         }
     };
 
-    class InstBufCommand : public ICommand<LoaderContext>{
+    class InstBufCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
-            c.instBuffers.push_back(new InstancedBuffer(*(c.meshList).getByName(tmp1), *(c.shaders).getByName(tmp2), tmp3));
+        void execute(LoaderContext &c) override
+        {
+            string meshName = bite(" ", c.args);
+            string shaderName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            c.instBuffers.push_back(new InstancedBuffer(*(c.meshList).getByName(meshName),
+                                                        *(c.shaders).getByName(shaderName),
+                                                        bufferName));
             c.instBuffers.at(c.instBuffers.size() - 1)->genBuffers();
         }
     };
 
-    class TexLCommand : public ICommand<LoaderContext>{
+    class TexLCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            c.materialLists.at(c.materialLists.size()-1)->textures->addLayouts(1);
+        void execute(LoaderContext &c) override
+        {
+            c.materialLists.at(c.materialLists.size() - 1)->textures->addLayouts(1);
 
-            size_t itmp1 = biteInt(" ", c.args);
-            size_t itmp2 = biteInt(" ", c.args);
-            size_t itmp3 = biteInt(" ", c.args);
-            string tmp1 = bite(" ", c.args);
+            size_t layoutId = biteInt(" ", c.args);
+            GLuint textureUnit = biteInt(" ", c.args);
+            size_t textureIndex = biteInt(" ", c.args);
+            string uniformName = bite(" ", c.args);
 
-            c.materialLists.at(c.materialLists.size()-1)->textures->appendTextureToLayout(itmp1, itmp2, itmp3, tmp1);
+            c.materialLists.at(c.materialLists.size() - 1)->textures->appendTextureToLayout(layoutId, textureUnit, textureIndex, uniformName);
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "texl"){
+            if (nextCommand == "texl")
+            {
                 c.step();
                 texlc.execute(c);
             }
         }
     };
 
-    class TexMCommand : public ICommand<LoaderContext>{
+    class TexMCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            c.materialLists.at(c.materialLists.size()-1)->textures->loadNew(c.cwd + c.args);
+        void execute(LoaderContext &c) override
+        {
+            c.materialLists.at(c.materialLists.size() - 1)->textures->loadNew(c.cwd + c.args);
 
             c.step();
-            if(c.command == "texm"){
+            if (c.command == "texm")
+            {
                 texmc.execute(c);
             }
-            else if(c.command == "texl"){
+            else if (c.command == "texl")
+            {
                 texlc.execute(c);
             }
-            else{
+            else
+            {
                 throw string("there must be a texl command after texm block in scene");
             }
         }
     };
 
-    class TexCommand : public ICommand<LoaderContext>{
+    class TexCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            MaterialList* texbmat = new MaterialList;
+        void execute(LoaderContext &c) override
+        {
+            MaterialList *texbmat = new MaterialList;
             texbmat->pushNew();
             texbmat->name = c.args;
 
             c.materialLists.push_back(texbmat);
 
             c.step();
-            if(c.command == "texm"){
+            if (c.command == "texm")
+            {
                 texmc.execute(c);
             }
-            else{
+            else
+            {
                 throw string("there must be a texm command after tex in scene");
             }
         }
     };
 
-    class MatCommand : public ICommand<LoaderContext>{
+    class MatCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = c.cwd + bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            // TODO throw error if there is no texture specified in .mat
+            // else vector is out of borders
 
-            c.materialLoader.load(tmp1);
-            MaterialList* materials = c.materialLoader.list;
-            TextureList* textures = materials->textures;
+            // TODO fix to use other textures than map_Kd
 
-            textures->addLayouts(materials->size());//gen layout for each material
+            string mtlPath = c.cwd + bite(" ", c.args);
+            string textureFolderPath = bite(" ", c.args);
+            string materialListName = bite(" ", c.args);
+
+            c.materialLoader.load(mtlPath);
+            MaterialList *materials = c.materialLoader.list;
+            TextureList *textures = materials->textures;
+
+            textures->addLayouts(materials->size()); // gen layout for each material
 
             unordered_set<string> loaded;
             unordered_map<string, size_t> ids;
             size_t idCounter = 0;
-            for(size_t i = 0; i < materials->size(); ++i){//for every material
-                string texName = materials->at(i)->getTextureNames().at(0);//texture name
-                if(loaded.count(texName) == 0){//if not loaded
-                    textures->loadNew(c.cwd + tmp2 + "/" + texName);//load by path
-                    loaded.emplace(texName);//mark loaded
-                    ids.emplace(pair(texName, idCounter));//map name to id in TextureList
+            for (size_t i = 0; i < materials->size(); ++i)
+            {                                                               // for every material
+                string texName = materials->at(i)->getTextureNames().at(0); // texture name
+                if (loaded.count(texName) == 0)
+                {                                                                 // if not loaded
+                    textures->loadNew(c.cwd + textureFolderPath + "/" + texName); // load by path
+                    loaded.emplace(texName);                                      // mark loaded
+                    ids.emplace(pair(texName, idCounter));                        // map name to id in TextureList
                     ++idCounter;
                 }
             }
 
-            for(size_t i = 0; i < materials->size(); ++i){
-                string texName = materials->at(i)->getTextureNames().at(0);//texture name
+            for (size_t i = 0; i < materials->size(); ++i)
+            {
+                string texName = materials->at(i)->getTextureNames().at(0); // texture name
                 textures->appendTextureToLayout(i, 0, ids.at(texName), "texture0");
             }
 
-            materials->name = tmp3;
+            materials->name = materialListName;
             c.materialLists.push_back(materials);
         }
     };
 
-    class LightCommand : public ICommand<LoaderContext>{
+    class LightCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
             string tmp1 = bite(" ", c.args);
 
-            //x,y,z,name
+            // x,y,z,name
             c.model->addNewLightSource(x, y, z, tmp1);
         }
     };
-    class CamCommand : public ICommand<LoaderContext>{
+    class CamCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
@@ -356,125 +434,144 @@ private:
             float sensitivity = biteFloat(" ", c.args);
             string tmp1 = bite(" ", c.args);
 
-            //x,y,z,name
+            // x,y,z,name
             c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, tmp1);
         }
     };
 
-    class FrmbCommand : public ICommand<LoaderContext>{
+    class FrmbCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            size_t itmp1 = biteInt(" ", c.args);
-            size_t itmp2 = biteInt(" ", c.args);
-            size_t itmp3 = biteInt(" ", c.args);
-            string tmp1 = bite(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            size_t width = biteInt(" ", c.args);
+            size_t height = biteInt(" ", c.args);
+            size_t frmbAmount = biteInt(" ", c.args);
+            string frmbName = bite(" ", c.args);
 
-            Framebuffer* framebuffer = new Framebuffer(itmp1, itmp2, tmp1);
-            framebuffer->appendTextureColorBuffers(itmp3);
+            Framebuffer *framebuffer = new Framebuffer(width, height, frmbName);
+            framebuffer->appendTextureColorBuffers(frmbAmount);
             c.model->addFramebuffer(*framebuffer);
 
-            MaterialList* frmbmat = new MaterialList;
+            MaterialList *frmbmat = new MaterialList;
             frmbmat->pushNew();
 
-            frmbmat->name = tmp1;
+            frmbmat->name = frmbName;
             frmbmat->textures = framebuffer->textureColorBuffers;
             c.materialLists.push_back(frmbmat);
         }
     };
 
-    template<class T>
-    class MoveCommand : public ICommand<LoaderContext>{
+    template <class T>
+    class MoveCommand : public ICommand<LoaderContext>
+    {
     public:
-        MoveCommand(){
+        MoveCommand()
+        {
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
-            o->move(x,y,z);
+            o->move(x, y, z);
         }
-        T* o;
+        T *o;
     };
 
-    template<class T>
-    class ScaleCommand : public ICommand<LoaderContext>{
+    template <class T>
+    class ScaleCommand : public ICommand<LoaderContext>
+    {
     public:
-        ScaleCommand(){
+        ScaleCommand()
+        {
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
-            o->scaleTo(x,y,z);
+            o->scaleTo(x, y, z);
         }
-        T* o;
+        T *o;
     };
 
-    template<class T>
-    class RotCommand : public ICommand<LoaderContext>{
+    template <class T>
+    class RotCommand : public ICommand<LoaderContext>
+    {
     public:
-        RotCommand(){
+        RotCommand()
+        {
             static_assert(std::is_base_of<IObject, T>::value, "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
-            o->rotateTo(x,y,z);
+            o->rotateTo(x, y, z);
         }
-        T* o;
+        T *o;
     };
 
-    class MeshObjCommand : public ICommand<LoaderContext>{
+    class MeshObjCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp3 = bite(" ", c.args);
-            string tmp4 = bite(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            string materialName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            string objName = bite(" ", c.args);
 
-            size_t which1 = 0, which2 = 0;
+            size_t whichMtl = 0, whichMeshbuf = 0;
 
-            for(size_t i = 0; i < c.materialLists.size(); ++i){
-                if(c.materialLists.at(i)->name == tmp1){
-                    which1 = i;
+            for (size_t i = 0; i < c.materialLists.size(); ++i)
+            {
+                if (c.materialLists.at(i)->name == materialName)
+                {
+                    whichMtl = i;
                     break;
                 }
             }
 
-            for(size_t i = 0; i < c.meshBuffers.size(); ++i){
-                if(c.meshBuffers.at(i)->name == tmp2){
-                    which2 = i;
+            for (size_t i = 0; i < c.meshBuffers.size(); ++i)
+            {
+                if (c.meshBuffers.at(i)->name == bufferName)
+                {
+                    whichMeshbuf = i;
                     break;
                 }
             }
-            //remove textures from addNewObject cause it moved it Materials
-            c.model->addNewObject(*(c.meshBuffers).at(which2),
-                                  c.materialLists.at(which1), tmp4);
+            c.model->addNewObject(*(c.meshBuffers).at(whichMeshbuf),
+                                  c.materialLists.at(whichMtl), objName);
 
             string nextCommand = c.getNextCommand();
-            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
-                if(nextCommand == "move"){
+            while (nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot")
+            {
+                if (nextCommand == "move")
+                {
                     c.step();
-                    momovec.o = c.model->getMeshObject(tmp4);
-                    momovec.execute(c);
+                    movec.o = c.model->getMeshObject(objName);
+                    movec.execute(c);
                 }
-                if(nextCommand == "scale"){
+                if (nextCommand == "scale")
+                {
                     c.step();
-                    moscalec.o = c.model->getMeshObject(tmp4);
+                    moscalec.o = c.model->getMeshObject(objName);
                     moscalec.execute(c);
                 }
-                if(nextCommand == "rot"){
+                if (nextCommand == "rot")
+                {
                     c.step();
-                    morotc.o = c.model->getMeshObject(tmp4);
+                    morotc.o = c.model->getMeshObject(objName);
                     morotc.execute(c);
                 }
                 nextCommand = c.getNextCommand();
@@ -482,54 +579,63 @@ private:
         }
     };
 
-    class SklObjCommand : public ICommand<LoaderContext>{
+    class SklObjCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp4 = bite(" ", c.args);
-            string tmp5 = c.cwd + bite(" ", c.args);
-            float ftmp1 = biteFloat(" ", c.args);
-            float ftmp2 = biteFloat(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            string materialName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            string objName = bite(" ", c.args);
+            string anmPath = c.cwd + bite(" ", c.args);
+            float anmMult = biteFloat(" ", c.args);
+            float anmStart = biteFloat(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
-            for(size_t i = 0; i < c.materialLists.size(); ++i){
-                if(c.materialLists.at(i)->name == tmp1){
+            for (size_t i = 0; i < c.materialLists.size(); ++i)
+            {
+                if (c.materialLists.at(i)->name == materialName)
+                {
                     which1 = i;
                     break;
                 }
             }
 
-
-            for(size_t i = 0; i < c.sklBuffers.size(); ++i){
-                if(c.sklBuffers.at(i)->name == tmp2){
+            for (size_t i = 0; i < c.sklBuffers.size(); ++i)
+            {
+                if (c.sklBuffers.at(i)->name == bufferName)
+                {
                     which2 = i;
                     break;
                 }
             }
 
             c.model->addNewObject(*c.sklBuffers.at(which2),
-                                   c.materialLists.at(which1), tmp4);
-            c.model->getSkeletonObject(tmp4)->parseAndPushAnimation(tmp5, ftmp1, ftmp2, tmp5);//add name instead of last arg
-            c.model->getSkeletonObject(tmp4)->setCurrAnimation(tmp5);
-            c.model->getSkeletonObject(tmp4)->startAnimation();
+                                  c.materialLists.at(which1), objName);
+            c.model->getSkeletonObject(objName)->parseAndPushAnimation(anmPath, anmMult, anmStart, anmPath); // add name instead of last arg
+            c.model->getSkeletonObject(objName)->setCurrAnimation(anmPath);
+            c.model->getSkeletonObject(objName)->startAnimation();
 
             string nextCommand = c.getNextCommand();
-            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
-                if(nextCommand == "move"){
+            while (nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot")
+            {
+                if (nextCommand == "move")
+                {
                     c.step();
-                    somovec.o = c.model->getSkeletonObject(tmp4);
+                    somovec.o = c.model->getSkeletonObject(objName);
                     somovec.execute(c);
                 }
-                if(nextCommand == "scale"){
+                if (nextCommand == "scale")
+                {
                     c.step();
-                    soscalec.o = c.model->getSkeletonObject(tmp4);
+                    soscalec.o = c.model->getSkeletonObject(objName);
                     soscalec.execute(c);
                 }
-                if(nextCommand == "rot"){
+                if (nextCommand == "rot")
+                {
                     c.step();
-                    sorotc.o = c.model->getSkeletonObject(tmp4);
+                    sorotc.o = c.model->getSkeletonObject(objName);
                     sorotc.execute(c);
                 }
             }
@@ -537,24 +643,30 @@ private:
         }
     };
 
-    class InstObjCommand : public ICommand<LoaderContext>{
+    class InstObjCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp1 = bite(" ", c.args);
-            string tmp2 = bite(" ", c.args);
-            string tmp5 = bite(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            string materialName = bite(" ", c.args);
+            string bufferName = bite(" ", c.args);
+            string objName = bite(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
-            for(size_t i = 0; i < c.materialLists.size(); ++i){
-                if(c.materialLists.at(i)->name == tmp1){
+            for (size_t i = 0; i < c.materialLists.size(); ++i)
+            {
+                if (c.materialLists.at(i)->name == materialName)
+                {
                     which1 = i;
                     break;
                 }
             }
 
-            for(size_t i = 0; i < c.instBuffers.size(); ++i){
-                if(c.instBuffers.at(i)->name == tmp2){
+            for (size_t i = 0; i < c.instBuffers.size(); ++i)
+            {
+                if (c.instBuffers.at(i)->name == bufferName)
+                {
                     which2 = i;
                     break;
                 }
@@ -562,20 +674,23 @@ private:
 
             vector<Position> poses;
 
-            c.model->addNewObject(*c.instBuffers.at(which2), c.materialLists.at(which1), poses, tmp5);
+            c.model->addNewObject(*c.instBuffers.at(which2), c.materialLists.at(which1), poses, objName);
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "instel"){
+            if (nextCommand == "instel")
+            {
                 c.step();
                 instelc.execute(c);
             }
         }
     };
 
-    class InstElCommand : public ICommand<LoaderContext>{
+    class InstElCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            InstancedObject* lastInstObj = c.model->getInstancedObject(c.model->instancedObjects->size()-1);
+        void execute(LoaderContext &c) override
+        {
+            InstancedObject *lastInstObj = c.model->getInstancedObject(c.model->instancedObjects->size() - 1);
             lastInstObj->modelMatrices.push_back(Position());
 
             float x = biteFloat(" ", c.args);
@@ -597,17 +712,20 @@ private:
             lastInstObj->scaleTo(lastInstObj->modelMatrices.size() - 1, x, y, z);
 
             string nextCommand = c.getNextCommand();
-            if(nextCommand == "instel"){
+            if (nextCommand == "instel")
+            {
                 c.step();
                 instelc.execute(c);
             }
         }
     };
 
-    class SkyboxCommand : public ICommand<LoaderContext>{
+    class SkyboxCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
-            string tmp2 = bite(" ", c.args);
+        void execute(LoaderContext &c) override
+        {
+            string bufferName = bite(" ", c.args);
 
             vector<string> skyboxSides;
             skyboxSides.push_back(c.cwd + bite(" ", c.args));
@@ -621,8 +739,10 @@ private:
 
             size_t which = 0;
 
-            for(size_t i = 0; i < c.meshBuffers.size(); ++i){
-                if(c.meshBuffers.at(i)->name == tmp2){
+            for (size_t i = 0; i < c.meshBuffers.size(); ++i)
+            {
+                if (c.meshBuffers.at(i)->name == bufferName)
+                {
                     which = i;
                     break;
                 }
@@ -631,18 +751,22 @@ private:
             c.model->addNewSkybox(skyboxSides, *c.meshBuffers.at(which), tmp4);
 
             string nextCommand = c.getNextCommand();
-            while(nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot"){
-                if(nextCommand == "move"){
+            while (nextCommand == "move" || nextCommand == "scale" || nextCommand == "rot")
+            {
+                if (nextCommand == "move")
+                {
                     c.step();
                     skmovec.o = c.model->getSkyboxObject(tmp4);
                     skmovec.execute(c);
                 }
-                if(nextCommand == "scale"){
+                if (nextCommand == "scale")
+                {
                     c.step();
                     skscalec.o = c.model->getSkyboxObject(tmp4);
                     skscalec.execute(c);
                 }
-                if(nextCommand == "rot"){
+                if (nextCommand == "rot")
+                {
                     c.step();
                     skrotc.o = c.model->getSkyboxObject(tmp4);
                     skrotc.execute(c);
@@ -652,9 +776,11 @@ private:
         }
     };
 
-    class BckColCommand : public ICommand<LoaderContext>{
+    class BckColCommand : public ICommand<LoaderContext>
+    {
     public:
-        void execute(LoaderContext& c) override{
+        void execute(LoaderContext &c) override
+        {
             float r, g, b, a;
 
             r = biteFloat(" ", c.args);
@@ -680,7 +806,7 @@ private:
     static LightCommand lightc;
     static CamCommand camc;
     static FrmbCommand frmbc;
-    static MoveCommand<MeshObject> momovec;
+    static MoveCommand<MeshObject> movec;
     static MoveCommand<SkeletonObject> somovec;
     static MoveCommand<SkyboxObject> skmovec;
     static ScaleCommand<MeshObject> moscalec;
@@ -711,7 +837,7 @@ SceneLoader::MatCommand SceneLoader::matc;
 SceneLoader::LightCommand SceneLoader::lightc;
 SceneLoader::CamCommand SceneLoader::camc;
 SceneLoader::FrmbCommand SceneLoader::frmbc;
-SceneLoader::MoveCommand<MeshObject> SceneLoader::momovec;
+SceneLoader::MoveCommand<MeshObject> SceneLoader::movec;
 SceneLoader::MoveCommand<SkeletonObject> SceneLoader::somovec;
 SceneLoader::MoveCommand<SkyboxObject> SceneLoader::skmovec;
 SceneLoader::ScaleCommand<MeshObject> SceneLoader::moscalec;

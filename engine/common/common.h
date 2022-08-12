@@ -13,6 +13,7 @@ using namespace std;
 
 float someCounter = 0;
 
+#define HIDE_CURSOR 0
 #define DEBUG_GL
 
 #ifdef DEBUG_GL

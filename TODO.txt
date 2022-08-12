@@ -19,6 +19,7 @@ rename some GL_* definitions to own enums
 !12
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
 split shad to two commands in SceneLoader
+split shader.h to shaderloader, shaderfragment and shderprogram files
 
 13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
@@ -29,7 +30,7 @@ make counter instead of noname in object etc names
 16
 hide window pointers etc in *Object classes
 
-17
++-17
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
 or just let hot change
 
@@ -51,8 +52,8 @@ or make interface for a lot of different cases instead
 27
 add namespaces
 
-28
-+remove GLfloat etc where it must be just float etc
++28
+remove GLfloat etc where it must be just float etc
 check types in SceneLoader, they must be equal to what constructors get
 e.g. FrmbCommand variables for Framebuffer
 
@@ -97,8 +98,9 @@ add GUIObject and 2d object
 44
 allow to split SceneLoader scene.txt by multiple files
 
-!45
++45
 add material manual properties command for SceneLoader tex* commands
+(resolved as a bad feature as it is already implemented in mat comand)
 
 47 (18)
 add opengl debug mode
@@ -116,12 +118,16 @@ this code must be compiled in executable not to slowdown render
 
 51
 add CMakeList to compile other libraries
+or else add compilation guide
 
-52
+!52
 check every refrence and pointer for null after loading
 
-56
-also check if the sufficient num args provided while parsing files
+!56
+check if the sufficient num args provided while parsing files
+
+57
+split animation.h to animationloader and animation files
 
 lastplan:
 
