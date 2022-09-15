@@ -30,7 +30,7 @@ TODO: add more explanations here
 
  ### Dependencies
 * GLEW32
-* GFLW3
+* GLFW3
 * SOIL2
 * opengl
 * glm
