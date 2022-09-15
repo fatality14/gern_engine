@@ -1,5 +1,5 @@
-#include <render/renderer.h>
-#include <render/sceneloader.h>
+#include <renderer.h>
+#include <sceneloader.h>
 #include <chrono>
 #include <filesystem>
 

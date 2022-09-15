@@ -24,6 +24,7 @@ public:
         shaderFields.push(*position);
         shaderFields.push(*perspective);
         shaderFields.push(*view);
+        shaderFields.push(*lightSources);
     }
 
     void setTextureList(TextureList& tl){
@@ -41,6 +42,7 @@ public:
         if(currShaderId != shader->program){
             perspective->pushToShader(*shader);
             view->pushToShader(*shader);
+            lightSources->pushToShader(*shader);
 
             currShaderId = shader->program;
         }

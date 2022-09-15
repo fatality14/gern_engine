@@ -29,7 +29,9 @@ target_include_directories(ogl PRIVATE
     thirdparty/GLFW/
     thirdparty/SOIL2/
     thirdparty/glm/
-    libs/)
+    libs/
+    usrsrc/
+)
 
 #[[ use on your own risk
 file(GLOB ALL_HEADERS

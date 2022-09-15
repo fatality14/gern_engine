@@ -8,13 +8,11 @@
 
 #include <SOIL2.h>
 #include <vector>
+#include <flags.h>
 
 using namespace std;
 
 float someCounter = 0;
-
-#define HIDE_CURSOR 0
-#define DEBUG_GL
 
 #ifdef DEBUG_GL
 //clear last error if any and check for new after call

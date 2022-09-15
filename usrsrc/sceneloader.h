@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 
-#include <render/framemodel.h>
+#include <framemodel.h>
 #include <mesh/meshloader.h>
 #include <object/skeletonobject.h>
 #include <mesh/skeletonloader.h>

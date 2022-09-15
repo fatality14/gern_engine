@@ -53,6 +53,7 @@ public:
 
         perspective->selfPushable = false;
         view->selfPushable = false;
+        lightSources->selfPushable = false;
         view->setShaderParams("viewMatrix", "cameraPos");
     }
     ~FrameModel(){

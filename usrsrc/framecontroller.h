@@ -1,6 +1,6 @@
 #pragma once
 
-#include <render/framemodel.h>
+#include <framemodel.h>
 
 //move to another file like as FrameModel
 class FrameController : public IFrameController<FrameModel>{
@@ -16,25 +16,7 @@ public:
         static MeshObject* currObj;
         static SkeletonObject* currSklObj;
         static InstancedObject* currInstObj;
-        ///////////////////////////////
 
-        //move that in draw function
-        if(once){
-            for(size_t i = 0; i < m.meshObjects->size(); ++i){
-                currObj = m.meshObjects->at(i);
-                currObj->shaderFields.push(*currObj->lightSources->at(0));
-            }
-            for(size_t i = 0; i < m.skeletonObjects->size(); ++i){
-                currSklObj = m.skeletonObjects->at(i);
-                currSklObj->shaderFields.push(*currSklObj->lightSources->at(0));
-            }
-            for(size_t i = 0; i < m.instancedObjects->size(); ++i){
-                currInstObj = m.instancedObjects->at(i);
-                currInstObj->shaderFields.push(*currInstObj->lightSources->at(0));
-            }
-            once = false;
-        }
-        ///////////////////////////////
         m.bindFramebuffer(0, 1);
 
         currInstObj = m.getInstancedObject("paimon");
@@ -72,7 +54,6 @@ public:
 //            image = &t->loadDataFromShader();
 //            ++amount;
         }
-
         ///////////////////////////////
         m.updateCommonData();
 
