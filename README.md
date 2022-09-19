@@ -8,11 +8,12 @@ Root folder:
 * `resources` folder - contains user resource files like .obj or .png
 * `shaders` folder - contains .glsl shader files
 * `thirdparty` folder - contains third party source files
+* `usrsrc` - contains user-defined code
 * `SOIL2GUIDE` file - recomendations how to compile soil with cmake
 * `TODO` file - list of tasks
 * `main.cpp` - main executable file with minimal sample program
 
-`engine/render` folder contains classes to specify the user's render logic.
+`usrsrc` folder contains classes to specify the user's render logic.
 
 It is written in MVC pattern, where:
 * `framecontroller.h` - has a controller class with sample frame draw logic
