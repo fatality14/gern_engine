@@ -4,7 +4,7 @@
 #include <render/window.h>
 #include <render/mouselistener.h>
 #include <shader/camera.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 
 class Perspective : public IShaderField{
 public:

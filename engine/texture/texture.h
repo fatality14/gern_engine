@@ -1,9 +1,9 @@
 #pragma once
 
 #include <common/common.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 #include <texture/itexture.h>
-#include <common/list.h>
+#include <common/alist.h>
 
 class Texture : public ITexture, public IShaderField{
 public:

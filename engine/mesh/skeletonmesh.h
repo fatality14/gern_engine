@@ -1,8 +1,8 @@
 #pragma once
 
 #include <common/common.h>
-#include <common/list.h>
-#include <mesh/imesh.h>
+#include <common/alist.h>
+#include <mesh/amesh.h>
 #include <mesh/skeletonvertex.h>
 #include <animation/joint.h>
 

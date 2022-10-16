@@ -1,9 +1,9 @@
 #pragma once
 
 #include <common/common.h>
-#include <mesh/imesh.h>
+#include <mesh/amesh.h>
 #include <mesh/ivertex.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 #include <shader/shaderfieldlist.h>
 
 class IBuffer : public ICommon{};

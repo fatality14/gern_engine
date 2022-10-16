@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 
 template <class T, class U>
 class ShaderAttrib : public IShaderField{

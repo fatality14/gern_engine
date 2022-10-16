@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 #include <texture/itexture.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 
 class SkyboxTexture : public ITexture, public IShaderField{
 public:

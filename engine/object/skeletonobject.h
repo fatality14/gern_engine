@@ -3,6 +3,7 @@
 #include <object/aobject.h>
 #include <buffer/skeletonbuffer.h>
 #include <animation/animation.h>
+#include <animation/poseloader.h>
 #include <shader/lightsource.h>
 #include <texture/material.h>
 
@@ -33,11 +34,15 @@ public:
         shaderFields.push(*perspective);
         shaderFields.push(*view);
     }
+    
+    // void parseAndPushAnimation(string animationFilePath, float animationTimeMult = 1, float startTime = 0, string name = "noname"){
+    //     currAnimation = new Animation(buffer->getMesh().joints, animationTimeMult, startTime, name);
+    //     currAnimation->parseKeyPoses(animationFilePath);
+    //     animations.push(*currAnimation);
+    // }
 
-    void parseAndPushAnimation(string animationFilePath, float animationTimeMult = 1, float startTime = 0, string name = "noname"){
-        currAnimation = new Animation(buffer->getMesh().joints, animationTimeMult, startTime, name);
-        currAnimation->parseKeyPoses(animationFilePath);
-        animations.push(*currAnimation);
+    void addAnimation(Animation& a){
+        animations.push(a);
     }
 
     void popAnimationByIndex(size_t index){

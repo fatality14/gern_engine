@@ -1,7 +1,7 @@
 #pragma once
 
 #include <common/common.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 #include <texture/texture.h>
 
 class Material : public IShaderField{

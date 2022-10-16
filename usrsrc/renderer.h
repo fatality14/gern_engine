@@ -1,6 +1,6 @@
 #pragma once
 
-#include <render/irenderer.h>
+#include <render/arenderer.h>
 #include <framecontroller.h>
 
 typedef ARenderer<FrameModel, FrameController> Renderer;

@@ -1,19 +1,13 @@
 #pragma once
 
-#include <common/common.h>
 #include <render/window.h>
 #include <shader/view.h>
 #include <shader/perspective.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 #include <shader/position.h>
 #include <texture/texture.h>
 #include <buffer/meshbuffer.h>
-
-class IObject : public ICommon{
-public:
-    virtual void draw(int flags = 0) = 0;
-    virtual ~IObject(){};
-};
+#include <object/iobject.h>
 
 template <class T>
 class AObject : public IObject{
@@ -102,8 +96,4 @@ public:
     void scaleTo(glm::vec3 scale){
         position->scaleTo(scale);
     }
-};
-
-class IObjectList : public AListO<IObject>{
-
 };

@@ -106,7 +106,7 @@ private:
         setPolygonMode(pmFace, pmMode);
     }
 
-    static void framebufferResizeCallback(GLFWwindow* window, int fbW, int fbH){
+    static void framebufferResizeCallback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int fbW, [[maybe_unused]] int fbH){
         GLDB(glViewport(0, 0, fbW, fbH));
     }
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 
 class ShaderFieldList : public AList<IShaderField>{
 public:

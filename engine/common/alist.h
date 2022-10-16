@@ -1,8 +1,7 @@
 #pragma once
 
 #include <common/common.h>
-
-struct IList : public ICommon{};
+#include <common/ilist.h>
 
 //add check for repeating names in list
 template<class T>

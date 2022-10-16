@@ -27,7 +27,7 @@ public:
 
     static GLuint currShaderId;
 
-    virtual void draw(int flags = 0) override{
+    virtual void draw([[maybe_unused]] int flags = 0) override{
         window->setDrawOrder(false);
         shader->bind();
 

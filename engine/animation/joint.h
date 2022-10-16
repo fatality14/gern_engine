@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 #include <animation/jointposition.h>
-#include <shader/shaderfield.h>
+#include <shader/ishaderfield.h>
 
 class Joint : public ICommon{
 public:
