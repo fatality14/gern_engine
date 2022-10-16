@@ -91,6 +91,9 @@ class Animation : private ULoader {
                 currPoseIndex = 0;
             }
         }
+        else{
+            reset();
+        }
     }
     void applyPose(Pose &p) {
         for (size_t i = 0; i < p.getPositionsAmount(); ++i) {

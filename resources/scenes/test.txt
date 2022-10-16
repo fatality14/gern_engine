@@ -25,7 +25,8 @@ meshobj screenbuff quad screen
 rot 0 180 0
 meshobj blank sphere sphere
 scale 0.01 0.01 0.01
-sklobj paimonmat paimonskl paimon resources/models/GenshinImpactPack/paimon/paimon.anm 1 10
+sklobj paimonmat paimonskl paimon
+anm resources/models/GenshinImpactPack/paimon/paimon.anm 1 10
 instobj paimonmat paimoninst paimon
 instel 5 0 0  90 0 0  1 0.2 0.2
 instel -5 0 0  90 0 0  0.2 0.2 0.2

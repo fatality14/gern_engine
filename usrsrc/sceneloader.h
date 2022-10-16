@@ -1,5 +1,6 @@
 #pragma once
 
+#include <animation/poseloader.h>
 #include <common/common.h>
 #include <framemodel.h>
 #include <mesh/meshloader.h>
@@ -8,7 +9,6 @@
 #include <object/skeletonobject.h>
 #include <render/isceneloader.h>
 #include <texture/materialloader.h>
-#include <animation/poseloader.h>
 
 #include <queue>
 #include <unordered_map>
@@ -33,7 +33,7 @@ class LoaderContext : public IContext {
 
     bool step() {
         if (lines.size() != 0) {
-            string &currLine = lines.front();
+            string& currLine = lines.front();
 
             ULoader::removeBadSpaces(currLine);
 
@@ -55,7 +55,7 @@ class LoaderContext : public IContext {
 
     string cwd;
 
-    FrameModel *model;
+    FrameModel* model;
     queue<string> lines;
     string args;
     string command;
@@ -66,20 +66,20 @@ class LoaderContext : public IContext {
     SkeletonLoader skeletizer;
     MaterialLoader materialLoader;
     ShaderList shaders;
-    vector<MaterialList *> materialLists;
+    vector<MaterialList*> materialLists;
 
     PoseLoader poseLoader;
 
-    vector<MeshBuffer *> meshBuffers;
-    vector<SkeletonBuffer *> sklBuffers;
-    vector<InstancedBuffer *> instBuffers;
+    vector<MeshBuffer*> meshBuffers;
+    vector<SkeletonBuffer*> sklBuffers;
+    vector<InstancedBuffer*> instBuffers;
 };
 
 typedef ICommand<LoaderContext> Command;
 
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
   public:
-    void load(string path, FrameModel &data) override {
+    void load(string path, FrameModel& data) override {
         c.model = &data;
 
         ifstream f;
@@ -155,6 +155,10 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
                 sklobjc.execute(c);
                 continue;
             }
+            if (c.command == "anm") {
+                anmc.execute(c);
+                continue;
+            }
             if (c.command == "instobj") {
                 instobjc.execute(c);
                 continue;
@@ -175,12 +179,12 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
   private:
     class CwdCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override { c.cwd = bite(" ", c.args); }
+        void execute(LoaderContext& c) override { c.cwd = bite(" ", c.args); }
     };
 
     class MeshCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string path = c.cwd + bite(" ", c.args);
             string meshName = bite(" ", c.args);
             c.meshList.push(c.meshLoader.load(path, meshName));
@@ -189,7 +193,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class SklCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string skeletonPath = c.cwd + bite(" ", c.args);
             c.skeletonList.push(c.skeletizer.skeletize(
@@ -199,7 +203,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class ShadCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string vertexPath = c.cwd + bite(" ", c.args);
             string fragmentPath = c.cwd + bite(" ", c.args);
             string shaderName = bite(" ", c.args);
@@ -210,7 +214,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class MeshBufCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -223,7 +227,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class SklBufCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -236,7 +240,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class InstBufCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -249,7 +253,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class TexLCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->addLayouts(1);
 
@@ -272,7 +276,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class TexMCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->loadNew(c.cwd + c.args);
 
@@ -290,8 +294,8 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class TexCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
-            MaterialList *texbmat = new MaterialList;
+        void execute(LoaderContext& c) override {
+            MaterialList* texbmat = new MaterialList;
             texbmat->pushNew();
             texbmat->name = c.args;
 
@@ -308,7 +312,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class MatCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             // TODO throw error if there is no texture specified in .mat
             // else vector is out of borders
 
@@ -319,8 +323,8 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
             string materialListName = bite(" ", c.args);
 
             c.materialLoader.load(mtlPath);
-            MaterialList *materials = c.materialLoader.list;
-            TextureList *textures = materials->textures;
+            MaterialList* materials = c.materialLoader.list;
+            TextureList* textures = materials->textures;
 
             textures->addLayouts(
                 materials->size()); // gen layout for each material
@@ -357,7 +361,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class LightCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
@@ -369,7 +373,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
     class CamCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
@@ -384,17 +388,17 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class FrmbCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             size_t width = biteInt(" ", c.args);
             size_t height = biteInt(" ", c.args);
             size_t frmbAmount = biteInt(" ", c.args);
             string frmbName = bite(" ", c.args);
 
-            Framebuffer *framebuffer = new Framebuffer(width, height, frmbName);
+            Framebuffer* framebuffer = new Framebuffer(width, height, frmbName);
             framebuffer->appendTextureColorBuffers(frmbAmount);
             c.model->addFramebuffer(*framebuffer);
 
-            MaterialList *frmbmat = new MaterialList;
+            MaterialList* frmbmat = new MaterialList;
             frmbmat->pushNew();
 
             frmbmat->name = frmbName;
@@ -410,14 +414,14 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
             o->move(x, y, z);
         }
-        T *o;
+        T* o;
     };
 
     template <class T> class ScaleCommand : public ICommand<LoaderContext> {
@@ -427,14 +431,14 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
             o->scaleTo(x, y, z);
         }
-        T *o;
+        T* o;
     };
 
     template <class T> class RotCommand : public ICommand<LoaderContext> {
@@ -444,19 +448,19 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
 
             o->rotateTo(x, y, z);
         }
-        T *o;
+        T* o;
     };
 
     class MeshObjCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
             string objName = bite(" ", c.args);
@@ -504,13 +508,10 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class SklObjCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
             string objName = bite(" ", c.args);
-            string anmPath = c.cwd + bite(" ", c.args);
-            float anmMult = biteFloat(" ", c.args);
-            float anmStart = biteFloat(" ", c.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -530,43 +531,69 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
             c.model->addNewObject(*c.sklBuffers.at(which2),
                                   c.materialLists.at(which1), objName);
-            
-            PoseList* poses = c.poseLoader.parseKeyPoses(anmPath);
-            Animation* anm = new Animation(c.sklBuffers.at(which2)->getMesh().joints, anmMult, anmStart, anmPath);
-            anm->setKeyPoses(*poses);
-            c.model->getSkeletonObject(objName)->addAnimation(*anm);
-            // c.model->getSkeletonObject(objName)->parseAndPushAnimation(
-            //     anmPath, anmMult, anmStart,
-            //     anmPath); // add name instead of last arg
-            c.model->getSkeletonObject(objName)->setCurrAnimation(anmPath);
-            c.model->getSkeletonObject(objName)->startAnimation();
+
+            SkeletonObject* currObject = c.model->getSkeletonObject(objName);
 
             string nextCommand = c.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.step();
-                    somovec.o = c.model->getSkeletonObject(objName);
+                    somovec.o = currObject;
                     somovec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.step();
-                    soscalec.o = c.model->getSkeletonObject(objName);
+                    soscalec.o = currObject;
                     soscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
                     c.step();
-                    sorotc.o = c.model->getSkeletonObject(objName);
+                    sorotc.o = currObject;
                     sorotc.execute(c);
                 }
+                nextCommand = c.getNextCommand();
             }
-            nextCommand = c.getNextCommand();
+
+            if (nextCommand == "anm") {
+                c.step();
+                anmc.o = currObject;
+                anmc.execute(c);
+            }
+            currObject->startAnimation();
         }
+    };
+
+    class AnmCommand : public ICommand<LoaderContext> {
+      public:
+        void execute(LoaderContext& c) override {
+            string anmPath = c.cwd + bite(" ", c.args);
+            float anmMult = biteFloat(" ", c.args);
+            float anmStart = biteFloat(" ", c.args);
+
+            PoseList* poses = c.poseLoader.parseKeyPoses(anmPath);
+            Animation* anm =
+                new Animation(o->buffer->getMesh().joints,
+                              anmMult, anmStart, anmPath);
+            anm->setKeyPoses(*poses);
+
+            o->addAnimation(*anm);
+            o->setCurrAnimation(anmPath);
+
+            string nextCommand = c.getNextCommand();
+            if (nextCommand == "anm") {
+                c.step();
+                // anmc.o = this->o; //no need to while anmc is static
+                anmc.execute(c);
+            }
+        }
+
+        SkeletonObject* o;
     };
 
     class InstObjCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
             string objName = bite(" ", c.args);
@@ -602,8 +629,8 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class InstElCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
-            InstancedObject *lastInstObj = c.model->getInstancedObject(
+        void execute(LoaderContext& c) override {
+            InstancedObject* lastInstObj = c.model->getInstancedObject(
                 c.model->instancedObjects->size() - 1);
             lastInstObj->modelMatrices.push_back(Position());
 
@@ -637,7 +664,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class SkyboxCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             string bufferName = bite(" ", c.args);
 
             vector<string> skyboxSides;
@@ -686,7 +713,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     class BckColCommand : public ICommand<LoaderContext> {
       public:
-        void execute(LoaderContext &c) override {
+        void execute(LoaderContext& c) override {
             float r, g, b, a;
 
             r = biteFloat(" ", c.args);
@@ -723,6 +750,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     inline static RotCommand<SkyboxObject> skrotc;
     inline static MeshObjCommand meshobjc;
     inline static SklObjCommand sklobjc;
+    inline static AnmCommand anmc;
     inline static InstObjCommand instobjc;
     inline static InstElCommand instelc;
     inline static SkyboxCommand skyboxc;

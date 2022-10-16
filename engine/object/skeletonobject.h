@@ -34,12 +34,6 @@ public:
         shaderFields.push(*perspective);
         shaderFields.push(*view);
     }
-    
-    // void parseAndPushAnimation(string animationFilePath, float animationTimeMult = 1, float startTime = 0, string name = "noname"){
-    //     currAnimation = new Animation(buffer->getMesh().joints, animationTimeMult, startTime, name);
-    //     currAnimation->parseKeyPoses(animationFilePath);
-    //     animations.push(*currAnimation);
-    // }
 
     void addAnimation(Animation& a){
         animations.push(a);
