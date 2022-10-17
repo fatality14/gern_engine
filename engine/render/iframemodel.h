@@ -2,4 +2,4 @@
 
 #include <common/common.h>
 
-class IFrameModel  : public ICommon{};
+class IFrameModel : public ICommon {};

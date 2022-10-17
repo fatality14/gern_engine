@@ -3,7 +3,7 @@
 #include <common/common.h>
 #include <render/window.h>
 
-class MouseListener : public ICommon{
+class MouseListener : public ICommon {
 public:
     float dt;
     float currTime;
@@ -18,7 +18,7 @@ public:
     double mouseOffsetX;
     double mouseOffsetY;
 
-    MouseListener(Window& w){
+    MouseListener(Window& w) {
         window = &w;
 
         dt = 0;
@@ -37,25 +37,26 @@ public:
         firstMouse = true;
     }
 
-    void update(){
+    void update() {
         updateDt();
         updateInput();
-        //cout << dt << " " << mouseOffsetX << " " << mouseOffsetY << endl;
+        // cout << dt << " " << mouseOffsetX << " " << mouseOffsetY << endl;
     }
+
 private:
     Window* window;
 
     bool firstMouse;
 
-    void updateDt(){
+    void updateDt() {
         currTime = static_cast<float>(glfwGetTime());
         dt = currTime - lastTime;
         lastTime = currTime;
     }
-    void updateInput(){
+    void updateInput() {
         glfwGetCursorPos(window->getWindowPtr(), &mouseX, &mouseY);
 
-        if(firstMouse){
+        if (firstMouse) {
             lastMouseX = mouseX;
             lastMouseY = mouseY;
             firstMouse = false;

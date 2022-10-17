@@ -2,20 +2,20 @@
 
 #include <animation/joint.h>
 #include <animation/pose.h>
+#include <animation/poseloader.h>
 #include <chrono>
 #include <common/alist.h>
 #include <common/common.h>
 #include <common/loader.h>
-#include <animation/poseloader.h>
 
 class Animation : private ULoader {
-  public:
+public:
     float animationTimeMult;
     float currAnimationTime;
 
     string name;
 
-    Animation(JointList &jointsToAnimate, float animationTimeMult = 1,
+    Animation(JointList& jointsToAnimate, float animationTimeMult = 1,
               float startTime = 0, string name = "noname") {
         joints = &jointsToAnimate;
         this->startTime = startTime;
@@ -28,9 +28,7 @@ class Animation : private ULoader {
         calcCurrPose();
         applyPose(currPose);
     }
-    void setKeyPoses(const PoseList& keyPoses) {
-        this->keyPoses = keyPoses;
-    }
+    void setKeyPoses(const PoseList& keyPoses) { this->keyPoses = keyPoses; }
     void setStartTime(float time) { startTime = time; }
     void reset() {
         auto additionalTime =
@@ -42,7 +40,7 @@ class Animation : private ULoader {
     }
     float getCurrTime() { return currAnimationTime; }
 
-  private:
+private:
     float startTime = 0;
 
     //    std::chrono::duration<long long, std::ratio<1, 1000000000>> snapTime;
@@ -51,7 +49,7 @@ class Animation : private ULoader {
     std::chrono::steady_clock::time_point currTimeTimer;
     PoseList keyPoses;
     Pose currPose;
-    JointList *joints;
+    JointList* joints;
     float keyPoseTime;
     float interpolationCoef;
 
@@ -90,19 +88,18 @@ class Animation : private ULoader {
                 timePassed = 0;
                 currPoseIndex = 0;
             }
-        }
-        else{
+        } else {
             reset();
         }
     }
-    void applyPose(Pose &p) {
+    void applyPose(Pose& p) {
         for (size_t i = 0; i < p.getPositionsAmount(); ++i) {
             joints->getById(p.ids.at(i)).moveTo(p.locations.at(i));
             joints->getById(p.ids.at(i)).rotateTo(p.rotations.at(i));
             joints->getById(p.ids.at(i)).scaleTo(p.scales.at(i));
         }
     }
-    Pose interpolatePoses(Pose &p1, Pose &p2, float interpolationCoef) {
+    Pose interpolatePoses(Pose& p1, Pose& p2, float interpolationCoef) {
         Pose p;
         for (size_t i = 0; i < p1.getPositionsAmount(); ++i) {
             p.locations.push_back(p1.locations.at(i) * (1 - interpolationCoef) +

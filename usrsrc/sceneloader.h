@@ -15,7 +15,7 @@
 #include <unordered_set>
 
 class LoaderContext : public IContext {
-  public:
+public:
     ~LoaderContext() {
         for (size_t i = 0; i < meshBuffers.size(); ++i) {
             delete meshBuffers[i];
@@ -78,7 +78,7 @@ class LoaderContext : public IContext {
 typedef ICommand<LoaderContext> Command;
 
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
-  public:
+public:
     void load(string path, FrameModel& data) override {
         c.model = &data;
 
@@ -176,14 +176,14 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 
     LoaderContext c;
 
-  private:
+private:
     class CwdCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override { c.cwd = bite(" ", c.args); }
     };
 
     class MeshCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string path = c.cwd + bite(" ", c.args);
             string meshName = bite(" ", c.args);
@@ -192,7 +192,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class SklCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string skeletonPath = c.cwd + bite(" ", c.args);
@@ -202,7 +202,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class ShadCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string vertexPath = c.cwd + bite(" ", c.args);
             string fragmentPath = c.cwd + bite(" ", c.args);
@@ -213,7 +213,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class MeshBufCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
@@ -226,7 +226,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class SklBufCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
@@ -239,7 +239,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class InstBufCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
             string shaderName = bite(" ", c.args);
@@ -252,7 +252,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class TexLCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->addLayouts(1);
@@ -275,7 +275,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class TexMCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->loadNew(c.cwd + c.args);
@@ -293,7 +293,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class TexCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             MaterialList* texbmat = new MaterialList;
             texbmat->pushNew();
@@ -311,7 +311,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class MatCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             // TODO throw error if there is no texture specified in .mat
             // else vector is out of borders
@@ -360,7 +360,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class LightCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
@@ -372,7 +372,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
         }
     };
     class CamCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
@@ -387,7 +387,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class FrmbCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             size_t width = biteInt(" ", c.args);
             size_t height = biteInt(" ", c.args);
@@ -408,7 +408,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     template <class T> class MoveCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         MoveCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
@@ -425,7 +425,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     template <class T> class ScaleCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         ScaleCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
@@ -442,7 +442,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     template <class T> class RotCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         RotCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
@@ -459,7 +459,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class MeshObjCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -507,7 +507,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class SklObjCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -565,16 +565,15 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class AnmCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string anmPath = c.cwd + bite(" ", c.args);
             float anmMult = biteFloat(" ", c.args);
             float anmStart = biteFloat(" ", c.args);
 
             PoseList* poses = c.poseLoader.parseKeyPoses(anmPath);
-            Animation* anm =
-                new Animation(o->buffer->getMesh().joints,
-                              anmMult, anmStart, anmPath);
+            Animation* anm = new Animation(o->buffer->getMesh().joints, anmMult,
+                                           anmStart, anmPath);
             anm->setKeyPoses(*poses);
 
             o->addAnimation(*anm);
@@ -592,7 +591,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class InstObjCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string materialName = bite(" ", c.args);
             string bufferName = bite(" ", c.args);
@@ -628,7 +627,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class InstElCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             InstancedObject* lastInstObj = c.model->getInstancedObject(
                 c.model->instancedObjects->size() - 1);
@@ -663,7 +662,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class SkyboxCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             string bufferName = bite(" ", c.args);
 
@@ -712,7 +711,7 @@ class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
     };
 
     class BckColCommand : public ICommand<LoaderContext> {
-      public:
+    public:
         void execute(LoaderContext& c) override {
             float r, g, b, a;
 

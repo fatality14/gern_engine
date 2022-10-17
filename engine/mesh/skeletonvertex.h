@@ -3,7 +3,7 @@
 #include <common/common.h>
 #include <mesh/ivertex.h>
 
-struct SkeletonVertex : public IVertex{
+struct SkeletonVertex : public IVertex {
     glm::vec3 position;
     glm::vec2 texcoord;
     glm::vec3 normal;

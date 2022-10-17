@@ -2,4 +2,4 @@
 
 #include <common/common.h>
 
-struct IList : public ICommon{};
+struct IList : public ICommon {};

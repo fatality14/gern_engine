@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 
-class ITexture : public ICommon{
+class ITexture : public ICommon {
 public:
     virtual void loadTexture() = 0;
 };

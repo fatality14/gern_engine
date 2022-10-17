@@ -4,17 +4,17 @@
 #include <common/loader.h>
 #include <texture/material.h>
 
-class MaterialLoader : private ULoader{
+class MaterialLoader : private ULoader {
 public:
     MaterialList* list;
 
-    void load(string path){
+    void load(string path) {
         list = new MaterialList;
 
         ifstream f;
         f.open(path);
 
-        if(f.fail()){
+        if (f.fail()) {
             throw string("Cannot open file: ") + path;
         }
 
@@ -28,9 +28,9 @@ public:
         string tmp;
         float ftmp1, ftmp2, ftmp3;
 
-        //TODO: check if file is not init to prevent infinie loading
+        // TODO: check if file is not init to prevent infinie loading
 
-        while(!f.eof()){
+        while (!f.eof()) {
             Material* m;
 
             getline(f, line);
@@ -38,48 +38,47 @@ public:
 
             token = bite(" ", line);
 
-
-            if(token == "#"){
+            if (token == "#") {
                 continue;
             }
-            if(token == "newmtl"){
+            if (token == "newmtl") {
                 m = new Material(bite(" ", line));
                 list->push(*m);
             }
-            if(token == "Ka"){
+            if (token == "Ka") {
                 ftmp1 = biteFloat(" ", line);
                 ftmp2 = biteFloat(" ", line);
                 ftmp3 = biteFloat(" ", line);
                 m->setAmbientColor(ftmp1, ftmp2, ftmp3);
             }
-            if(token == "Kd"){
+            if (token == "Kd") {
                 ftmp1 = biteFloat(" ", line);
                 ftmp2 = biteFloat(" ", line);
                 ftmp3 = biteFloat(" ", line);
                 m->setDiffuseColor(ftmp1, ftmp2, ftmp3);
             }
-            if(token == "Ks"){
+            if (token == "Ks") {
                 ftmp1 = biteFloat(" ", line);
                 ftmp2 = biteFloat(" ", line);
                 ftmp3 = biteFloat(" ", line);
                 m->setSpecularColor(ftmp1, ftmp2, ftmp3);
             }
-            if(token == "Ns"){
+            if (token == "Ns") {
                 ftmp1 = biteFloat(" ", line);
                 m->setSpecularHighlights(ftmp1);
             }
-            if(token == "Ni"){
+            if (token == "Ni") {
                 ftmp1 = biteFloat(" ", line);
                 m->setOpticalDensity(ftmp1);
             }
-            if(token == "d"){
+            if (token == "d") {
                 ftmp1 = biteFloat(" ", line);
                 m->setDissolve(ftmp1);
             }
-            if(token == "map_Kd"){
+            if (token == "map_Kd") {
                 m->pushTextureName(bite(" ", line));
             }
-            if(token == "map_Ka"){
+            if (token == "map_Ka") {
                 m->pushTextureName(bite(" ", line));
             }
             //...other maps

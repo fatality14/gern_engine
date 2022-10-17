@@ -1,9 +1,10 @@
 #pragma once
 
 #include <animation/pose.h>
+#include <common/loader.h>
 
 class PoseLoader : private ULoader {
-  public:
+public:
     PoseList* parseKeyPoses(string filePath) {
         PoseList* keyPoses = new PoseList;
 
