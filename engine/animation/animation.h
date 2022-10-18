@@ -20,6 +20,7 @@ public:
         joints = &jointsToAnimate;
         this->startTime = startTime;
         reset();
+
         this->animationTimeMult = animationTimeMult;
         currAnimationTime = 0;
         this->name = name;

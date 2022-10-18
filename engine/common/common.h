@@ -40,7 +40,7 @@ float someCounter = 0;
 
 class ICommon {
 public:
-    virtual ~ICommon() {}
+    virtual ~ICommon() = default;
 };
 
 // TODO: add notes that camera and mesh classes are just data containers, rename

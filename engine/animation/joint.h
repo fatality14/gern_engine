@@ -1,10 +1,11 @@
 #pragma once
 
+#include <common/iposition.h>
 #include <animation/jointposition.h>
 #include <common/common.h>
 #include <shader/ishaderfield.h>
 
-class Joint : public ICommon {
+class Joint : public IPosition {
 public:
     vector<Joint*> childs;
     JointPosition* position;
@@ -16,51 +17,51 @@ public:
         position = new JointPosition;
     }
 
-    void move(float x, float y, float z) {
+    void move(float x, float y, float z) override {
         position->move(x, y, z);
         setChildTransforms();
     }
-    void move(glm::vec3 location) {
+    void move(glm::vec3 location) override {
         position->move(location);
         setChildTransforms();
     }
-    void moveTo(float x, float y, float z) {
+    void moveTo(float x, float y, float z) override {
         position->moveTo(x, y, z);
         setChildTransforms();
     }
-    void moveTo(glm::vec3 location) {
+    void moveTo(glm::vec3 location) override {
         position->moveTo(location);
         setChildTransforms();
     }
-    void rotate(float x, float y, float z) {
+    void rotate(float x, float y, float z) override {
         position->rotate(x, y, z);
         setChildTransforms();
     }
-    void rotate(glm::vec3 rotation) {
+    void rotate(glm::vec3 rotation) override {
         position->rotate(rotation);
         setChildTransforms();
     }
-    void rotateTo(float x, float y, float z) {
+    void rotateTo(float x, float y, float z) override {
         position->rotateTo(x, y, z);
         setChildTransforms();
     }
-    void rotateTo(glm::vec3 rotation) {
+    void rotateTo(glm::vec3 rotation) override {
         position->rotateTo(rotation);
         setChildTransforms();
     }
-    void scaleBy(float x, float y, float z) {
+    void scaleBy(float x, float y, float z) override{
         position->scaleBy(x, y, z);
         setChildTransforms();
     }
-    void scaleBy(glm::vec3 scale) {
+    void scaleBy(glm::vec3 scale) override{
         position->scaleBy(scale);
         setChildTransforms();
     }
-    void scaleTo(float x, float y, float z) {
+    void scaleTo(float x, float y, float z) override{
         position->scaleTo(x, y, z);
         setChildTransforms();
     }
-    void scaleTo(glm::vec3 scale) {
+    void scaleTo(glm::vec3 scale) override{
         position->scaleTo(scale);
         setChildTransforms();
     }
