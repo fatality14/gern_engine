@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <common/common.h>
 #include <shader/ishaderfield.h>
 #include <texture/itexture.h>
@@ -7,8 +8,8 @@
 class SkyboxTexture : public ITexture, public IShaderField {
 public:
     GLuint textureId;
-    vector<string> facePaths;
-    SkyboxTexture(vector<string> facePaths) {
+    array<string, 6> facePaths;
+    SkyboxTexture(array<string, 6> facePaths) {
         this->facePaths = facePaths;
 
         loadTexture();

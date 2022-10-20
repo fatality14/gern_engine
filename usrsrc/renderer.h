@@ -3,4 +3,4 @@
 #include <framecontroller.h>
 #include <render/arenderer.h>
 
-typedef ARenderer<FrameModel, FrameController> Renderer;
+using Renderer = ARenderer<FrameModel, FrameController>;

@@ -9,6 +9,7 @@
 #include <SOIL2.h>
 #include <flags.h>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 

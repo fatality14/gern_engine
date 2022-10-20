@@ -666,13 +666,10 @@ private:
         void execute(LoaderContext& c) override {
             string bufferName = bite(" ", c.args);
 
-            vector<string> skyboxSides;
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
-            skyboxSides.push_back(c.cwd + bite(" ", c.args));
+            array<string, 6> skyboxSides;
+            for_each(skyboxSides.begin(), skyboxSides.end(), [&c](auto& i){
+                i = c.cwd + bite(" ", c.args);
+            });
 
             string tmp4 = bite(" ", c.args);
 
