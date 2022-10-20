@@ -20,10 +20,6 @@ private:
     basic_string<GLchar> src = "";
     ifstream file;
 
-    void terminateCompilation(){
-        glfwTerminate();
-    }
-
     GLenum getShaderType(const filesystem::path& path){
         GLenum shaderType;
 
@@ -67,9 +63,7 @@ private:
         GLDB(glGetShaderiv(shader, GL_COMPILE_STATUS, &isNoError));
         if (!isNoError) {
             GLDB(glGetShaderInfoLog(shader, 512, NULL, infoLog));
-            cout << "Error compiling vertex shader" << endl;
-            cout << infoLog << endl;
-            terminateCompilation();
+            throw string("cannot compile shader ") + path.string() + "\n" +  infoLog;
         }
 
         return shader;
@@ -88,9 +82,7 @@ private:
         GLDB(glGetProgramiv(program, GL_LINK_STATUS, &isNoError));
         if (!isNoError) {
             GLDB(glGetProgramInfoLog(program, 512, NULL, infoLog));
-            cout << "Error linking program" << endl;
-            cout << infoLog << endl;
-            terminateCompilation();
+            throw string("cannot link shader program\n") + infoLog;
         }
 
         for (size_t i = 0; i < shaders.size(); ++i) {

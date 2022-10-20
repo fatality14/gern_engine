@@ -7,6 +7,7 @@ skl paimon resources/models/GenshinImpactPack/paimon/paimon.skl
 shad default
 shadel shaders/obj_vertex.vsh
 shadel shaders/obj_fragment.fsh
+shadel shaders/common_light.fsh
 shad skybox
 shadel shaders/skybox_vertex.vsh
 shadel shaders/skybox_fragment.fsh

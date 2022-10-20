@@ -80,8 +80,9 @@ private:
 
         GLenum checkComplete;
         GLDBR(checkComplete, glCheckFramebufferStatus(GL_FRAMEBUFFER));
-        if (checkComplete != GL_FRAMEBUFFER_COMPLETE)
-            cout << "Framebuffer is not complete!" << endl;
+        if (checkComplete != GL_FRAMEBUFFER_COMPLETE) {
+            throw string("cannot complete framebuffer\n");
+        }
         unbind();
     }
 };
