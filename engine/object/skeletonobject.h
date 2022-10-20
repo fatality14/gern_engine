@@ -17,7 +17,7 @@ public:
 
     bool doAnimation = false;
 
-    static GLuint currShaderId;
+    inline static GLuint currShaderId;
 
     // make arguments optional
     SkeletonObject(Window& w, SkeletonBuffer& b, Perspective& p, View& v,
@@ -115,7 +115,5 @@ public:
         texList->unbindTextures();
     }
 };
-
-GLuint SkeletonObject::currShaderId = -1;
 
 class SkeletonObjects : public AListO<SkeletonObject> {};

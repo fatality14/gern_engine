@@ -89,9 +89,7 @@ public:
         texList->unbindTextures();
     }
 
-    static GLuint currShaderId;
+    inline static GLuint currShaderId;
 };
-
-GLuint MeshObject::currShaderId = -1;
 
 class MeshObjectList : public AListO<MeshObject> {};

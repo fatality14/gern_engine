@@ -13,7 +13,7 @@ public:
 
     vector<Position> modelMatrices;
 
-    static GLuint currShaderId;
+    inline static GLuint currShaderId = -1;
 
     // make arguments optional
     InstancedObject(Window& w, InstancedBuffer& b, Perspective& p, View& v,
@@ -35,7 +35,7 @@ public:
     void setTextureList(TextureList& tl) { texList = &tl; }
     TextureList& getTextureList() { return *texList; }
 
-    void draw(int flags = 0) override {
+    virtual void draw(int flags = 0) override {
         shader->bind();
 
         if (currShaderId != shader->program) {
@@ -157,7 +157,5 @@ public:
             modelMatrices[index].scaleTo(scale);
     }
 };
-
-GLuint InstancedObject::currShaderId = -1;
 
 class InstancedObjects : public AListO<InstancedObject> {};

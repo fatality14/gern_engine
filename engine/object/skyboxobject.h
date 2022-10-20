@@ -21,7 +21,7 @@ public:
     }
     ~SkyboxObject() { delete skyboxTexture; }
 
-    static GLuint currShaderId;
+    inline static GLuint currShaderId;
 
     virtual void draw([[maybe_unused]] int flags = 0) override {
         window->setDrawOrder(false);
@@ -55,7 +55,5 @@ public:
     void setTexture(SkyboxTexture& st) { skyboxTexture = &st; }
     SkyboxTexture& getTexture() { return *skyboxTexture; }
 };
-
-GLuint SkyboxObject::currShaderId = -1;
 
 class SkyboxList : public AListO<SkyboxObject> {};

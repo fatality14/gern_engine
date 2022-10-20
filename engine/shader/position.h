@@ -1,12 +1,13 @@
 #pragma once
 
+#include "common/iposition.h"
 #include <common/common.h>
 #include <render/mouselistener.h>
 #include <render/window.h>
 #include <shader/camera.h>
 #include <shader/ishaderfield.h>
 
-class Position : public IShaderField {
+class Position : public IShaderField, public IPosition {
 public:
     Position() {
         location = glm::vec3(0.f);
@@ -40,63 +41,63 @@ public:
         //        updateMatrices();
     }
     glm::mat4& getModelMatrix() { return modelMatrix; }
-    void move(float x, float y, float z) {
+    void move(float x, float y, float z) override {
         location.x += x;
         location.y += y;
         location.z += z;
         updateMatrices();
     }
-    void move(glm::vec3 location) {
+    void move(glm::vec3 location) override {
         this->location += location;
         updateMatrices();
     }
-    void moveTo(float x, float y, float z) {
+    void moveTo(float x, float y, float z) override {
         location.x = x;
         location.y = y;
         location.z = z;
         updateMatrices();
     }
-    void moveTo(glm::vec3 location) {
+    void moveTo(glm::vec3 location) override {
         this->location = location;
         updateMatrices();
     }
-    void rotate(float x, float y, float z) {
+    void rotate(float x, float y, float z) override {
         rotation.x += x;
         rotation.y += y;
         rotation.z += z;
         updateMatrices();
     }
-    void rotate(glm::vec3 rotation) {
+    void rotate(glm::vec3 rotation) override {
         this->rotation += rotation;
         updateMatrices();
     }
-    void rotateTo(float x, float y, float z) {
+    void rotateTo(float x, float y, float z) override {
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
         updateMatrices();
     }
-    void rotateTo(glm::vec3 rotation) {
+    void rotateTo(glm::vec3 rotation) override {
         this->rotation = rotation;
         updateMatrices();
     }
-    void scaleBy(float x, float y, float z) {
+    void scaleBy(float x, float y, float z) override {
         scale.x += x;
         scale.y += y;
         scale.z += z;
         updateMatrices();
     }
-    void scaleBy(glm::vec3 scale) {
+    void scaleBy(glm::vec3 scale) override {
         this->scale += scale;
         updateMatrices();
     }
-    void scaleTo(float x, float y, float z) {
+    void scaleTo(float x, float y, float z) override {
         scale.x = x;
         scale.y = y;
         scale.z = z;
         updateMatrices();
     }
-    void scaleTo(glm::vec3 scale) {
+    void scaleTo(glm::vec3 scale) override {
         this->scale = scale;
         updateMatrices();
     }
