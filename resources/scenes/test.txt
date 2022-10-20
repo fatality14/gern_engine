@@ -4,11 +4,21 @@ mesh resources/models/quad.obj quad
 mesh resources/models/sphere.obj sphere
 mesh resources/models/GenshinImpactPack/paimon/paimon.obj paimon
 skl paimon resources/models/GenshinImpactPack/paimon/paimon.skl
-shad shaders/obj_vertex.vsh shaders/obj_fragment.fsh default
-shad shaders/skybox_vertex.vsh shaders/skybox_fragment.fsh skybox
-shad shaders/screen_vertex.vsh shaders/screen_fragment.fsh screen
-shad shaders/skeleton_obj_vertex.vsh shaders/skeleton_obj_fragment.fsh skeleton
-shad shaders/instanced_obj_vertex.vsh shaders/instanced_obj_fragment.fsh instanced
+shad default
+shadel shaders/obj_vertex.vsh
+shadel shaders/obj_fragment.fsh
+shad skybox
+shadel shaders/skybox_vertex.vsh
+shadel shaders/skybox_fragment.fsh
+shad screen
+shadel shaders/screen_vertex.vsh
+shadel shaders/screen_fragment.fsh
+shad skeleton
+shadel shaders/skeleton_obj_vertex.vsh
+shadel shaders/skeleton_obj_fragment.fsh
+shad instanced
+shadel shaders/instanced_obj_vertex.vsh
+shadel shaders/instanced_obj_fragment.fsh
 tex blank
 texm resources/pictures/blank.png
 texl 0 0 0 texture0

@@ -2,18 +2,19 @@
 
 #include <common/alist.h>
 #include <common/common.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 class Shader : public ICommon {
 public:
     GLuint program;
     string name;
 
-    Shader(string vertexPath, string fragmentPath, string name = "noname") {
-        this->vertexPath = vertexPath;
-        this->fragmentPath = fragmentPath;
+    Shader() = default;
+    Shader(GLuint program, string name = "noname") {
+        this->program = program;
         this->name = name;
-
-        compileShaders();
     }
     Shader(Shader& s) = delete;
     ~Shader() { GLDB(glDeleteProgram(program)); }
@@ -102,118 +103,8 @@ public:
         GLDB(glUniform1f(glGetUniformLocation(program, uniformName.data()),
                          value));
     }
-
-private:
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    string vertexPath;
-    string fragmentPath;
-    bool isCompiled = true;
-    char infoLog[512];
-    GLint isError;
-    string temp = "";
-    string src = "";
-    ifstream in_file;
-    const GLchar* vertSrc;
-    const GLchar* fragSrc;
-
-    void compileVertex() {
-        temp = "";
-        src = "";
-
-        in_file.open(vertexPath);
-
-        if (in_file.fail()) {
-            throw string("Cannot open file: ") + vertexPath;
-        }
-
-        while (getline(in_file, temp))
-            src += temp + "\n";
-
-        in_file.close();
-
-        GLDBR(vertexShader, glCreateShader(GL_VERTEX_SHADER));
-        vertSrc = src.c_str();
-
-        GLDB(glShaderSource(vertexShader, 1, &vertSrc, NULL));
-        GLDB(glCompileShader(vertexShader));
-
-        GLDB(glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isError));
-        if (!isError) {
-            GLDB(glGetShaderInfoLog(vertexShader, 512, NULL, infoLog));
-            cout << "Error compiling vertex shader" << endl;
-            cout << infoLog << endl;
-            isCompiled = false;
-        }
-    }
-    void compileFragment() {
-        // fragment shader code is the same as vertex
-        temp = "";
-        src = "";
-
-        in_file.open(fragmentPath);
-
-        if (in_file.fail()) {
-            throw string("Cannot open file: ") + vertexPath;
-        }
-
-        while (getline(in_file, temp))
-            src += temp + "\n";
-
-        in_file.close();
-
-        GLDBR(fragmentShader, glCreateShader(GL_FRAGMENT_SHADER));
-        fragSrc = src.c_str();
-
-        GLDB(glShaderSource(fragmentShader, 1, &fragSrc, NULL));
-        GLDB(glCompileShader(fragmentShader));
-
-        GLDB(glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isError));
-        if (!isError) {
-            GLDB(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
-            cout << "Error compiling vertex shader" << endl;
-            cout << infoLog << endl;
-            isCompiled = false;
-        }
-    }
-    void compileProgram() {
-        GLDBR(program, glCreateProgram());
-
-        GLDB(glAttachShader(program, vertexShader));
-        GLDB(glAttachShader(program, fragmentShader));
-
-        GLDB(glLinkProgram(program));
-
-        GLDB(glGetProgramiv(program, GL_LINK_STATUS, &isError));
-        if (!isError) {
-            GLDB(glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog));
-            cout << "Error linking program" << endl;
-            cout << infoLog << endl;
-            isCompiled = false;
-        }
-
-        GLDB(glDeleteShader(vertexShader));
-        GLDB(glDeleteShader(fragmentShader));
-
-        // the program should be set in window while cycle
-        unbind();
-    }
-    void compileShaders() {
-        compileVertex();
-        compileFragment();
-        compileProgram();
-
-        if (!isCompiled) {
-            glfwTerminate(); // TODO: replace with throw exception or else?
-        }
-    }
 };
 
 class ShaderList : public AListO<Shader> {
-public:
-    void pushNew(string vertexPath, string fragmentPath,
-                 string name = "noname") {
-        Shader* shader = new Shader(vertexPath, fragmentPath, name);
-        push(*shader);
-    }
+
 };

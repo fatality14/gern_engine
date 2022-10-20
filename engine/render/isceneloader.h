@@ -5,13 +5,13 @@
 
 class IContext : public ICommon {};
 
-template <class U> class ICommand : public ICommon {
+template <class U, class R = void> class ICommand : public ICommon {
 public:
     ICommand() {
         static_assert(std::is_base_of<IContext, U>::value,
                       "Template parameter U must be derived from IContext");
     }
-    virtual void execute(U& context) = 0;
+    virtual R execute(U& context) = 0;
 };
 
 template <class T> class ISceneLoader : public ICommon {

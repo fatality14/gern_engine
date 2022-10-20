@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shader/shader.h"
+#include "shader/shaderloader.h"
 #include <animation/poseloader.h>
 #include <common/common.h>
 #include <framemodel.h>
@@ -13,6 +15,7 @@
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 class LoaderContext : public IContext {
 public:
@@ -69,6 +72,7 @@ public:
     vector<MaterialList*> materialLists;
 
     PoseLoader poseLoader;
+    ShaderLoader shaderLoader;
 
     vector<MeshBuffer*> meshBuffers;
     vector<SkeletonBuffer*> sklBuffers;
@@ -77,6 +81,8 @@ public:
 
 typedef ICommand<LoaderContext> Command;
 
+
+//TODO provide throw wherever it needed
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 public:
     void load(string path, FrameModel& data) override {
@@ -204,12 +210,52 @@ private:
     class ShadCommand : public ICommand<LoaderContext> {
     public:
         void execute(LoaderContext& c) override {
-            string vertexPath = c.cwd + bite(" ", c.args);
-            string fragmentPath = c.cwd + bite(" ", c.args);
             string shaderName = bite(" ", c.args);
-            // vertex, fragment, name
-            c.shaders.pushNew(vertexPath, fragmentPath, shaderName);
+
+            Shader* shader = new Shader();
+            shader->name = shaderName;
+
+            string nextCommand = c.getNextCommand();
+            if (nextCommand == "shadel") {
+                shadelc.shader = shader;
+
+                c.step();
+                shadelc.execute(c);
+            } else {
+                throw string("there must be a shadel command after shad "
+                             "block in scene");
+            }
         }
+    };
+
+    class ShadElCommand : public ICommand<LoaderContext> {
+    public:
+        ShadElCommand(){
+            paths = new vector<filesystem::path>();
+        }
+        ~ShadElCommand(){
+            delete paths;
+        }
+
+        void execute(LoaderContext& c) override {
+            filesystem::path path = c.cwd + bite(" ", c.args);
+            paths->push_back(path);
+
+            string nextCommand = c.getNextCommand();
+            if (nextCommand == "shadel") {
+                c.step();
+                // no need to pass paths to next execution while shadelc is
+                // static, but it might not in future
+                shadelc.execute(c);
+            } else {
+                shader->program = c.shaderLoader.load(*paths);
+                paths->clear();
+                c.shaders.push(*shader);
+            }
+        }
+
+        vector<filesystem::path>* paths;
+        Shader* shader;
     };
 
     class MeshBufCommand : public ICommand<LoaderContext> {
@@ -582,7 +628,8 @@ private:
             string nextCommand = c.getNextCommand();
             if (nextCommand == "anm") {
                 c.step();
-                // anmc.o = this->o; //no need to while anmc is static
+                // anmc.o = this->o; //no need to while anmc is static, but it
+                // might not in future
                 anmc.execute(c);
             }
         }
@@ -667,9 +714,8 @@ private:
             string bufferName = bite(" ", c.args);
 
             array<string, 6> skyboxSides;
-            for_each(skyboxSides.begin(), skyboxSides.end(), [&c](auto& i){
-                i = c.cwd + bite(" ", c.args);
-            });
+            for_each(skyboxSides.begin(), skyboxSides.end(),
+                     [&c](auto& i) { i = c.cwd + bite(" ", c.args); });
 
             string tmp4 = bite(" ", c.args);
 
@@ -725,6 +771,7 @@ private:
     inline static MeshCommand meshc;
     inline static SklCommand sklc;
     inline static ShadCommand shadc;
+    inline static ShadElCommand shadelc;
     inline static MeshBufCommand meshbufc;
     inline static SklBufCommand sklbufc;
     inline static InstBufCommand instbufc;
