@@ -17,7 +17,7 @@ public:
 
     bool doAnimation = false;
 
-    inline static GLuint currShaderId;
+    inline static GLuint currShaderId = -1;
 
     // make arguments optional
     SkeletonObject(Window& w, SkeletonBuffer& b, Perspective& p, View& v,

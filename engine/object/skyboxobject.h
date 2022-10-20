@@ -21,7 +21,7 @@ public:
     }
     ~SkyboxObject() { delete skyboxTexture; }
 
-    inline static GLuint currShaderId;
+    inline static GLuint currShaderId = -1;
 
     virtual void draw([[maybe_unused]] int flags = 0) override {
         window->setDrawOrder(false);

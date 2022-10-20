@@ -8,8 +8,6 @@ public:
     PoseList* parseKeyPoses(string filePath) {
         PoseList* keyPoses = new PoseList;
 
-        keyPoses->wipe();
-
         ifstream f;
         f.open(filePath);
 

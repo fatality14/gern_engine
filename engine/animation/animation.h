@@ -14,6 +14,8 @@ public:
     float currAnimationTime;
 
     string name;
+    JointList* joints;
+    PoseList keyPoses;
 
     Animation(JointList& jointsToAnimate, float animationTimeMult = 1,
               float startTime = 0, string name = "noname") {
@@ -48,9 +50,7 @@ private:
 
     std::chrono::steady_clock::time_point startTimeTimer;
     std::chrono::steady_clock::time_point currTimeTimer;
-    PoseList keyPoses;
     Pose currPose;
-    JointList* joints;
     float keyPoseTime;
     float interpolationCoef;
 

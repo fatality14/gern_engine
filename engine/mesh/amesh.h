@@ -3,10 +3,9 @@
 #include <mesh/imesh.h>
 #include <mesh/ivertex.h>
 
-// restrict T type with common vertex interface
 template <class T> class AMesh : public IMesh {
 public:
-    // add some methods to change polygons
+    //TODO add some methods to change polygons
     vector<T>* vertices;
     vector<GLint>* indices;
     vector<GLint> partEndVertexIds;
