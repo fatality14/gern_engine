@@ -18,7 +18,7 @@ public:
     // make arguments optional
     InstancedObject(Window& w, InstancedBuffer& b, Perspective& p, View& v,
                     LightSourceList& lsl, MaterialList& ml,
-                    vector<Position> modelMatrices, string name = "noname")
+                    vector<Position> modelMatrices, const string& name = "noname")
         : AObject(w, b, p, v, name) {
         this->modelMatrices = modelMatrices;
         lightSources = &lsl;

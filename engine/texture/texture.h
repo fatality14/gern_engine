@@ -1,9 +1,12 @@
 #pragma once
 
+#include <array>
 #include <common/alist.h>
 #include <common/common.h>
+#include <memory>
 #include <shader/ishaderfield.h>
 #include <texture/itexture.h>
+#include <vector>
 
 class Texture : public ITexture, public IShaderField {
 public:
@@ -14,8 +17,8 @@ public:
     Texture(Texture& t) = delete;
     ~Texture() { GLDB(glDeleteTextures(1, &textureId)); }
 
-    void setUniformName(string uniformName) { this->name = uniformName; }
-    void setShaderParams(GLuint texuteUnit, string uniformName) {
+    void setUniformName(const string& uniformName) { this->name = uniformName; }
+    void setShaderParams(GLuint texuteUnit, const string& uniformName) {
         this->textureUnit = texuteUnit;
         this->name = uniformName;
     }
@@ -27,13 +30,13 @@ public:
     }
     void bind() { GLDB(glBindTexture(GL_TEXTURE_2D, textureId)); }
 
-    void setLoadParams(string path) { this->path = path; }
+    void setLoadParams(const string& path) { this->path = path; }
     void loadTexture() override {
         image_width = 0;
         image_height = 0;
 
-        image = SOIL_load_image(path.data(), &image_width, &image_height, NULL,
-                                SOIL_LOAD_RGBA);
+        unique_ptr<unsigned char[]> image (SOIL_load_image(path.data(), &image_width, &image_height, NULL,
+                                SOIL_LOAD_RGBA));
 
         GLDB(glBindTexture(GL_TEXTURE_2D, textureId));
 
@@ -46,14 +49,11 @@ public:
         if (image) {
             GLDB(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width,
                               image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                              image));
+                              image.get()));
             GLDB(glGenerateMipmap(GL_TEXTURE_2D));
         } else {
             throw string("Texture ") + path + " loading failed";
         }
-
-        delete[] image;
-        image = nullptr;
     }
 
     void setTextureSize(GLsizei width, GLsizei height) {
@@ -63,22 +63,19 @@ public:
     GLsizei getTextureWidth() { return image_width; }
     GLsizei getTextureHeight() { return image_height; }
 
-    void setNewTextureData(unsigned char* data) {
+    void setNewTextureData(const vector<unsigned char>& data) {
         bind();
+        //TODO check data size to fit
         GLDB(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height,
-                          0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+                          0, GL_RGBA, GL_UNSIGNED_BYTE, data.data()));
         GLDB(glGenerateMipmap(GL_TEXTURE_2D));
     }
 
-    unsigned char& loadDataFromShader() {
-        if (image != nullptr) {
-            delete[] image;
-            image = nullptr;
-        }
+    vector<unsigned char> loadDataFromShader() {
+        vector<unsigned char> image (image_width * image_height * 4);
 
-        image = new unsigned char[image_width * image_height * 4];
         bind();
-        GLDB(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
+        GLDB(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data()));
 
         //        int save_result = SOIL_save_image
         //            (
@@ -87,7 +84,7 @@ public:
         //                image_width, image_height, 4,
         //                c
         //            );
-        return *image;
+        return image;
     }
 
 private:
@@ -95,8 +92,6 @@ private:
     GLsizei image_height;
 
     string path;
-
-    unsigned char* image = nullptr;
 };
 
 class TextureList : public AListO<Texture>, public IShaderField {

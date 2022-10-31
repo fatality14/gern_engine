@@ -13,7 +13,7 @@ public:
 
     // make arguments optional
     MeshObject(Window& w, MeshBuffer& b, Perspective& p, View& v,
-               LightSourceList& lsl, MaterialList& ml, string name = "noname")
+               LightSourceList& lsl, MaterialList& ml, const string& name = "noname")
         : AObject(w, b, p, v, name) {
         lightSources = &lsl;
         materials = &ml;

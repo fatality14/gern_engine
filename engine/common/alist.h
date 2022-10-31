@@ -8,7 +8,7 @@ template <class T> class AList : public IList {
 public:
     size_t size() { return list.size(); }
     void push(T& obj) { list.push_back(&obj); }
-    void popByName(string name) {
+    void popByName(const string& name) {
         for (size_t i = 0; i < list.size(); i++) {
             if (list.at(i)->name == name) {
                 list.erase(list.begin() + i);
@@ -16,7 +16,7 @@ public:
         }
     }
     void popByIndex(size_t index) { list.erase(list.begin() + index); }
-    T* getByName(string name) {
+    T* getByName(const string& name) {
         for (size_t i = 0; i < list.size(); i++) {
             if (list.at(i)->name == name) {
                 return list.at(i);

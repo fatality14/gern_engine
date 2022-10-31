@@ -68,21 +68,21 @@ public:
     }
 
     // make arguments optional
-    void addNewLightSource(float x, float y, float z, string name = "noname") {
+    void addNewLightSource(float x, float y, float z, const string& name = "noname") {
         LightSource* ls = new LightSource(name);
         ls->setPosition(x, y, z);
         lightSources->push(*ls);
     }
-    void addNewObject(MeshBuffer& b, MaterialList* ml, string name = "noname") {
-        for (size_t i = 0; i < ml->list.size(); ++i) {
-            ml->list.at(i)->setShaderParams("material");
+    void addNewObject(MeshBuffer& b, MaterialList& ml, const string& name = "noname") {
+        for (size_t i = 0; i < ml.list.size(); ++i) {
+            ml.list.at(i)->setShaderParams("material");
         }
         MeshObject* o = new MeshObject(*window, b, *perspective, *view,
-                                       *lightSources, *ml, name);
+                                       *lightSources, ml, name);
         meshObjects->push(*o);
     }
     void addNewObject(SkeletonBuffer& b, MaterialList* ml,
-                      string name = "noname") {
+                      const string& name = "noname") {
         for (size_t i = 0; i < ml->list.size(); ++i) {
             ml->list.at(i)->setShaderParams("material");
         }
@@ -91,7 +91,7 @@ public:
         skeletonObjects->push(*o);
     }
     void addNewObject(InstancedBuffer& b, MaterialList* ml,
-                      vector<Position>& mm, string name = "noname") {
+                      vector<Position>& mm, const string& name = "noname") {
         for (size_t i = 0; i < ml->list.size(); ++i) {
             ml->list.at(i)->setShaderParams("material");
         }
@@ -99,8 +99,8 @@ public:
             *window, b, *perspective, *view, *lightSources, *ml, mm, name);
         instancedObjects->push(*o);
     }
-    void addNewSkybox(array<string, 6> facePaths, MeshBuffer& b,
-                      string name = "noname") {
+    void addNewSkybox(const array<string, 6>& facePaths, MeshBuffer& b,
+                      const string& name = "noname") {
         SkyboxTexture* st = new SkyboxTexture(facePaths);
         st->setShaderParams(0, "skybox");
         SkyboxObject* so =
@@ -108,66 +108,66 @@ public:
         skyboxes->push(*so);
     }
     void addFramebuffer(Framebuffer& fb) { framebuffers->push(fb); }
-    void addNewCamera(glm::vec3 location, float movementSpeed,
-                      float sensitivity, string name = "noname") {
+    void addNewCamera(const glm::vec3& location, float movementSpeed,
+                      float sensitivity, const string& name = "noname") {
         camList->push(
             *(new Camera(location, movementSpeed, sensitivity, name)));
     }
     void addNewCamera(float x, float y, float z, float movementSpeed,
-                      float sensitivity, string name = "noname") {
+                      float sensitivity, const string& name = "noname") {
         camList->push(*(
             new Camera(glm::vec3(x, y, z), movementSpeed, sensitivity, name)));
     }
 
-    MeshObject* getMeshObject(size_t index) { return meshObjects->at(index); }
-    MeshObject* getMeshObject(string name) {
-        return meshObjects->getByName(name);
+    MeshObject& getMeshObject(size_t index) { return *meshObjects->at(index); }
+    MeshObject& getMeshObject(const string& name) {
+        return *meshObjects->getByName(name);
     }
     void popObject(size_t index) { meshObjects->popByIndex(index); }
-    void popObject(string name) { meshObjects->popByName(name); }
+    void popObject(const string& name) { meshObjects->popByName(name); }
 
-    SkeletonObject* getSkeletonObject(size_t index) {
-        return skeletonObjects->at(index);
+    SkeletonObject& getSkeletonObject(size_t index) {
+        return *skeletonObjects->at(index);
     }
-    SkeletonObject* getSkeletonObject(string name) {
-        return skeletonObjects->getByName(name);
+    SkeletonObject& getSkeletonObject(const string& name) {
+        return *skeletonObjects->getByName(name);
     }
     void popSkeletonObject(size_t index) { skeletonObjects->popByIndex(index); }
-    void popSkeletonObject(string name) { skeletonObjects->popByName(name); }
+    void popSkeletonObject(const string& name) { skeletonObjects->popByName(name); }
 
-    InstancedObject* getInstancedObject(size_t index) {
-        return instancedObjects->at(index);
+    InstancedObject& getInstancedObject(size_t index) {
+        return *instancedObjects->at(index);
     }
-    InstancedObject* getInstancedObject(string name) {
-        return instancedObjects->getByName(name);
+    InstancedObject& getInstancedObject(const string& name) {
+        return *instancedObjects->getByName(name);
     }
     void popInstancedObject(size_t index) {
         instancedObjects->popByIndex(index);
     }
-    void popInstancedObject(string name) { instancedObjects->popByName(name); }
+    void popInstancedObject(const string& name) { instancedObjects->popByName(name); }
 
-    SkyboxObject* getSkyboxObject(size_t index) { return skyboxes->at(index); }
-    SkyboxObject* getSkyboxObject(string name) {
-        return skyboxes->getByName(name);
+    SkyboxObject& getSkyboxObject(size_t index) { return *skyboxes->at(index); }
+    SkyboxObject& getSkyboxObject(const string& name) {
+        return *skyboxes->getByName(name);
     }
     void popSkyboxObject(size_t index) { skyboxes->popByIndex(index); }
-    void popSkyboxObject(string name) { skyboxes->popByName(name); }
+    void popSkyboxObject(const string& name) { skyboxes->popByName(name); }
 
-    Framebuffer* getFramebuffer(size_t index) {
-        return framebuffers->at(index);
+    Framebuffer& getFramebuffer(size_t index) {
+        return *framebuffers->at(index);
     }
-    Framebuffer* getFramebuffer(string name) {
-        return framebuffers->getByName(name);
+    Framebuffer& getFramebuffer(const string& name) {
+        return *framebuffers->getByName(name);
     }
     void popFramebuffer(size_t index) { framebuffers->popByIndex(index); }
-    void popFramebuffer(string name) { framebuffers->popByName(name); }
+    void popFramebuffer(const string& name) { framebuffers->popByName(name); }
 
     void bindFramebuffer(size_t index, GLuint attachmentNum = 0) {
         framebuffers->at(index)->bind();
         framebuffers->at(index)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
     }
-    void bindFramebuffer(string name, GLuint attachmentNum = 0) {
+    void bindFramebuffer(const string& name, GLuint attachmentNum = 0) {
         framebuffers->getByName(name)->bind();
         framebuffers->getByName(name)->bindTextureColorBuffer(attachmentNum);
         clearBuffers();
@@ -177,13 +177,13 @@ public:
         clearBuffers();
     }
 
-    Camera* getCamera(size_t index) { return camList->at(index); }
-    Camera* getCamera(string name) { return camList->getByName(name); }
+    Camera& getCamera(size_t index) { return *camList->at(index); }
+    Camera& getCamera(const string& name) { return *camList->getByName(name); }
     void popCamera(size_t index) { camList->popByIndex(index); }
-    void popCamera(string name) { camList->popByName(name); }
+    void popCamera(const string& name) { camList->popByName(name); }
 
-    void setCamera(size_t index) { view->setCamera(*getCamera(index)); }
-    void setCamera(string name) { view->setCamera(*getCamera(name)); }
+    void setCamera(size_t index) { view->setCamera(getCamera(index)); }
+    void setCamera(const string& name) { view->setCamera(getCamera(name)); }
 
     void clearBuffers() {
         GLDB(glClearColor(r, g, b, a));

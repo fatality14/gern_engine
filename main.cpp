@@ -3,7 +3,6 @@
 #include <renderer.h>
 #include <sceneloader.h>
 
-
 int main(int argc, char* argv[]) {
     int window_width = 1366;
     int window_height = 768;
@@ -11,7 +10,7 @@ int main(int argc, char* argv[]) {
     Renderer renderer(window_width, window_height);
     SceneLoader sl;
 
-    //    auto start = std::chrono::steady_clock::now();
+    auto start = std::chrono::steady_clock::now();
     try {
         if (argc == 2) {
             const string path = argv[1];
@@ -30,11 +29,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    //    auto end = std::chrono::steady_clock::now();
-    //    std::chrono::duration<double> elapsed_seconds = end-start;
-    //    std::cout << "elapsed time: " <<
-    //    std::chrono::duration_cast<std::chrono::microseconds>(elapsed_seconds).count()
-    //    << "s\n";
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "load time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     elapsed_seconds)
+                     .count()
+              << "ms\n";
 
     renderer.renderLoop();
 

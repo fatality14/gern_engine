@@ -4,6 +4,7 @@
 #include "shader/shaderloader.h"
 #include <animation/poseloader.h>
 #include <common/common.h>
+#include <filesystem>
 #include <framemodel.h>
 #include <mesh/meshloader.h>
 #include <mesh/skeletonloader.h>
@@ -85,7 +86,7 @@ typedef ICommand<LoaderContext> Command;
 //TODO provide throw wherever it needed
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 public:
-    void load(string path, FrameModel& data) override {
+    void load(const filesystem::path& path, FrameModel& data) override {
         c.model = &data;
 
         ifstream f;
@@ -94,7 +95,7 @@ public:
         string line;
 
         if (f.fail()) {
-            throw string("Cannot open file: ") + path;
+            throw string("Cannot open file: ") + path.string();
         }
 
         while (!f.eof()) {
@@ -527,24 +528,24 @@ private:
                 }
             }
             c.model->addNewObject(*(c.meshBuffers).at(whichMeshbuf),
-                                  c.materialLists.at(whichMtl), objName);
+                                  *c.materialLists.at(whichMtl), objName);
 
             string nextCommand = c.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.step();
-                    movec.o = c.model->getMeshObject(objName);
+                    movec.o = &c.model->getMeshObject(objName);
                     movec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.step();
-                    moscalec.o = c.model->getMeshObject(objName);
+                    moscalec.o = &c.model->getMeshObject(objName);
                     moscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
                     c.step();
-                    morotc.o = c.model->getMeshObject(objName);
+                    morotc.o = &c.model->getMeshObject(objName);
                     morotc.execute(c);
                 }
                 nextCommand = c.getNextCommand();
@@ -578,7 +579,7 @@ private:
             c.model->addNewObject(*c.sklBuffers.at(which2),
                                   c.materialLists.at(which1), objName);
 
-            SkeletonObject* currObject = c.model->getSkeletonObject(objName);
+            SkeletonObject* currObject = &c.model->getSkeletonObject(objName);
 
             string nextCommand = c.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
@@ -676,7 +677,7 @@ private:
     class InstElCommand : public ICommand<LoaderContext> {
     public:
         void execute(LoaderContext& c) override {
-            InstancedObject* lastInstObj = c.model->getInstancedObject(
+            InstancedObject* lastInstObj = &c.model->getInstancedObject(
                 c.model->instancedObjects->size() - 1);
             lastInstObj->modelMatrices.push_back(Position());
 
@@ -735,17 +736,17 @@ private:
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.step();
-                    skmovec.o = c.model->getSkyboxObject(tmp4);
+                    skmovec.o = &c.model->getSkyboxObject(tmp4);
                     skmovec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.step();
-                    skscalec.o = c.model->getSkyboxObject(tmp4);
+                    skscalec.o = &c.model->getSkyboxObject(tmp4);
                     skscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
                     c.step();
-                    skrotc.o = c.model->getSkyboxObject(tmp4);
+                    skrotc.o = &c.model->getSkyboxObject(tmp4);
                     skrotc.execute(c);
                 }
                 nextCommand = c.getNextCommand();

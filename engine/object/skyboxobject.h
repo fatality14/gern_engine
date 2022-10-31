@@ -10,7 +10,7 @@ public:
     SkyboxTexture* skyboxTexture;
 
     SkyboxObject(Window& w, SkyboxTexture& st, MeshBuffer& b, Perspective& p,
-                 View& v, string name = "noname")
+                 View& v, const string& name = "noname")
         : AObject(w, b, p, v, name) {
         skyboxTexture = &st;
 

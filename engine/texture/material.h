@@ -10,7 +10,7 @@ public:
         this->matname = matname;
     }
 
-    void setShaderParams(string name){
+    void setShaderParams(const string& name){
         this->name = name;
     }
     void pushToShader(Shader& s) override{

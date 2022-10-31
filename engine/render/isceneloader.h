@@ -20,5 +20,5 @@ public:
         static_assert(std::is_base_of<IFrameModel, T>::value,
                       "Template parameter T must be derived from IFrameModel");
     }
-    virtual void load(string path, T& data) = 0;
+    virtual void load(const filesystem::path& path, T& data) = 0;
 };

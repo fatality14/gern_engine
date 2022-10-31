@@ -22,7 +22,7 @@ public:
     // make arguments optional
     SkeletonObject(Window& w, SkeletonBuffer& b, Perspective& p, View& v,
                    LightSourceList& lsl, MaterialList& ml,
-                   string name = "noname")
+                   const string& name = "noname")
         : AObject(w, b, p, v, name) {
         lightSources = &lsl;
         materials = &ml;

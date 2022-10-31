@@ -16,7 +16,7 @@ add const qualifiers where it need to be
 11
 rename some GL_* definitions to own enums
 
-!12
+12+
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
 split shad to two commands in SceneLoader
 split shader.h to shaderloader, shaderfragment and shderprogram files
@@ -64,7 +64,7 @@ a bug in animation while moving bone, it moves according to default object posit
 pass user function in setDefaultEvents
 or which is better make Event class
 
-31
++31
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
 
 32?
@@ -72,20 +72,23 @@ do something with *List, IObject and other common cases
 
 33
 consider change setShaderParams method in IShaderField
+might use parameter pack
 
 34
 do something with name field, it should display field usage
 
 36?
 move load method to ILoader and override it in loaders
+might use parameter pack
 
 37
 in case of different mesh file formats modify MeshLoader
 
 38
 make Window proxy pattern
+there's only one instance of Window allowed for each process
 
-!39
++39
 make AnimationList and all related for SceneLoader
 
 +41
@@ -97,6 +100,7 @@ add GUIObject and 2d object
 
 44
 allow to split SceneLoader scene.txt by multiple files
+should be done as a main logic wrapper
 
 +45
 add material manual properties command for SceneLoader tex* commands
@@ -118,7 +122,7 @@ this code must be compiled in executable not to slowdown render
 
 51
 add CMakeList to compile other libraries
-or else add compilation guide
+or else add compilation guide (which might be better for possible library updates)
 
 !52
 check every refrence and pointer for null after loading
@@ -126,7 +130,7 @@ check every refrence and pointer for null after loading
 !56
 check if the sufficient num args provided while parsing files
 
-57
++57
 split animation.h to animationloader and animation files
 
 lastplan:

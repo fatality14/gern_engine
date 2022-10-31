@@ -9,7 +9,7 @@ class SkyboxTexture : public ITexture, public IShaderField {
 public:
     GLuint textureId;
     array<string, 6> facePaths;
-    SkyboxTexture(array<string, 6> facePaths) {
+    SkyboxTexture(const array<string, 6>& facePaths) {
         this->facePaths = facePaths;
 
         loadTexture();
@@ -17,7 +17,7 @@ public:
     SkyboxTexture(SkyboxTexture& st) = delete;
     ~SkyboxTexture() { GLDB(glDeleteTextures(1, &textureId)); }
 
-    void setShaderParams(GLuint textureUnit, string uniformName) {
+    void setShaderParams(GLuint textureUnit, const string& uniformName) {
         this->textureUnit = textureUnit;
         this->name = uniformName;
     }

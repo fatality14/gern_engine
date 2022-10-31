@@ -3,6 +3,8 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include <string_view>
+#include <memory>
 
 #include <common/gl.h>
 #include <common/glm.h>

@@ -19,8 +19,8 @@ public:
     float movementSpeed = 0.1f;
     float sensitivity = 5.f;
 
-    Camera(glm::vec3 location, float movementSpeed = 0.1, float sensitivity = 5,
-           string name = "noname") {
+    Camera(const glm::vec3& location, float movementSpeed = 0.1, float sensitivity = 5,
+           const string& name = "noname") {
         this->name = name;
 
         this->movementSpeed = movementSpeed;

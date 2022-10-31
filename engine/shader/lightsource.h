@@ -7,7 +7,7 @@ class LightSource : public IShaderField {
 public:
     glm::vec3 lightPos;
 
-    LightSource(string name = "noname") {
+    LightSource(const string& name = "noname") {
         this->name = name;
         lightPos = glm::vec3(0.f, 0.f, 2.f);
     }

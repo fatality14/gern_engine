@@ -4,7 +4,7 @@
 
 class IObject : public ICommon {
 public:
-    virtual void draw(int flags = 0) = 0;
+    virtual void draw([[maybe_unused]] int flags = 0) = 0;
     virtual ~IObject(){};
 };
 
