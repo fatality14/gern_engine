@@ -2,14 +2,15 @@
 
 #include <array>
 #include <common/common.h>
+#include <memory>
 #include <shader/ishaderfield.h>
 #include <texture/itexture.h>
 
 class SkyboxTexture : public ITexture, public IShaderField {
 public:
     GLuint textureId;
-    array<string, 6> facePaths;
-    SkyboxTexture(const array<string, 6>& facePaths) {
+    array<filesystem::path, 6> facePaths;
+    SkyboxTexture(const array<filesystem::path, 6>& facePaths) {
         this->facePaths = facePaths;
 
         loadTexture();
@@ -29,22 +30,22 @@ public:
     }
 
     void loadTexture() override {
-        image_width = 0;
-        image_height = 0;
+        GLsizei image_width = 0;
+        GLsizei image_height = 0;
 
         GLDB(glGenTextures(1, &textureId));
         GLDB(glBindTexture(GL_TEXTURE_CUBE_MAP, textureId));
 
         for (size_t i = 0; i < facePaths.size(); i++) {
-            image = SOIL_load_image(facePaths.at(i).data(), &image_width,
-                                    &image_height, NULL, SOIL_LOAD_RGB);
+            unique_ptr<unsigned char[]> image (SOIL_load_image(facePaths.at(i).c_str(), &image_width,
+                                    &image_height, NULL, SOIL_LOAD_RGB));
             if (image) {
                 GLDB(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
                                   image_width, image_height, 0, GL_RGB,
-                                  GL_UNSIGNED_BYTE, image));
-                SOIL_free_image_data(image);
+                                  GL_UNSIGNED_BYTE, image.get()));
+                // SOIL_free_image_data(image); //no need to with unique_ptr
             } else {
-                throw string("Texture ") + facePaths.at(i) + " loading failed";
+                throw string("Texture ") + facePaths.at(i).string() + " loading failed";
             }
         }
 
@@ -61,10 +62,5 @@ public:
     }
 
 private:
-    GLsizei image_width;
-    GLsizei image_height;
-
     GLuint textureUnit = 0;
-
-    unsigned char* image;
 };

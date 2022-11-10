@@ -54,7 +54,7 @@ public:
             GLDB(glFrontFace(GL_CW));
         }
     }
-    GLFWwindow* getWindowPtr() { return window; }
+    GLFWwindow& getWindow() { return *window; }
 
 private:
     GLFWwindow* window;

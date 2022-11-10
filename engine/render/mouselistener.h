@@ -54,7 +54,7 @@ private:
         lastTime = currTime;
     }
     void updateInput() {
-        glfwGetCursorPos(window->getWindowPtr(), &mouseX, &mouseY);
+        glfwGetCursorPos(&window->getWindow(), &mouseX, &mouseY);
 
         if (firstMouse) {
             lastMouseX = mouseX;

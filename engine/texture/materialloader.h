@@ -6,22 +6,21 @@
 
 class MaterialLoader : private ULoader {
 public:
-    MaterialList* list;
 
-    void load(string path) {
-        list = new MaterialList;
+    MaterialList* load(const filesystem::path& path) {
+        MaterialList* list = new MaterialList;
 
         ifstream f;
         f.open(path);
 
         if (f.fail()) {
-            throw string("Cannot open file: ") + path;
+            throw string("Cannot open file: ") + path.string();
         }
 
         string line;
 
         getline(f, line);
-        removeBadSpaces(line);
+        removeExcessSpaces(line);
 
         string token = bite(" ", line);
 
@@ -34,7 +33,7 @@ public:
             Material* m;
 
             getline(f, line);
-            removeBadSpaces(line);
+            removeExcessSpaces(line);
 
             token = bite(" ", line);
 
@@ -83,5 +82,7 @@ public:
             }
             //...other maps
         }
+
+        return list;
     }
 };

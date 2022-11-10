@@ -20,8 +20,8 @@ public:
                                  camera->location + camera->front, camera->up);
     }
 
-    void setShaderParams(string viewMatrixUniformName,
-                         string cameraPosUniformName) {
+    void setShaderParams(const string& viewMatrixUniformName,
+                         const string& cameraPosUniformName) {
         name = viewMatrixUniformName;
         cameraName = cameraPosUniformName;
     }
@@ -64,22 +64,22 @@ public:
         camera->up = glm::normalize(glm::cross(camera->right, camera->front));
     }
     void setDefaultEvents() {
-        setEvent(window->getWindowPtr(), A,
+        setEvent(&window->getWindow(), A,
                  camera->location -= camera->right * camera->movementSpeed);
-        setEvent(window->getWindowPtr(), D,
+        setEvent(&window->getWindow(), D,
                  camera->location += camera->right * camera->movementSpeed);
-        setEvent(window->getWindowPtr(), Q,
+        setEvent(&window->getWindow(), Q,
                  camera->location -= camera->up * camera->movementSpeed);
-        setEvent(window->getWindowPtr(), E,
+        setEvent(&window->getWindow(), E,
                  camera->location += camera->up * camera->movementSpeed);
-        setEvent(window->getWindowPtr(), S,
+        setEvent(&window->getWindow(), S,
                  camera->location -= camera->front * camera->movementSpeed);
-        setEvent(window->getWindowPtr(), W,
+        setEvent(&window->getWindow(), W,
                  camera->location += camera->front * camera->movementSpeed);
     }
     void setCamera(Camera& c) { camera = &c; }
     Camera& getCamera() { return *camera; }
-    const GLFWwindow* __getWindowPtr() { return window->getWindowPtr(); }
+    const GLFWwindow& getWindow() { return window->getWindow(); }
     glm::mat4& getViewMatrix() { return viewMatrix; }
 
 private:

@@ -28,8 +28,8 @@ public:
         static_assert(std::is_base_of<IBuffer, T>::value,
                       "Template parameter T must be derived from IBuffer");
 
-        if (w.getWindowPtr() != p.__getWindowPtr() ||
-            p.__getWindowPtr() != v.__getWindowPtr()) {
+        if (&w.getWindow() != &p.getWindow() ||
+            &p.getWindow() != &v.getWindow()) {
             cout << "Perspective and view passed in \"Object\" constructor "
                     "must have pointers to the same \"Window\" object\n";
             cout << "Object not created\n";

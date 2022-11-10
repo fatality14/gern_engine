@@ -99,7 +99,7 @@ public:
             *window, b, *perspective, *view, *lightSources, *ml, mm, name);
         instancedObjects->push(*o);
     }
-    void addNewSkybox(const array<string, 6>& facePaths, MeshBuffer& b,
+    void addNewSkybox(const array<filesystem::path, 6>& facePaths, MeshBuffer& b,
                       const string& name = "noname") {
         SkyboxTexture* st = new SkyboxTexture(facePaths);
         st->setShaderParams(0, "skybox");

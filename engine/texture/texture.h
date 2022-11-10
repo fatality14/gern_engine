@@ -3,6 +3,7 @@
 #include <array>
 #include <common/alist.h>
 #include <common/common.h>
+#include <filesystem>
 #include <memory>
 #include <shader/ishaderfield.h>
 #include <texture/itexture.h>
@@ -30,12 +31,12 @@ public:
     }
     void bind() { GLDB(glBindTexture(GL_TEXTURE_2D, textureId)); }
 
-    void setLoadParams(const string& path) { this->path = path; }
+    void setLoadParams(const filesystem::path& path) { this->path = path; }
     void loadTexture() override {
         image_width = 0;
         image_height = 0;
 
-        unique_ptr<unsigned char[]> image (SOIL_load_image(path.data(), &image_width, &image_height, NULL,
+        unique_ptr<unsigned char[]> image (SOIL_load_image(path.c_str(), &image_width, &image_height, NULL,
                                 SOIL_LOAD_RGBA));
 
         GLDB(glBindTexture(GL_TEXTURE_2D, textureId));
@@ -52,7 +53,7 @@ public:
                               image.get()));
             GLDB(glGenerateMipmap(GL_TEXTURE_2D));
         } else {
-            throw string("Texture ") + path + " loading failed";
+            throw string("Texture ") + path.string() + " loading failed";
         }
     }
 
@@ -91,14 +92,14 @@ private:
     GLsizei image_width;
     GLsizei image_height;
 
-    string path;
+    filesystem::path path;
 };
 
 class TextureList : public AListO<Texture>, public IShaderField {
 private:
     struct TextureLayout {
         void pushTexture(GLuint texutreUnit, size_t textureIndex,
-                         string uniformName) {
+                         const string& uniformName) {
             texutreUnits.push_back(texutreUnit);
             textureIndexes.push_back(textureIndex);
             uniformNames.push_back(uniformName);
@@ -113,18 +114,18 @@ private:
 
     vector<TextureLayout> texLayouts;
 
-    void pushTextureToShaderByIndex(Shader* shader, GLuint n,
-                                    size_t textureIndex, string uniformName) {
+    void pushTextureToShaderByIndex(Shader& shader, GLuint n,
+                                    size_t textureIndex, const string& uniformName) {
         at(textureIndex)->setShaderParams(n, uniformName);
-        at(textureIndex)->pushToShader(*shader);
+        at(textureIndex)->pushToShader(shader);
     }
 
     size_t layoutId = 0;
 
 public:
-    TextureList(string name = "noname") { this->name = name; }
+    TextureList(const string& name = "noname") { this->name = name; }
 
-    void loadNew(string path) {
+    void loadNew(const filesystem::path& path) {
         Texture* t = new Texture;
 
         t->setLoadParams(path);
@@ -139,7 +140,7 @@ public:
     }
 
     void appendTextureToLayout(size_t layoutId, GLuint textureUnit,
-                               size_t textureIndex, string uniformName) {
+                               size_t textureIndex, const string& uniformName) {
         texLayouts.at(layoutId).pushTexture(textureUnit, textureIndex,
                                             uniformName);
     }
@@ -151,11 +152,11 @@ public:
 
     void setShaderParams(size_t layoutId) { this->layoutId = layoutId; }
     void pushToShader(Shader& shader) override {
-        TextureLayout* currLayout = &texLayouts.at(layoutId);
-        for (size_t i = 0; i < currLayout->textureIndexes.size(); ++i) {
-            pushTextureToShaderByIndex(&shader, currLayout->texutreUnits.at(i),
-                                       currLayout->textureIndexes.at(i),
-                                       currLayout->uniformNames.at(i));
+        TextureLayout& currLayout = texLayouts.at(layoutId);
+        for (size_t i = 0; i < currLayout.textureIndexes.size(); ++i) {
+            pushTextureToShaderByIndex(shader, currLayout.texutreUnits.at(i),
+                                       currLayout.textureIndexes.at(i),
+                                       currLayout.uniformNames.at(i));
         }
     }
     size_t layoutsAmount() { return texLayouts.size(); }

@@ -39,7 +39,7 @@ public:
         if (lines.size() != 0) {
             string& currLine = lines.front();
 
-            ULoader::removeBadSpaces(currLine);
+            ULoader::removeExcessSpaces(currLine);
 
             command = ULoader::bite(" ", currLine);
             args = currLine;
@@ -100,7 +100,7 @@ public:
 
         while (!f.eof()) {
             getline(f, line);
-            removeBadSpaces(line);
+            removeExcessSpaces(line);
             c.lines.push(line);
         }
 
@@ -369,8 +369,7 @@ private:
             string textureFolderPath = bite(" ", c.args);
             string materialListName = bite(" ", c.args);
 
-            c.materialLoader.load(mtlPath);
-            MaterialList* materials = c.materialLoader.list;
+            MaterialList* materials = c.materialLoader.load(mtlPath);
             TextureList* textures = materials->textures;
 
             textures->addLayouts(
@@ -714,7 +713,7 @@ private:
         void execute(LoaderContext& c) override {
             string bufferName = bite(" ", c.args);
 
-            array<string, 6> skyboxSides;
+            array<filesystem::path, 6> skyboxSides;
             for_each(skyboxSides.begin(), skyboxSides.end(),
                      [&c](auto& i) { i = c.cwd + bite(" ", c.args); });
 

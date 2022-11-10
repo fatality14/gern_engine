@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
             throw string(
                 "You must specify scene file path as a first argument.");
         }
-    } catch (string e) {
+    } catch (const string& e) {
         cout << e << endl;
         return -1;
     } catch (...) {

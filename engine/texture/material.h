@@ -6,7 +6,7 @@
 
 class Material : public IShaderField{
 public:
-    Material(string matname = "noname"){
+    Material(const string& matname = "noname"){
         this->matname = matname;
     }
 
@@ -63,10 +63,10 @@ public:
         return dissolve;
     }
 
-    void pushTextureName(string t){
+    void pushTextureName(const string& t){
         textureNames.push_back(t);
     }
-    vector<string> getTextureNames(){
+    vector<string>& getTextureNames(){
         return textureNames;
     }
 
@@ -84,10 +84,11 @@ private:
 
 class MaterialList : public AListO<Material>{
 public:
-    void pushNew(string matname = "noname"){
+    void pushNew(const string& matname = "noname"){
         push(*(new Material(matname)));
     }
 
+    //TODO must not be owning, textures should be stored as references and owned by model
     TextureList* textures = new TextureList;
     string name = "noname";
 };

@@ -45,7 +45,7 @@ private:
             switchCase = -1;
 
             getline(f, line);
-            removeBadSpaces(line);
+            removeExcessSpaces(line);
 
             token = bite(" ", line);
 

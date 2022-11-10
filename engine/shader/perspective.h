@@ -27,14 +27,14 @@ public:
         s.setUniformMatrix4fv(name, glm::value_ptr(projectionMatrix));
     }
     void updateMatrices() {
-        glfwGetFramebufferSize(window->getWindowPtr(), &window->fbWidth,
+        glfwGetFramebufferSize(&window->getWindow(), &window->fbWidth,
                                &window->fbHeight);
         projectionMatrix = glm::perspective(
             glm::radians(fov),
             static_cast<float>(window->fbWidth) / window->fbHeight, nearPlane,
             farPlane);
     }
-    const GLFWwindow* __getWindowPtr() { return window->getWindowPtr(); }
+    const GLFWwindow& getWindow() { return window->getWindow(); }
     glm::mat4& getProjectionMatrix() { return projectionMatrix; }
 
     // TODO: fill with smth later or remove

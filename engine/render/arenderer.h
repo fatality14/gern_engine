@@ -29,22 +29,22 @@ public:
 
     void renderLoop() {
         doContinue = true;
-        while (!glfwWindowShouldClose(window->getWindowPtr())) {
+        while (!glfwWindowShouldClose(&window->getWindow())) {
             glfwPollEvents();
 
             // get enter press event to fast close
-            if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_ENTER) ==
+            if (glfwGetKey(&window->getWindow(), GLFW_KEY_ENTER) ==
                 GLFW_PRESS) {
                 doContinue = false;
             }
 
             controller->frameFunction();
 
-            glfwSwapBuffers(window->getWindowPtr());
+            glfwSwapBuffers(&window->getWindow());
             GLDB(glFlush());
 
             if (!doContinue) {
-                glfwSetWindowShouldClose(window->getWindowPtr(), GLFW_TRUE);
+                glfwSetWindowShouldClose(&window->getWindow(), GLFW_TRUE);
                 break;
             }
         }

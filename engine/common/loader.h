@@ -21,7 +21,7 @@ public:
         return numArgs;
     }
 
-    static void removeBadSpaces(string& line) {
+    static void removeExcessSpaces(string& line) {
         size_t i = -1;
         while (true) {
             ++i;
