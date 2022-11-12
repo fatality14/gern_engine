@@ -36,16 +36,11 @@ public:
 
         shaderFields.pushToShader(*shader);
 
-        position->setDefaultEvents(window); // remove this later
+        position->setDefaultEvents(*window); // remove this later
 
         buffer->bind();
 
-        if (buffer->getMesh().nIndices != 0)
-            // glDrawElements(GL_TRIANGLES, buffer->getMesh().nIndices,
-            // GL_UNSIGNED_INT, (void*)0);
-            exit(0);
-        else
-            GLDB(glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices));
+        GLDB(glDrawArrays(GL_TRIANGLES, 0, buffer->getMesh().nVertices));
 
         buffer->unbind();
         shader->unbind();

@@ -57,7 +57,7 @@ public:
         return ULoader::bite(" ", nextCommand);
     }
 
-    string cwd;
+    filesystem::path cwd;
 
     FrameModel* model;
     queue<string> lines;
@@ -192,7 +192,7 @@ private:
     class MeshCommand : public ICommand<LoaderContext> {
     public:
         void execute(LoaderContext& c) override {
-            string path = c.cwd + bite(" ", c.args);
+            filesystem::path path = c.cwd / bite(" ", c.args);
             string meshName = bite(" ", c.args);
             c.meshList.push(c.meshLoader.load(path, meshName));
         }
@@ -202,7 +202,7 @@ private:
     public:
         void execute(LoaderContext& c) override {
             string meshName = bite(" ", c.args);
-            string skeletonPath = c.cwd + bite(" ", c.args);
+            filesystem::path skeletonPath = c.cwd / bite(" ", c.args);
             c.skeletonList.push(c.skeletizer.skeletize(
                 *(c.meshList).getByName(meshName), skeletonPath));
         }
@@ -239,7 +239,7 @@ private:
         }
 
         void execute(LoaderContext& c) override {
-            filesystem::path path = c.cwd + bite(" ", c.args);
+            filesystem::path path = c.cwd / bite(" ", c.args);
             paths->push_back(path);
 
             string nextCommand = c.getNextCommand();
@@ -325,7 +325,7 @@ private:
     public:
         void execute(LoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
-                ->textures->loadNew(c.cwd + c.args);
+                ->textures->loadNew(c.cwd / c.args);
 
             c.step();
             if (c.command == "texm") {
@@ -365,8 +365,8 @@ private:
 
             // TODO fix to use other textures than map_Kd
 
-            string mtlPath = c.cwd + bite(" ", c.args);
-            string textureFolderPath = bite(" ", c.args);
+            filesystem::path mtlPath = c.cwd / bite(" ", c.args);
+            filesystem::path textureFolderPath = bite(" ", c.args);
             string materialListName = bite(" ", c.args);
 
             MaterialList* materials = c.materialLoader.load(mtlPath);
@@ -383,7 +383,7 @@ private:
                 string texName =
                     materials->at(i)->getTextureNames().at(0); // texture name
                 if (loaded.count(texName) == 0) {              // if not loaded
-                    textures->loadNew(c.cwd + textureFolderPath + "/" +
+                    textures->loadNew(c.cwd / textureFolderPath /
                                       texName); // load by path
                     loaded.emplace(texName);    // mark loaded
                     ids.emplace(
@@ -411,10 +411,10 @@ private:
             float x = biteFloat(" ", c.args);
             float y = biteFloat(" ", c.args);
             float z = biteFloat(" ", c.args);
-            string tmp1 = bite(" ", c.args);
+            string name = bite(" ", c.args);
 
             // x,y,z,name
-            c.model->addNewLightSource(x, y, z, tmp1);
+            c.model->addNewLightSource(x, y, z, name);
         }
     };
     class CamCommand : public ICommand<LoaderContext> {
@@ -425,10 +425,10 @@ private:
             float z = biteFloat(" ", c.args);
             float movementSpeed = biteFloat(" ", c.args);
             float sensitivity = biteFloat(" ", c.args);
-            string tmp1 = bite(" ", c.args);
+            string name = bite(" ", c.args);
 
             // x,y,z,name
-            c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, tmp1);
+            c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, name);
         }
     };
 
@@ -613,7 +613,7 @@ private:
     class AnmCommand : public ICommand<LoaderContext> {
     public:
         void execute(LoaderContext& c) override {
-            string anmPath = c.cwd + bite(" ", c.args);
+            filesystem::path anmPath = c.cwd / bite(" ", c.args);
             float anmMult = biteFloat(" ", c.args);
             float anmStart = biteFloat(" ", c.args);
 
@@ -715,7 +715,7 @@ private:
 
             array<filesystem::path, 6> skyboxSides;
             for_each(skyboxSides.begin(), skyboxSides.end(),
-                     [&c](auto& i) { i = c.cwd + bite(" ", c.args); });
+                     [&c](auto& i) { i = c.cwd / bite(" ", c.args); });
 
             string tmp4 = bite(" ", c.args);
 

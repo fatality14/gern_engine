@@ -9,14 +9,14 @@ class MeshLoader : private ULoader {
 public:
     MeshLoader() { allPolyIndexes = new vector<vector<glm::ivec3>>; }
 
-    Mesh& load(string path, string meshName = "noname") {
+    Mesh& load(const filesystem::path& path, const string& meshName = "noname") {
         mesh = new Mesh(meshName);
 
         ifstream f;
         f.open(path);
 
         if (f.fail()) {
-            throw string("Cannot open file: ") + path;
+            throw string("Cannot open file: ") + path.string();
         }
 
         string line;
@@ -137,8 +137,6 @@ public:
                 ++mesh->nVertices;
             }
         }
-
-        mesh->nIndices = 0;
 
         if (norms.size() == 0) {
             calcNormals();

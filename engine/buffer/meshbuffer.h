@@ -6,7 +6,7 @@
 
 class MeshBuffer : public ABuffer<Mesh, Vertex> {
 public:
-    MeshBuffer(Mesh& m, Shader& s, string name = "noname")
+    MeshBuffer(Mesh& m, Shader& s, const string& name = "noname")
         : ABuffer(m, s, name) {
         shaderfields.push(vpos);
         shaderfields.push(vtex);

@@ -6,7 +6,7 @@
 
 class SkeletonBuffer : public ABuffer<SkeletonMesh, SkeletonVertex> {
 public:
-    SkeletonBuffer(SkeletonMesh& m, Shader& s, string name = "noname")
+    SkeletonBuffer(SkeletonMesh& m, Shader& s, const string& name = "noname")
         : ABuffer(m, s, name) {
         shaderfields.push(vpos);
         shaderfields.push(vtex);

@@ -15,10 +15,10 @@ public:
 
     string name;
 
-    static bool isWindowInit;
+    inline static bool isWindowInit = false;
 
     Window(int width, int height, GLenum pmFace = GL_FRONT_AND_BACK,
-           GLenum pmMode = GL_FILL, string windowName = "default") {
+           GLenum pmMode = GL_FILL, const string& windowName = "default") {
         if (isWindowInit) {
             cout << "Only one window allowed for the process\n";
             exit(0);
@@ -106,10 +106,7 @@ private:
     }
 
     static void framebufferResizeCallback([[maybe_unused]] GLFWwindow* window,
-                                          [[maybe_unused]] int fbW,
-                                          [[maybe_unused]] int fbH) {
+                                          int fbW, int fbH) {
         GLDB(glViewport(0, 0, fbW, fbH));
     }
 };
-
-bool Window::isWindowInit = false;

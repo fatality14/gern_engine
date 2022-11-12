@@ -8,7 +8,7 @@
 
 class InstancedBuffer : public ABuffer<Mesh, Vertex> {
 public:
-    InstancedBuffer(Mesh& m, Shader& s, string name = "noname")
+    InstancedBuffer(Mesh& m, Shader& s, const string& name = "noname")
         : ABuffer(m, s, name), vmodel("model", 4, 0, 1) {
         shaderfields.push(vpos);
         shaderfields.push(vtex);
@@ -30,7 +30,7 @@ public:
 
         vmodel.pushToShader(*shader);
     }
-    void setShader(Shader* s) {
+    void setShader(Shader& s) {
         ABuffer::setShader(s);
 
         bind();

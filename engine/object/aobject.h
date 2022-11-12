@@ -24,7 +24,7 @@ public:
 
     GLuint drawmode = GL_TRIANGLES;
 
-    AObject(Window& w, T& b, Perspective& p, View& v, string name = "noname") {
+    AObject(Window& w, T& b, Perspective& p, View& v, const string& name = "noname") {
         static_assert(std::is_base_of<IBuffer, T>::value,
                       "Template parameter T must be derived from IBuffer");
 

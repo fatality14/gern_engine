@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::steady_clock::now();
     try {
         if (argc == 2) {
-            const string path = argv[1];
-            if (path.size() != 0) {
+            const filesystem::path path = argv[1];
+            if (!path.empty()) {
                 sl.load(path, *renderer.model);
             }
         } else {

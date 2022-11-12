@@ -13,7 +13,8 @@ public:
 
     // make arguments optional
     MeshObject(Window& w, MeshBuffer& b, Perspective& p, View& v,
-               LightSourceList& lsl, MaterialList& ml, const string& name = "noname")
+               LightSourceList& lsl, MaterialList& ml,
+               const string& name = "noname")
         : AObject(w, b, p, v, name) {
         lightSources = &lsl;
         materials = &ml;
@@ -31,7 +32,7 @@ public:
     void draw(int flags = 0) override {
         shader->bind();
 
-        position->setDefaultEvents(window);
+        position->setDefaultEvents(*window);
 
         if (currShaderId != shader->program) {
             perspective->pushToShader(*shader);
@@ -46,41 +47,35 @@ public:
 
         buffer->bind();
 
-        if (buffer->getMesh().nIndices != 0)
-            // glDrawElements(drawmode, buffer->getMesh().nIndices,
-            // GL_UNSIGNED_INT, (void*)0);
-            exit(0);
-        else {
-            Mesh* currMesh = &buffer->getMesh();
-            // cout << "Draw mesh: " << currMesh->name << endl;
-            GLint startFrom = 0;
-            size_t textureI = 0;
-            size_t materialI = 0;
+        Mesh* currMesh = &buffer->getMesh();
+        // cout << "Draw mesh: " << currMesh->name << endl;
+        GLint startFrom = 0;
+        size_t textureI = 0;
+        size_t materialI = 0;
 
-            for (size_t j = 0; j < currMesh->partEndMtlIds.size(); ++j) {
-                if (textureI == texList->layoutsAmount()) {
-                    textureI = 0;
-                }
-                texList->setShaderParams(textureI);
-                texList->pushToShader(*shader);
-                ++textureI;
+        for (size_t j = 0; j < currMesh->partEndMtlIds.size(); ++j) {
+            if (textureI == texList->layoutsAmount()) {
+                textureI = 0;
+            }
+            texList->setShaderParams(textureI);
+            texList->pushToShader(*shader);
+            ++textureI;
 
-                if (materialI == materials->size()) {
-                    materialI = 0;
-                }
-                materials->at(materialI)->pushToShader(*shader);
-                ++materialI;
+            if (materialI == materials->size()) {
+                materialI = 0;
+            }
+            materials->at(materialI)->pushToShader(*shader);
+            ++materialI;
 
-                if (j == 0) {
-                    GLDB(glDrawArrays(drawmode, startFrom,
-                                      currMesh->partEndMtlIds.at(j)));
-                    startFrom = currMesh->partEndMtlIds.at(j);
-                } else {
-                    GLDB(glDrawArrays(drawmode, startFrom,
-                                      currMesh->partEndMtlIds.at(j) -
-                                          currMesh->partEndMtlIds.at(j - 1)));
-                    startFrom = currMesh->partEndMtlIds.at(j);
-                }
+            if (j == 0) {
+                GLDB(glDrawArrays(drawmode, startFrom,
+                                  currMesh->partEndMtlIds.at(j)));
+                startFrom = currMesh->partEndMtlIds.at(j);
+            } else {
+                GLDB(glDrawArrays(drawmode, startFrom,
+                                  currMesh->partEndMtlIds.at(j) -
+                                      currMesh->partEndMtlIds.at(j - 1)));
+                startFrom = currMesh->partEndMtlIds.at(j);
             }
         }
 

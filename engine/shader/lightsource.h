@@ -24,7 +24,7 @@ public:
 
 class LightSourceList : public AListO<LightSource>, public IShaderField {
 public:
-    void pushNew(string name = "noname") { push(*(new LightSource(name))); }
+    void pushNew(const string& name = "noname") { push(*(new LightSource(name))); }
     void pushToShader(Shader& shader) override {
         for (size_t i = 0; i < size(); ++i) {
             list.at(i)->pushToShader(shader);

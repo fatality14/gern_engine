@@ -19,7 +19,7 @@ public:
         scales.push_back(scale);
         ids.push_back(id);
     }
-    size_t getPositionsAmount() { return ids.size(); }
+    size_t getPositionsAmount() const { return ids.size(); }
 };
 
 class PoseList : public AListO<Pose> {

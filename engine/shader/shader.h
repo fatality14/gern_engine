@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fwd.hpp"
 #include <common/alist.h>
 #include <common/common.h>
 #include <string>
@@ -12,7 +13,7 @@ public:
     string name;
 
     Shader() = default;
-    Shader(GLuint program, string name = "noname") {
+    Shader(GLuint program, const string& name = "noname") {
         this->program = program;
         this->name = name;
     }
@@ -26,7 +27,7 @@ public:
     }
 
     template <class T>
-    void setFloatAttribPointer(string layoutName, GLint vecSize,
+    void setFloatAttribPointer(const string& layoutName, GLint vecSize,
                                size_t offset) {
         GLuint attribLoc;
         GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
@@ -42,7 +43,7 @@ public:
         GLDB(glEnableVertexAttribArray(attribLoc));
     }
     template <class T>
-    void setIntAttribPointer(string layoutName, GLint vecSize, size_t offset) {
+    void setIntAttribPointer(const string& layoutName, GLint vecSize, size_t offset) {
         GLuint attribLoc;
         GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
         if (attribLoc == (GLuint)-1) {
@@ -57,7 +58,7 @@ public:
         GLDB(glEnableVertexAttribArray(attribLoc));
     }
     template <class T>
-    void setMatAttribPointer(string layoutName, GLint matSize, size_t offset,
+    void setMatAttribPointer(const string& layoutName, GLint matSize, size_t offset,
                              GLuint divisor = 0) {
         GLuint attribLoc;
         GLDBR(attribLoc, glGetAttribLocation(program, layoutName.data()));
@@ -84,22 +85,24 @@ public:
         }
     }
 
-    void setUniformMatrix4fv(string uniformName, const GLfloat* value,
+    //TODO refactor value argument
+    void setUniformMatrix4fv(const string& uniformName, const GLfloat* const value,
                              GLsizei size = 1) {
         GLDB(glUniformMatrix4fv(
             glGetUniformLocation(program, uniformName.data()), size, GL_FALSE,
             value));
     }
-    void setUniform3fv(string uniformName, const GLfloat* value,
+    //TODO refactor value argument
+    void setUniform3fv(const string& uniformName, const GLfloat* const value,
                        GLsizei size = 1) {
         GLDB(glUniform3fv(glGetUniformLocation(program, uniformName.data()),
                           size, value));
     }
-    void setUniform1i(string uniformName, GLint value) {
+    void setUniform1i(const string& uniformName, GLint value) {
         GLDB(glUniform1i(glGetUniformLocation(program, uniformName.data()),
                          value));
     }
-    void setUniform1f(string uniformName, GLfloat value) {
+    void setUniform1f(const string& uniformName, GLfloat value) {
         GLDB(glUniform1f(glGetUniformLocation(program, uniformName.data()),
                          value));
     }

@@ -33,7 +33,7 @@ public:
         modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     }
 
-    void setDefaultEvents(Window* w) {
+    void setDefaultEvents(Window& w) {
         //        setEvent(w->getWindowPtr(), 2, scale -= 0.01f);
         //        setEvent(w->getWindowPtr(), 1, scale += 0.01f);
         //        setEvent(w->getWindowPtr(), Z, rotation.y -= 5.f);

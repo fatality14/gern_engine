@@ -15,7 +15,7 @@ public:
     Joint rootJoint;
     JointList joints;
 
-    // remove?
+    //TODO remove?
     void genJointsFromRoot() { joints.appendFromRootJoint(rootJoint); }
 };
 

@@ -12,7 +12,7 @@ public:
     size_t id;
     string name;
 
-    Joint(string name = "noname") {
+    Joint(const string& name = "noname") {
         this->name = name;
         position = new JointPosition;
     }
@@ -85,6 +85,7 @@ class JointList : public AListO<Joint>, public IShaderField {
 public:
     JointList() { name = "jointTransforms"; }
 
+    //TODO refactor body
     void pushToShader(Shader& s) override {
         jointPoses.clear();
         for (size_t i = 0; i < size(); ++i) {
@@ -94,6 +95,7 @@ public:
                 jointPoses.push_back(mat[j]);
             }
         }
+        
         s.setUniformMatrix4fv(name, jointPoses.data(), size());
     }
 

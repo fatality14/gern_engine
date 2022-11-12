@@ -7,7 +7,7 @@ struct ILoader : public ICommon {};
 // U stands for utility
 class ULoader : public ILoader {
 public:
-    static size_t calcNumArgsDividedBy(string delimiter, string line) {
+    static size_t calcNumArgsDividedBy(const string& delimiter, string line) {
         size_t numArgs = 0;
         string token;
         bool end;

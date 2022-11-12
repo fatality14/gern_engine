@@ -4,7 +4,7 @@
 
 template <class T> class ShaderUniform : public IShaderField {
 public:
-    ShaderUniform(T value, string uniformName, size_t size = 1) {
+    ShaderUniform(T value, const string& uniformName, size_t size = 1) {
         this->value = value;
         this->name = uniformName;
         this->size = size;
@@ -23,7 +23,7 @@ public:
         }
     }
 
-    void setValue(T value) { this->value = value; }
+    void setValue(const T& value) { this->value = value; }
 
 private:
     T value;

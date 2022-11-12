@@ -4,7 +4,7 @@
 
 template <class T, class U> class ShaderAttrib : public IShaderField {
 public:
-    ShaderAttrib(string layoutName, GLint vecSize, size_t offset) {
+    ShaderAttrib(const string& layoutName, GLint vecSize, size_t offset) {
         this->name = layoutName;
         this->vecSize = vecSize;
         this->offset = offset;

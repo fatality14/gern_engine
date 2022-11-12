@@ -68,7 +68,7 @@ private:
 
         return shader;
     }
-    GLuint compileProgram(vector<GLuint>& shaders) {
+    GLuint compileProgram(const vector<GLuint>& shaders) {
         GLuint program;
 
         GLDBR(program, glCreateProgram());

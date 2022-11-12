@@ -6,7 +6,7 @@
 // add check for repeating names in list
 template <class T> class AList : public IList {
 public:
-    size_t size() { return list.size(); }
+    size_t size() const { return list.size(); }
     void push(T& obj) { list.push_back(&obj); }
     void popByName(const string& name) {
         for (size_t i = 0; i < list.size(); i++) {

@@ -18,7 +18,8 @@ public:
     // make arguments optional
     InstancedObject(Window& w, InstancedBuffer& b, Perspective& p, View& v,
                     LightSourceList& lsl, MaterialList& ml,
-                    vector<Position> modelMatrices, const string& name = "noname")
+                    vector<Position> modelMatrices,
+                    const string& name = "noname")
         : AObject(w, b, p, v, name) {
         this->modelMatrices = modelMatrices;
         lightSources = &lsl;
@@ -58,44 +59,38 @@ public:
             updateBufferModelMats();
         }
 
-        if (buffer->getMesh().nIndices != 0)
-            // glDrawElements(drawmode, buffer->getMesh().nIndices,
-            // GL_UNSIGNED_INT, (void*)0);
-            exit(0);
-        else {
-            Mesh* currMesh = &buffer->getMesh();
-            // cout << "Draw mesh: " << currMesh->name << endl;
-            GLint startFrom = 0;
-            size_t textureI = 0;
-            size_t materialI = 0;
+        Mesh* currMesh = &buffer->getMesh();
+        // cout << "Draw mesh: " << currMesh->name << endl;
+        GLint startFrom = 0;
+        size_t textureI = 0;
+        size_t materialI = 0;
 
-            for (size_t j = 0; j < currMesh->partEndMtlIds.size(); ++j) {
-                if (textureI == texList->layoutsAmount()) {
-                    textureI = 0;
-                }
-                texList->setShaderParams(textureI);
-                texList->pushToShader(*shader);
-                ++textureI;
+        for (size_t j = 0; j < currMesh->partEndMtlIds.size(); ++j) {
+            if (textureI == texList->layoutsAmount()) {
+                textureI = 0;
+            }
+            texList->setShaderParams(textureI);
+            texList->pushToShader(*shader);
+            ++textureI;
 
-                if (materialI == materials->size()) {
-                    materialI = 0;
-                }
-                materials->at(materialI)->pushToShader(*shader);
-                ++materialI;
+            if (materialI == materials->size()) {
+                materialI = 0;
+            }
+            materials->at(materialI)->pushToShader(*shader);
+            ++materialI;
 
-                if (j == 0) {
-                    GLDB(glDrawArraysInstanced(drawmode, startFrom,
-                                               currMesh->partEndMtlIds.at(j),
-                                               modelMatrices.size()));
-                    startFrom = currMesh->partEndMtlIds.at(j);
-                } else {
-                    GLDB(glDrawArraysInstanced(
-                        drawmode, startFrom,
-                        currMesh->partEndMtlIds.at(j) -
-                            currMesh->partEndMtlIds.at(j - 1),
-                        modelMatrices.size()));
-                    startFrom = currMesh->partEndMtlIds.at(j);
-                }
+            if (j == 0) {
+                GLDB(glDrawArraysInstanced(drawmode, startFrom,
+                                           currMesh->partEndMtlIds.at(j),
+                                           modelMatrices.size()));
+                startFrom = currMesh->partEndMtlIds.at(j);
+            } else {
+                GLDB(
+                    glDrawArraysInstanced(drawmode, startFrom,
+                                          currMesh->partEndMtlIds.at(j) -
+                                              currMesh->partEndMtlIds.at(j - 1),
+                                          modelMatrices.size()));
+                startFrom = currMesh->partEndMtlIds.at(j);
             }
         }
 
@@ -104,7 +99,7 @@ public:
         texList->unbindTextures();
     }
 
-    void setModelMatrices(vector<Position> mm) { modelMatrices = mm; }
+    void setModelMatrices(const vector<Position>& mm) { modelMatrices = mm; }
     vector<Position>& getModelMatrices() { return modelMatrices; }
 
     // TODO: else should throw

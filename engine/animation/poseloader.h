@@ -2,17 +2,18 @@
 
 #include <animation/pose.h>
 #include <common/loader.h>
+#include <filesystem>
 
 class PoseLoader : private ULoader {
 public:
-    PoseList* parseKeyPoses(string filePath) {
+    PoseList* parseKeyPoses(const filesystem::path& filePath) {
         PoseList* keyPoses = new PoseList;
 
         ifstream f;
         f.open(filePath);
 
         if (f.fail()) {
-            throw string("Cannot open file: ") + filePath;
+            throw string("Cannot open file: ") + filePath.string();
         }
 
         string line;

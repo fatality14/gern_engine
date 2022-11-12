@@ -18,7 +18,7 @@ public:
     PoseList keyPoses;
 
     Animation(JointList& jointsToAnimate, float animationTimeMult = 1,
-              float startTime = 0, string name = "noname") {
+              float startTime = 0, const string& name = "noname") {
         joints = &jointsToAnimate;
         this->startTime = startTime;
         reset();
@@ -93,14 +93,14 @@ private:
             reset();
         }
     }
-    void applyPose(Pose& p) {
+    void applyPose(const Pose& p) {
         for (size_t i = 0; i < p.getPositionsAmount(); ++i) {
             joints->getById(p.ids.at(i)).moveTo(p.locations.at(i));
             joints->getById(p.ids.at(i)).rotateTo(p.rotations.at(i));
             joints->getById(p.ids.at(i)).scaleTo(p.scales.at(i));
         }
     }
-    Pose interpolatePoses(Pose& p1, Pose& p2, float interpolationCoef) {
+    Pose interpolatePoses(const Pose& p1, const Pose& p2, float interpolationCoef) {
         Pose p;
         for (size_t i = 0; i < p1.getPositionsAmount(); ++i) {
             p.locations.push_back(p1.locations.at(i) * (1 - interpolationCoef) +

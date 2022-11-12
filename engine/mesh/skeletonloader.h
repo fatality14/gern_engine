@@ -3,16 +3,16 @@
 #include <algorithm>
 #include <common/common.h>
 #include <common/loader.h>
+#include <filesystem>
 #include <mesh/mesh.h>
 #include <mesh/skeletonmesh.h>
 
 class SkeletonLoader : private ULoader {
 public:
-    SkeletonMesh& skeletize(Mesh& mesh, string skeletonPath) {
+    SkeletonMesh& skeletize(Mesh& mesh, const filesystem::path& skeletonPath) {
         skeletonMesh = new SkeletonMesh;
         skeletonMesh->name = mesh.name;
 
-        skeletonMesh->nIndices = mesh.nIndices;
         skeletonMesh->nVertices = mesh.nVertices;
         skeletonMesh->partEndMtlIds = mesh.partEndMtlIds;
         skeletonMesh->partEndVertexIds = mesh.partEndVertexIds;
@@ -26,12 +26,12 @@ public:
 private:
     SkeletonMesh* skeletonMesh;
 
-    void parseSkeleton(string filePath) {
+    void parseSkeleton(const filesystem::path& filePath) {
         ifstream f;
         f.open(filePath);
 
         if (f.fail()) {
-            throw string("Cannot open file: ") + filePath;
+            throw string("Cannot open file: ") + filePath.string();
         }
 
         string line;
