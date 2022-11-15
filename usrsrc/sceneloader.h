@@ -11,12 +11,58 @@
 #include <object/instancedobject.h>
 #include <object/skeletonobject.h>
 #include <render/isceneloader.h>
+#include <string>
 #include <texture/materialloader.h>
 
+#include <map>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+template<typename T>
+class FileParser : public ICommon{
+    bool step() {
+        if (lines.size() != 0) {
+            string& currLine = lines.front();
+
+            ULoader::removeExcessSpaces(currLine);
+
+            command = ULoader::bite(" ", currLine);
+            args = currLine;
+
+            lines.pop();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    string getNextCommand() {
+        string nextCommand = lines.front();
+        return ULoader::bite(" ", nextCommand);
+    }
+
+    bool isNextCommand(const string& command) {
+        return getNextCommand() == command;
+    }
+
+    void execute(const map<string, ICommand<T>&>& commands) {
+        bool found = commands.count(command);
+        if(found){
+            commands.at(command).execute(*this);
+        }
+        else{
+            //TODO cout path or name of file
+            cout << "Warning: no such command " << command << " found while loading scene" << endl;
+        }
+    }
+
+    queue<string> lines;
+    string args;
+    string command;
+};
 
 class LoaderContext : public IContext {
 public:
@@ -57,13 +103,28 @@ public:
         return ULoader::bite(" ", nextCommand);
     }
 
+    bool isNextCommand(const string& command) {
+        return getNextCommand() == command;
+    }
+
+    void execute(const map<string, ICommand<LoaderContext>&>& commands) {
+        bool found = commands.count(command);
+        if(found){
+            commands.at(command).execute(*this);
+        }
+        else{
+            //TODO cout path or name of file
+            cout << "Warning: no such command " << command << " found while loading scene" << endl;
+        }
+    }
+
     filesystem::path cwd;
 
-    FrameModel* model;
     queue<string> lines;
     string args;
     string command;
-
+    
+    FrameModel* model;
     MeshLoader meshLoader;
     MeshList meshList;
     SkeletonMeshList skeletonList;
@@ -82,10 +143,25 @@ public:
 
 typedef ICommand<LoaderContext> Command;
 
-
-//TODO provide throw wherever it needed
+// TODO provide throw wherever it needed
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 public:
+    using cmdPair = pair<string, ICommand<LoaderContext>&>;
+
+    inline static map<string, ICommand<LoaderContext>&> mainCmds;
+
+    SceneLoader() {
+        mainCmds = {cmdPair("cwd", cwdc),         cmdPair("mesh", meshc),
+                    cmdPair("skl", sklc),         cmdPair("shad", shadc),
+                    cmdPair("meshbuf", meshbufc), cmdPair("sklbuf", sklbufc),
+                    cmdPair("instbuf", instbufc), cmdPair("tex", texc),
+                    cmdPair("mat", matc),         cmdPair("light", lightc),
+                    cmdPair("cam", camc),         cmdPair("frmb", frmbc),
+                    cmdPair("meshobj", meshobjc), cmdPair("sklobj", sklobjc),
+                    cmdPair("anm", anmc),         cmdPair("instobj", instobjc),
+                    cmdPair("skybox", skyboxc),   cmdPair("bckcol", bckcolc)};
+    }
+
     void load(const filesystem::path& path, FrameModel& data) override {
         c.model = &data;
 
@@ -104,80 +180,8 @@ public:
             c.lines.push(line);
         }
 
-        c.step();
-        if (c.command == "cwd") {
-            cwdc.execute(c);
-        }
-
         while (c.step()) {
-            if (c.command == "mesh") {
-                meshc.execute(c);
-                continue;
-            }
-            if (c.command == "skl") {
-                sklc.execute(c);
-                continue;
-            }
-            if (c.command == "shad") {
-                shadc.execute(c);
-                continue;
-            }
-            if (c.command == "meshbuf") {
-                meshbufc.execute(c);
-                continue;
-            }
-            if (c.command == "sklbuf") {
-                sklbufc.execute(c);
-                continue;
-            }
-            if (c.command == "instbuf") {
-                instbufc.execute(c);
-                continue;
-            }
-            if (c.command == "tex") {
-                texc.execute(c);
-                continue;
-            }
-            if (c.command == "mat") {
-                matc.execute(c);
-                continue;
-            }
-            if (c.command == "light") {
-                lightc.execute(c);
-                continue;
-            }
-            if (c.command == "cam") {
-                camc.execute(c);
-                continue;
-            }
-            if (c.command == "frmb") {
-                frmbc.execute(c);
-                continue;
-            }
-            if (c.command == "meshobj") {
-                meshobjc.execute(c);
-                continue;
-            }
-            if (c.command == "sklobj") {
-                sklobjc.execute(c);
-                continue;
-            }
-            if (c.command == "anm") {
-                anmc.execute(c);
-                continue;
-            }
-            if (c.command == "instobj") {
-                instobjc.execute(c);
-                continue;
-            }
-            if (c.command == "skybox") {
-                skyboxc.execute(c);
-                continue;
-            }
-            if (c.command == "bckcol") {
-                bckcolc.execute(c);
-                continue;
-            }
+            c.execute(mainCmds);
         }
     }
 
@@ -216,11 +220,9 @@ private:
             Shader* shader = new Shader();
             shader->name = shaderName;
 
-            string nextCommand = c.getNextCommand();
-            if (nextCommand == "shadel") {
-                shadelc.shader = shader;
-
+            if (c.isNextCommand("shadel")) {
                 c.step();
+                shadelc.shader = shader;
                 shadelc.execute(c);
             } else {
                 throw string("there must be a shadel command after shad "
@@ -231,19 +233,14 @@ private:
 
     class ShadElCommand : public ICommand<LoaderContext> {
     public:
-        ShadElCommand(){
-            paths = new vector<filesystem::path>();
-        }
-        ~ShadElCommand(){
-            delete paths;
-        }
+        ShadElCommand() { paths = new vector<filesystem::path>(); }
+        ~ShadElCommand() { delete paths; }
 
         void execute(LoaderContext& c) override {
             filesystem::path path = c.cwd / bite(" ", c.args);
             paths->push_back(path);
 
-            string nextCommand = c.getNextCommand();
-            if (nextCommand == "shadel") {
+            if (c.isNextCommand("shadel")) {
                 c.step();
                 // no need to pass paths to next execution while shadelc is
                 // static, but it might not in future
@@ -313,8 +310,7 @@ private:
                 ->textures->appendTextureToLayout(layoutId, textureUnit,
                                                   textureIndex, uniformName);
 
-            string nextCommand = c.getNextCommand();
-            if (nextCommand == "texl") {
+            if (c.isNextCommand("texl")) {
                 c.step();
                 texlc.execute(c);
             }
@@ -327,10 +323,11 @@ private:
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->loadNew(c.cwd / c.args);
 
-            c.step();
-            if (c.command == "texm") {
+            if (c.isNextCommand("texm")) {
+                c.step();
                 texmc.execute(c);
-            } else if (c.command == "texl") {
+            } else if (c.isNextCommand("texl")) {
+                c.step();
                 texlc.execute(c);
             } else {
                 throw string("there must be a texl command after texm "
@@ -348,8 +345,8 @@ private:
 
             c.materialLists.push_back(texbmat);
 
-            c.step();
-            if (c.command == "texm") {
+            if (c.isNextCommand("texm")) {
+                c.step();
                 texmc.execute(c);
             } else {
                 throw string("there must be a texm command after tex in scene");
@@ -413,7 +410,6 @@ private:
             float z = biteFloat(" ", c.args);
             string name = bite(" ", c.args);
 
-            // x,y,z,name
             c.model->addNewLightSource(x, y, z, name);
         }
     };
@@ -427,7 +423,6 @@ private:
             float sensitivity = biteFloat(" ", c.args);
             string name = bite(" ", c.args);
 
-            // x,y,z,name
             c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, name);
         }
     };
@@ -534,8 +529,8 @@ private:
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.step();
-                    movec.o = &c.model->getMeshObject(objName);
-                    movec.execute(c);
+                    momovec.o = &c.model->getMeshObject(objName);
+                    momovec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.step();
@@ -601,7 +596,7 @@ private:
                 nextCommand = c.getNextCommand();
             }
 
-            if (nextCommand == "anm") {
+            if (c.isNextCommand("anm")) {
                 c.step();
                 anmc.o = currObject;
                 anmc.execute(c);
@@ -626,7 +621,7 @@ private:
             o->setCurrAnimation(anmPath);
 
             string nextCommand = c.getNextCommand();
-            if (nextCommand == "anm") {
+            if (c.isNextCommand("anm")) {
                 c.step();
                 // anmc.o = this->o; //no need to while anmc is static, but it
                 // might not in future
@@ -665,8 +660,7 @@ private:
             c.model->addNewObject(*c.instBuffers.at(which2),
                                   c.materialLists.at(which1), poses, objName);
 
-            string nextCommand = c.getNextCommand();
-            if (nextCommand == "instel") {
+            if (c.isNextCommand("instel")) {
                 c.step();
                 instelc.execute(c);
             }
@@ -700,8 +694,7 @@ private:
             lastInstObj->scaleTo(lastInstObj->modelMatrices.size() - 1, x, y,
                                  z);
 
-            string nextCommand = c.getNextCommand();
-            if (nextCommand == "instel") {
+            if (c.isNextCommand("instel")) {
                 c.step();
                 instelc.execute(c);
             }
@@ -782,7 +775,7 @@ private:
     inline static LightCommand lightc;
     inline static CamCommand camc;
     inline static FrmbCommand frmbc;
-    inline static MoveCommand<MeshObject> movec;
+    inline static MoveCommand<MeshObject> momovec;
     inline static MoveCommand<SkeletonObject> somovec;
     inline static MoveCommand<SkyboxObject> skmovec;
     inline static ScaleCommand<MeshObject> moscalec;

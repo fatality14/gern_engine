@@ -6,6 +6,7 @@
 
 class ShaderLoader : public ULoader{
 public:
+    //TODO return type must be a shader
     GLuint load(const vector<filesystem::path>& paths) {
         vector<GLuint> shaders;
         for (size_t i = 0; i < paths.size(); ++i) {
