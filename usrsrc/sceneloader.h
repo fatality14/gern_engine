@@ -28,39 +28,17 @@ public:
         const filesystem::path& filePath)
         : it{filePath, *this} {}
 
-    ~SceneLoaderContext() {
-        for (size_t i = 0; i < meshBuffers.size(); ++i) {
-            delete meshBuffers[i];
-        }
-        for (size_t i = 0; i < sklBuffers.size(); ++i) {
-            delete sklBuffers[i];
-        }
-        for (size_t i = 0; i < instBuffers.size(); ++i) {
-            delete instBuffers[i];
-        }
-        for (size_t i = 0; i < materialLists.size(); ++i) {
-            delete materialLists[i];
-        }
-    }
-
     CommandIterator<SceneLoaderContext> it;
 
-    filesystem::path cwd;
-    FrameModel* model;
-    MeshLoader meshLoader;
-    MeshList meshList;
-    SkeletonMeshList skeletonList;
-    SkeletonLoader skeletizer;
-    MaterialLoader materialLoader;
-    ShaderList shaders;
-    vector<MaterialList*> materialLists;
+    FrameModel* m;
 
+    filesystem::path cwd;
+
+    MeshLoader meshLoader;
+    MaterialLoader materialLoader;
     PoseLoader poseLoader;
     ShaderLoader shaderLoader;
-
-    vector<MeshBuffer*> meshBuffers;
-    vector<SkeletonBuffer*> sklBuffers;
-    vector<InstancedBuffer*> instBuffers;
+    SkeletonLoader skeletizer;
 };
 
 typedef ICommand<SceneLoaderContext> Command;
@@ -85,14 +63,16 @@ public:
     }
 
     void load(const filesystem::path& path, FrameModel& model) override {
-        SceneLoaderContext c(path);
+        c = new SceneLoaderContext(path);
 
-        c.model = &model;
+        c->m = &model;
 
-        while (c.it.step()) {
-            c.it.execute(commandList);
+        while (c->it.step()) {
+            c->it.execute(commandList);
         }
     }
+    
+    SceneLoaderContext* c;
 
 private:
     class CwdCommand : public ICommand<SceneLoaderContext> {
@@ -107,7 +87,7 @@ private:
         void execute(SceneLoaderContext& c) override {
             filesystem::path path = c.cwd / bite(" ", c.it.args);
             string meshName = bite(" ", c.it.args);
-            c.meshList.push(c.meshLoader.load(path, meshName));
+            c.m->meshList.push(*c.meshLoader.load(path, meshName));
         }
     };
 
@@ -116,8 +96,8 @@ private:
         void execute(SceneLoaderContext& c) override {
             string meshName = bite(" ", c.it.args);
             filesystem::path skeletonPath = c.cwd / bite(" ", c.it.args);
-            c.skeletonList.push(c.skeletizer.skeletize(
-                *(c.meshList).getByName(meshName), skeletonPath));
+            c.m->skeletonList.push(*c.skeletizer.skeletize(
+                *(c.m->meshList).getByName(meshName), skeletonPath));
         }
     };
 
@@ -157,7 +137,7 @@ private:
             } else {
                 shader->program = c.shaderLoader.load(*paths);
                 paths->clear();
-                c.shaders.push(*shader);
+                c.m->shaders.push(*shader);
             }
         }
 
@@ -171,10 +151,10 @@ private:
             string meshName = bite(" ", c.it.args);
             string shaderName = bite(" ", c.it.args);
             string bufferName = bite(" ", c.it.args);
-            c.meshBuffers.push_back(
-                new MeshBuffer(*(c.meshList).getByName(meshName),
-                               *(c.shaders).getByName(shaderName), bufferName));
-            c.meshBuffers.at(c.meshBuffers.size() - 1)->genBuffers();
+            c.m->meshBuffers.push_back(
+                new MeshBuffer(*(c.m->meshList).getByName(meshName),
+                               *(c.m->shaders).getByName(shaderName), bufferName));
+            c.m->meshBuffers.at(c.m->meshBuffers.size() - 1)->genBuffers();
         }
     };
 
@@ -184,10 +164,10 @@ private:
             string meshName = bite(" ", c.it.args);
             string shaderName = bite(" ", c.it.args);
             string bufferName = bite(" ", c.it.args);
-            c.sklBuffers.push_back(new SkeletonBuffer(
-                *(c.skeletonList).getByName(meshName),
-                *(c.shaders).getByName(shaderName), bufferName));
-            c.sklBuffers.at(c.sklBuffers.size() - 1)->genBuffers();
+            c.m->sklBuffers.push_back(new SkeletonBuffer(
+                *(c.m->skeletonList).getByName(meshName),
+                *(c.m->shaders).getByName(shaderName), bufferName));
+            c.m->sklBuffers.at(c.m->sklBuffers.size() - 1)->genBuffers();
         }
     };
 
@@ -197,17 +177,17 @@ private:
             string meshName = bite(" ", c.it.args);
             string shaderName = bite(" ", c.it.args);
             string bufferName = bite(" ", c.it.args);
-            c.instBuffers.push_back(new InstancedBuffer(
-                *(c.meshList).getByName(meshName),
-                *(c.shaders).getByName(shaderName), bufferName));
-            c.instBuffers.at(c.instBuffers.size() - 1)->genBuffers();
+            c.m->instBuffers.push_back(new InstancedBuffer(
+                *(c.m->meshList).getByName(meshName),
+                *(c.m->shaders).getByName(shaderName), bufferName));
+            c.m->instBuffers.at(c.m->instBuffers.size() - 1)->genBuffers();
         }
     };
 
     class TexLCommand : public ICommand<SceneLoaderContext> {
     public:
         void execute(SceneLoaderContext& c) override {
-            c.materialLists.at(c.materialLists.size() - 1)
+            c.m->materialLists.at(c.m->materialLists.size() - 1)
                 ->textures->addLayouts(1);
 
             size_t layoutId = biteInt(" ", c.it.args);
@@ -215,7 +195,7 @@ private:
             size_t textureIndex = biteInt(" ", c.it.args);
             string uniformName = bite(" ", c.it.args);
 
-            c.materialLists.at(c.materialLists.size() - 1)
+            c.m->materialLists.at(c.m->materialLists.size() - 1)
                 ->textures->appendTextureToLayout(layoutId, textureUnit,
                                                   textureIndex, uniformName);
 
@@ -229,7 +209,7 @@ private:
     class TexMCommand : public ICommand<SceneLoaderContext> {
     public:
         void execute(SceneLoaderContext& c) override {
-            c.materialLists.at(c.materialLists.size() - 1)
+            c.m->materialLists.at(c.m->materialLists.size() - 1)
                 ->textures->loadNew(c.cwd / c.it.args);
 
             if (c.it.isNextCommand("texm")) {
@@ -252,7 +232,7 @@ private:
             texbmat->pushNew();
             texbmat->name = c.it.args;
 
-            c.materialLists.push_back(texbmat);
+            c.m->materialLists.push_back(texbmat);
 
             if (c.it.isNextCommand("texm")) {
                 c.it.step();
@@ -307,7 +287,7 @@ private:
             }
 
             materials->name = materialListName;
-            c.materialLists.push_back(materials);
+            c.m->materialLists.push_back(materials);
         }
     };
 
@@ -319,7 +299,7 @@ private:
             float z = biteFloat(" ", c.it.args);
             string name = bite(" ", c.it.args);
 
-            c.model->addNewLightSource(x, y, z, name);
+            c.m->addNewLightSource(x, y, z, name);
         }
     };
     class CamCommand : public ICommand<SceneLoaderContext> {
@@ -332,7 +312,7 @@ private:
             float sensitivity = biteFloat(" ", c.it.args);
             string name = bite(" ", c.it.args);
 
-            c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, name);
+            c.m->addNewCamera(x, y, z, movementSpeed, sensitivity, name);
         }
     };
 
@@ -346,14 +326,14 @@ private:
 
             Framebuffer* framebuffer = new Framebuffer(width, height, frmbName);
             framebuffer->appendTextureColorBuffers(frmbAmount);
-            c.model->addFramebuffer(*framebuffer);
+            c.m->addFramebuffer(*framebuffer);
 
             MaterialList* frmbmat = new MaterialList;
             frmbmat->pushNew();
 
             frmbmat->name = frmbName;
             frmbmat->textures = framebuffer->textureColorBuffers;
-            c.materialLists.push_back(frmbmat);
+            c.m->materialLists.push_back(frmbmat);
         }
     };
 
@@ -418,38 +398,38 @@ private:
 
             size_t whichMtl = 0, whichMeshbuf = 0;
 
-            for (size_t i = 0; i < c.materialLists.size(); ++i) {
-                if (c.materialLists.at(i)->name == materialName) {
+            for (size_t i = 0; i < c.m->materialLists.size(); ++i) {
+                if (c.m->materialLists.at(i)->name == materialName) {
                     whichMtl = i;
                     break;
                 }
             }
 
-            for (size_t i = 0; i < c.meshBuffers.size(); ++i) {
-                if (c.meshBuffers.at(i)->name == bufferName) {
+            for (size_t i = 0; i < c.m->meshBuffers.size(); ++i) {
+                if (c.m->meshBuffers.at(i)->name == bufferName) {
                     whichMeshbuf = i;
                     break;
                 }
             }
-            c.model->addNewObject(*(c.meshBuffers).at(whichMeshbuf),
-                                  *c.materialLists.at(whichMtl), objName);
+            c.m->addNewObject(*(c.m->meshBuffers).at(whichMeshbuf),
+                                  *c.m->materialLists.at(whichMtl), objName);
 
             string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.it.step();
-                    momovec.o = &c.model->getMeshObject(objName);
+                    momovec.o = &c.m->getMeshObject(objName);
                     momovec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.it.step();
-                    moscalec.o = &c.model->getMeshObject(objName);
+                    moscalec.o = &c.m->getMeshObject(objName);
                     moscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
                     c.it.step();
-                    morotc.o = &c.model->getMeshObject(objName);
+                    morotc.o = &c.m->getMeshObject(objName);
                     morotc.execute(c);
                 }
                 nextCommand = c.it.getNextCommand();
@@ -466,24 +446,24 @@ private:
 
             size_t which1 = 0, which2 = 0;
 
-            for (size_t i = 0; i < c.materialLists.size(); ++i) {
-                if (c.materialLists.at(i)->name == materialName) {
+            for (size_t i = 0; i < c.m->materialLists.size(); ++i) {
+                if (c.m->materialLists.at(i)->name == materialName) {
                     which1 = i;
                     break;
                 }
             }
 
-            for (size_t i = 0; i < c.sklBuffers.size(); ++i) {
-                if (c.sklBuffers.at(i)->name == bufferName) {
+            for (size_t i = 0; i < c.m->sklBuffers.size(); ++i) {
+                if (c.m->sklBuffers.at(i)->name == bufferName) {
                     which2 = i;
                     break;
                 }
             }
 
-            c.model->addNewObject(*c.sklBuffers.at(which2),
-                                  c.materialLists.at(which1), objName);
+            c.m->addNewObject(*c.m->sklBuffers.at(which2),
+                                  c.m->materialLists.at(which1), objName);
 
-            SkeletonObject* currObject = &c.model->getSkeletonObject(objName);
+            SkeletonObject* currObject = &c.m->getSkeletonObject(objName);
 
             string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
@@ -551,15 +531,15 @@ private:
 
             size_t which1 = 0, which2 = 0;
 
-            for (size_t i = 0; i < c.materialLists.size(); ++i) {
-                if (c.materialLists.at(i)->name == materialName) {
+            for (size_t i = 0; i < c.m->materialLists.size(); ++i) {
+                if (c.m->materialLists.at(i)->name == materialName) {
                     which1 = i;
                     break;
                 }
             }
 
-            for (size_t i = 0; i < c.instBuffers.size(); ++i) {
-                if (c.instBuffers.at(i)->name == bufferName) {
+            for (size_t i = 0; i < c.m->instBuffers.size(); ++i) {
+                if (c.m->instBuffers.at(i)->name == bufferName) {
                     which2 = i;
                     break;
                 }
@@ -567,8 +547,8 @@ private:
 
             vector<Position> poses;
 
-            c.model->addNewObject(*c.instBuffers.at(which2),
-                                  c.materialLists.at(which1), poses, objName);
+            c.m->addNewObject(*c.m->instBuffers.at(which2),
+                                  c.m->materialLists.at(which1), poses, objName);
 
             if (c.it.isNextCommand("instel")) {
                 c.it.step();
@@ -580,8 +560,8 @@ private:
     class InstElCommand : public ICommand<SceneLoaderContext> {
     public:
         void execute(SceneLoaderContext& c) override {
-            InstancedObject* lastInstObj = &c.model->getInstancedObject(
-                c.model->instancedObjects->size() - 1);
+            InstancedObject* lastInstObj = &c.m->getInstancedObject(
+                c.m->instancedObjects->size() - 1);
             lastInstObj->modelMatrices.push_back(Position());
 
             float x = biteFloat(" ", c.it.args);
@@ -624,31 +604,31 @@ private:
 
             size_t which = 0;
 
-            for (size_t i = 0; i < c.meshBuffers.size(); ++i) {
-                if (c.meshBuffers.at(i)->name == bufferName) {
+            for (size_t i = 0; i < c.m->meshBuffers.size(); ++i) {
+                if (c.m->meshBuffers.at(i)->name == bufferName) {
                     which = i;
                     break;
                 }
             }
 
-            c.model->addNewSkybox(skyboxSides, *c.meshBuffers.at(which), tmp4);
+            c.m->addNewSkybox(skyboxSides, *c.m->meshBuffers.at(which), tmp4);
 
             string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
                     c.it.step();
-                    skmovec.o = &c.model->getSkyboxObject(tmp4);
+                    skmovec.o = &c.m->getSkyboxObject(tmp4);
                     skmovec.execute(c);
                 }
                 if (nextCommand == "scale") {
                     c.it.step();
-                    skscalec.o = &c.model->getSkyboxObject(tmp4);
+                    skscalec.o = &c.m->getSkyboxObject(tmp4);
                     skscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
                     c.it.step();
-                    skrotc.o = &c.model->getSkyboxObject(tmp4);
+                    skrotc.o = &c.m->getSkyboxObject(tmp4);
                     skrotc.execute(c);
                 }
                 nextCommand = c.it.getNextCommand();
@@ -666,7 +646,7 @@ private:
             b = biteFloat(" ", c.it.args);
             a = biteFloat(" ", c.it.args);
 
-            c.model->setBackgroundColor(r, g, b, a);
+            c.m->setBackgroundColor(r, g, b, a);
         }
     };
 

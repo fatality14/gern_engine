@@ -65,6 +65,19 @@ public:
         delete meshObjects;
         delete skeletonObjects;
         delete instancedObjects;
+
+        for (size_t i = 0; i < meshBuffers.size(); ++i) {
+            delete meshBuffers[i];
+        }
+        for (size_t i = 0; i < sklBuffers.size(); ++i) {
+            delete sklBuffers[i];
+        }
+        for (size_t i = 0; i < instBuffers.size(); ++i) {
+            delete instBuffers[i];
+        }
+        for (size_t i = 0; i < materialLists.size(); ++i) {
+            delete materialLists[i];
+        }
     }
 
     // make arguments optional
@@ -210,4 +223,13 @@ public:
         this->b = b;
         this->a = a;
     }
+
+    MeshList meshList;
+    SkeletonMeshList skeletonList;
+    ShaderList shaders;
+    vector<MaterialList*> materialLists;
+
+    vector<MeshBuffer*> meshBuffers;
+    vector<SkeletonBuffer*> sklBuffers;
+    vector<InstancedBuffer*> instBuffers;
 };

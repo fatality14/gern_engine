@@ -9,7 +9,7 @@
 
 class SkeletonLoader : private ULoader {
 public:
-    SkeletonMesh& skeletize(Mesh& mesh, const filesystem::path& skeletonPath) {
+    SkeletonMesh* skeletize(Mesh& mesh, const filesystem::path& skeletonPath) {
         skeletonMesh = new SkeletonMesh;
         skeletonMesh->name = mesh.name;
 
@@ -20,7 +20,7 @@ public:
         parseSkeleton(skeletonPath);
         addWeights(mesh);
 
-        return *skeletonMesh;
+        return skeletonMesh;
     }
 
 private:

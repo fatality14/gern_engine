@@ -9,7 +9,7 @@ class MeshLoader : private ULoader {
 public:
     MeshLoader() { allPolyIndexes = new vector<vector<glm::ivec3>>; }
 
-    Mesh& load(const filesystem::path& path, const string& meshName = "noname") {
+    Mesh* load(const filesystem::path& path, const string& meshName = "noname") {
         mesh = new Mesh(meshName);
 
         ifstream f;
@@ -144,7 +144,7 @@ public:
 
         clean();
 
-        return *mesh;
+        return mesh;
     }
 
 private:
