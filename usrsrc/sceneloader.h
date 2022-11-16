@@ -3,7 +3,10 @@
 #include "shader/shader.h"
 #include "shader/shaderloader.h"
 #include <animation/poseloader.h>
+#include <common/commanditerator.h>
 #include <common/common.h>
+#include <common/icommand.h>
+#include <common/icontext.h>
 #include <filesystem>
 #include <framemodel.h>
 #include <mesh/meshloader.h>
@@ -11,7 +14,6 @@
 #include <object/instancedobject.h>
 #include <object/skeletonobject.h>
 #include <render/isceneloader.h>
-#include <string>
 #include <texture/materialloader.h>
 
 #include <map>
@@ -20,53 +22,13 @@
 #include <unordered_set>
 #include <vector>
 
-template<typename T>
-class FileParser : public ICommon{
-    bool step() {
-        if (lines.size() != 0) {
-            string& currLine = lines.front();
-
-            ULoader::removeExcessSpaces(currLine);
-
-            command = ULoader::bite(" ", currLine);
-            args = currLine;
-
-            lines.pop();
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    string getNextCommand() {
-        string nextCommand = lines.front();
-        return ULoader::bite(" ", nextCommand);
-    }
-
-    bool isNextCommand(const string& command) {
-        return getNextCommand() == command;
-    }
-
-    void execute(const map<string, ICommand<T>&>& commands) {
-        bool found = commands.count(command);
-        if(found){
-            commands.at(command).execute(*this);
-        }
-        else{
-            //TODO cout path or name of file
-            cout << "Warning: no such command " << command << " found while loading scene" << endl;
-        }
-    }
-
-    queue<string> lines;
-    string args;
-    string command;
-};
-
-class LoaderContext : public IContext {
+class SceneLoaderContext : public IContext {
 public:
-    ~LoaderContext() {
+    SceneLoaderContext(
+        const filesystem::path& filePath)
+        : it{filePath, *this} {}
+
+    ~SceneLoaderContext() {
         for (size_t i = 0; i < meshBuffers.size(); ++i) {
             delete meshBuffers[i];
         }
@@ -81,49 +43,9 @@ public:
         }
     }
 
-    bool step() {
-        if (lines.size() != 0) {
-            string& currLine = lines.front();
-
-            ULoader::removeExcessSpaces(currLine);
-
-            command = ULoader::bite(" ", currLine);
-            args = currLine;
-
-            lines.pop();
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    string getNextCommand() {
-        string nextCommand = lines.front();
-        return ULoader::bite(" ", nextCommand);
-    }
-
-    bool isNextCommand(const string& command) {
-        return getNextCommand() == command;
-    }
-
-    void execute(const map<string, ICommand<LoaderContext>&>& commands) {
-        bool found = commands.count(command);
-        if(found){
-            commands.at(command).execute(*this);
-        }
-        else{
-            //TODO cout path or name of file
-            cout << "Warning: no such command " << command << " found while loading scene" << endl;
-        }
-    }
+    CommandIterator<SceneLoaderContext> it;
 
     filesystem::path cwd;
-
-    queue<string> lines;
-    string args;
-    string command;
-    
     FrameModel* model;
     MeshLoader meshLoader;
     MeshList meshList;
@@ -141,17 +63,17 @@ public:
     vector<InstancedBuffer*> instBuffers;
 };
 
-typedef ICommand<LoaderContext> Command;
+typedef ICommand<SceneLoaderContext> Command;
 
 // TODO provide throw wherever it needed
 class SceneLoader : private ULoader, public ISceneLoader<FrameModel> {
 public:
-    using cmdPair = pair<string, ICommand<LoaderContext>&>;
+    using cmdPair = pair<string, ICommand<SceneLoaderContext>&>;
 
-    inline static map<string, ICommand<LoaderContext>&> mainCmds;
+    inline static map<string, ICommand<SceneLoaderContext>&> commandList;
 
     SceneLoader() {
-        mainCmds = {cmdPair("cwd", cwdc),         cmdPair("mesh", meshc),
+        commandList = {cmdPair("cwd", cwdc),         cmdPair("mesh", meshc),
                     cmdPair("skl", sklc),         cmdPair("shad", shadc),
                     cmdPair("meshbuf", meshbufc), cmdPair("sklbuf", sklbufc),
                     cmdPair("instbuf", instbufc), cmdPair("tex", texc),
@@ -162,66 +84,53 @@ public:
                     cmdPair("skybox", skyboxc),   cmdPair("bckcol", bckcolc)};
     }
 
-    void load(const filesystem::path& path, FrameModel& data) override {
-        c.model = &data;
+    void load(const filesystem::path& path, FrameModel& model) override {
+        SceneLoaderContext c(path);
 
-        ifstream f;
-        f.open(path);
+        c.model = &model;
 
-        string line;
-
-        if (f.fail()) {
-            throw string("Cannot open file: ") + path.string();
-        }
-
-        while (!f.eof()) {
-            getline(f, line);
-            removeExcessSpaces(line);
-            c.lines.push(line);
-        }
-
-        while (c.step()) {
-            c.execute(mainCmds);
+        while (c.it.step()) {
+            c.it.execute(commandList);
         }
     }
 
-    LoaderContext c;
-
 private:
-    class CwdCommand : public ICommand<LoaderContext> {
+    class CwdCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override { c.cwd = bite(" ", c.args); }
+        void execute(SceneLoaderContext& c) override {
+            c.cwd = bite(" ", c.it.args);
+        }
     };
 
-    class MeshCommand : public ICommand<LoaderContext> {
+    class MeshCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            filesystem::path path = c.cwd / bite(" ", c.args);
-            string meshName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            filesystem::path path = c.cwd / bite(" ", c.it.args);
+            string meshName = bite(" ", c.it.args);
             c.meshList.push(c.meshLoader.load(path, meshName));
         }
     };
 
-    class SklCommand : public ICommand<LoaderContext> {
+    class SklCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string meshName = bite(" ", c.args);
-            filesystem::path skeletonPath = c.cwd / bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string meshName = bite(" ", c.it.args);
+            filesystem::path skeletonPath = c.cwd / bite(" ", c.it.args);
             c.skeletonList.push(c.skeletizer.skeletize(
                 *(c.meshList).getByName(meshName), skeletonPath));
         }
     };
 
-    class ShadCommand : public ICommand<LoaderContext> {
+    class ShadCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string shaderName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string shaderName = bite(" ", c.it.args);
 
             Shader* shader = new Shader();
             shader->name = shaderName;
 
-            if (c.isNextCommand("shadel")) {
-                c.step();
+            if (c.it.isNextCommand("shadel")) {
+                c.it.step();
                 shadelc.shader = shader;
                 shadelc.execute(c);
             } else {
@@ -231,17 +140,17 @@ private:
         }
     };
 
-    class ShadElCommand : public ICommand<LoaderContext> {
+    class ShadElCommand : public ICommand<SceneLoaderContext> {
     public:
         ShadElCommand() { paths = new vector<filesystem::path>(); }
         ~ShadElCommand() { delete paths; }
 
-        void execute(LoaderContext& c) override {
-            filesystem::path path = c.cwd / bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            filesystem::path path = c.cwd / bite(" ", c.it.args);
             paths->push_back(path);
 
-            if (c.isNextCommand("shadel")) {
-                c.step();
+            if (c.it.isNextCommand("shadel")) {
+                c.it.step();
                 // no need to pass paths to next execution while shadelc is
                 // static, but it might not in future
                 shadelc.execute(c);
@@ -256,12 +165,12 @@ private:
         Shader* shader;
     };
 
-    class MeshBufCommand : public ICommand<LoaderContext> {
+    class MeshBufCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string meshName = bite(" ", c.args);
-            string shaderName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string meshName = bite(" ", c.it.args);
+            string shaderName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
             c.meshBuffers.push_back(
                 new MeshBuffer(*(c.meshList).getByName(meshName),
                                *(c.shaders).getByName(shaderName), bufferName));
@@ -269,12 +178,12 @@ private:
         }
     };
 
-    class SklBufCommand : public ICommand<LoaderContext> {
+    class SklBufCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string meshName = bite(" ", c.args);
-            string shaderName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string meshName = bite(" ", c.it.args);
+            string shaderName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
             c.sklBuffers.push_back(new SkeletonBuffer(
                 *(c.skeletonList).getByName(meshName),
                 *(c.shaders).getByName(shaderName), bufferName));
@@ -282,12 +191,12 @@ private:
         }
     };
 
-    class InstBufCommand : public ICommand<LoaderContext> {
+    class InstBufCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string meshName = bite(" ", c.args);
-            string shaderName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string meshName = bite(" ", c.it.args);
+            string shaderName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
             c.instBuffers.push_back(new InstancedBuffer(
                 *(c.meshList).getByName(meshName),
                 *(c.shaders).getByName(shaderName), bufferName));
@@ -295,39 +204,39 @@ private:
         }
     };
 
-    class TexLCommand : public ICommand<LoaderContext> {
+    class TexLCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->addLayouts(1);
 
-            size_t layoutId = biteInt(" ", c.args);
-            GLuint textureUnit = biteInt(" ", c.args);
-            size_t textureIndex = biteInt(" ", c.args);
-            string uniformName = bite(" ", c.args);
+            size_t layoutId = biteInt(" ", c.it.args);
+            GLuint textureUnit = biteInt(" ", c.it.args);
+            size_t textureIndex = biteInt(" ", c.it.args);
+            string uniformName = bite(" ", c.it.args);
 
             c.materialLists.at(c.materialLists.size() - 1)
                 ->textures->appendTextureToLayout(layoutId, textureUnit,
                                                   textureIndex, uniformName);
 
-            if (c.isNextCommand("texl")) {
-                c.step();
+            if (c.it.isNextCommand("texl")) {
+                c.it.step();
                 texlc.execute(c);
             }
         }
     };
 
-    class TexMCommand : public ICommand<LoaderContext> {
+    class TexMCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             c.materialLists.at(c.materialLists.size() - 1)
-                ->textures->loadNew(c.cwd / c.args);
+                ->textures->loadNew(c.cwd / c.it.args);
 
-            if (c.isNextCommand("texm")) {
-                c.step();
+            if (c.it.isNextCommand("texm")) {
+                c.it.step();
                 texmc.execute(c);
-            } else if (c.isNextCommand("texl")) {
-                c.step();
+            } else if (c.it.isNextCommand("texl")) {
+                c.it.step();
                 texlc.execute(c);
             } else {
                 throw string("there must be a texl command after texm "
@@ -336,17 +245,17 @@ private:
         }
     };
 
-    class TexCommand : public ICommand<LoaderContext> {
+    class TexCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             MaterialList* texbmat = new MaterialList;
             texbmat->pushNew();
-            texbmat->name = c.args;
+            texbmat->name = c.it.args;
 
             c.materialLists.push_back(texbmat);
 
-            if (c.isNextCommand("texm")) {
-                c.step();
+            if (c.it.isNextCommand("texm")) {
+                c.it.step();
                 texmc.execute(c);
             } else {
                 throw string("there must be a texm command after tex in scene");
@@ -354,17 +263,17 @@ private:
         }
     };
 
-    class MatCommand : public ICommand<LoaderContext> {
+    class MatCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             // TODO throw error if there is no texture specified in .mat
             // else vector is out of borders
 
             // TODO fix to use other textures than map_Kd
 
-            filesystem::path mtlPath = c.cwd / bite(" ", c.args);
-            filesystem::path textureFolderPath = bite(" ", c.args);
-            string materialListName = bite(" ", c.args);
+            filesystem::path mtlPath = c.cwd / bite(" ", c.it.args);
+            filesystem::path textureFolderPath = bite(" ", c.it.args);
+            string materialListName = bite(" ", c.it.args);
 
             MaterialList* materials = c.materialLoader.load(mtlPath);
             TextureList* textures = materials->textures;
@@ -402,38 +311,38 @@ private:
         }
     };
 
-    class LightCommand : public ICommand<LoaderContext> {
+    class LightCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
-            string name = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
+            string name = bite(" ", c.it.args);
 
             c.model->addNewLightSource(x, y, z, name);
         }
     };
-    class CamCommand : public ICommand<LoaderContext> {
+    class CamCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
-            float movementSpeed = biteFloat(" ", c.args);
-            float sensitivity = biteFloat(" ", c.args);
-            string name = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
+            float movementSpeed = biteFloat(" ", c.it.args);
+            float sensitivity = biteFloat(" ", c.it.args);
+            string name = bite(" ", c.it.args);
 
             c.model->addNewCamera(x, y, z, movementSpeed, sensitivity, name);
         }
     };
 
-    class FrmbCommand : public ICommand<LoaderContext> {
+    class FrmbCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            size_t width = biteInt(" ", c.args);
-            size_t height = biteInt(" ", c.args);
-            size_t frmbAmount = biteInt(" ", c.args);
-            string frmbName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            size_t width = biteInt(" ", c.it.args);
+            size_t height = biteInt(" ", c.it.args);
+            size_t frmbAmount = biteInt(" ", c.it.args);
+            string frmbName = bite(" ", c.it.args);
 
             Framebuffer* framebuffer = new Framebuffer(width, height, frmbName);
             framebuffer->appendTextureColorBuffers(frmbAmount);
@@ -448,63 +357,64 @@ private:
         }
     };
 
-    template <class T> class MoveCommand : public ICommand<LoaderContext> {
+    template <class T> class MoveCommand : public ICommand<SceneLoaderContext> {
     public:
         MoveCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override {
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
 
             o->move(x, y, z);
         }
         T* o;
     };
 
-    template <class T> class ScaleCommand : public ICommand<LoaderContext> {
+    template <class T>
+    class ScaleCommand : public ICommand<SceneLoaderContext> {
     public:
         ScaleCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override {
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
 
             o->scaleTo(x, y, z);
         }
         T* o;
     };
 
-    template <class T> class RotCommand : public ICommand<LoaderContext> {
+    template <class T> class RotCommand : public ICommand<SceneLoaderContext> {
     public:
         RotCommand() {
             static_assert(std::is_base_of<IObject, T>::value,
                           "Template parameter T must be derived from IObject");
         }
 
-        void execute(LoaderContext& c) override {
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
 
             o->rotateTo(x, y, z);
         }
         T* o;
     };
 
-    class MeshObjCommand : public ICommand<LoaderContext> {
+    class MeshObjCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string materialName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
-            string objName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string materialName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
+            string objName = bite(" ", c.it.args);
 
             size_t whichMtl = 0, whichMeshbuf = 0;
 
@@ -524,35 +434,35 @@ private:
             c.model->addNewObject(*(c.meshBuffers).at(whichMeshbuf),
                                   *c.materialLists.at(whichMtl), objName);
 
-            string nextCommand = c.getNextCommand();
+            string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
-                    c.step();
+                    c.it.step();
                     momovec.o = &c.model->getMeshObject(objName);
                     momovec.execute(c);
                 }
                 if (nextCommand == "scale") {
-                    c.step();
+                    c.it.step();
                     moscalec.o = &c.model->getMeshObject(objName);
                     moscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
-                    c.step();
+                    c.it.step();
                     morotc.o = &c.model->getMeshObject(objName);
                     morotc.execute(c);
                 }
-                nextCommand = c.getNextCommand();
+                nextCommand = c.it.getNextCommand();
             }
         }
     };
 
-    class SklObjCommand : public ICommand<LoaderContext> {
+    class SklObjCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string materialName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
-            string objName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string materialName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
+            string objName = bite(" ", c.it.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -575,29 +485,29 @@ private:
 
             SkeletonObject* currObject = &c.model->getSkeletonObject(objName);
 
-            string nextCommand = c.getNextCommand();
+            string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
-                    c.step();
+                    c.it.step();
                     somovec.o = currObject;
                     somovec.execute(c);
                 }
                 if (nextCommand == "scale") {
-                    c.step();
+                    c.it.step();
                     soscalec.o = currObject;
                     soscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
-                    c.step();
+                    c.it.step();
                     sorotc.o = currObject;
                     sorotc.execute(c);
                 }
-                nextCommand = c.getNextCommand();
+                nextCommand = c.it.getNextCommand();
             }
 
-            if (c.isNextCommand("anm")) {
-                c.step();
+            if (c.it.isNextCommand("anm")) {
+                c.it.step();
                 anmc.o = currObject;
                 anmc.execute(c);
             }
@@ -605,12 +515,12 @@ private:
         }
     };
 
-    class AnmCommand : public ICommand<LoaderContext> {
+    class AnmCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            filesystem::path anmPath = c.cwd / bite(" ", c.args);
-            float anmMult = biteFloat(" ", c.args);
-            float anmStart = biteFloat(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            filesystem::path anmPath = c.cwd / bite(" ", c.it.args);
+            float anmMult = biteFloat(" ", c.it.args);
+            float anmStart = biteFloat(" ", c.it.args);
 
             PoseList* poses = c.poseLoader.parseKeyPoses(anmPath);
             Animation* anm = new Animation(o->buffer->getMesh().joints, anmMult,
@@ -620,9 +530,9 @@ private:
             o->addAnimation(*anm);
             o->setCurrAnimation(anmPath);
 
-            string nextCommand = c.getNextCommand();
-            if (c.isNextCommand("anm")) {
-                c.step();
+            string nextCommand = c.it.getNextCommand();
+            if (c.it.isNextCommand("anm")) {
+                c.it.step();
                 // anmc.o = this->o; //no need to while anmc is static, but it
                 // might not in future
                 anmc.execute(c);
@@ -632,12 +542,12 @@ private:
         SkeletonObject* o;
     };
 
-    class InstObjCommand : public ICommand<LoaderContext> {
+    class InstObjCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string materialName = bite(" ", c.args);
-            string bufferName = bite(" ", c.args);
-            string objName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string materialName = bite(" ", c.it.args);
+            string bufferName = bite(" ", c.it.args);
+            string objName = bite(" ", c.it.args);
 
             size_t which1 = 0, which2 = 0;
 
@@ -660,57 +570,57 @@ private:
             c.model->addNewObject(*c.instBuffers.at(which2),
                                   c.materialLists.at(which1), poses, objName);
 
-            if (c.isNextCommand("instel")) {
-                c.step();
+            if (c.it.isNextCommand("instel")) {
+                c.it.step();
                 instelc.execute(c);
             }
         }
     };
 
-    class InstElCommand : public ICommand<LoaderContext> {
+    class InstElCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             InstancedObject* lastInstObj = &c.model->getInstancedObject(
                 c.model->instancedObjects->size() - 1);
             lastInstObj->modelMatrices.push_back(Position());
 
-            float x = biteFloat(" ", c.args);
-            float y = biteFloat(" ", c.args);
-            float z = biteFloat(" ", c.args);
+            float x = biteFloat(" ", c.it.args);
+            float y = biteFloat(" ", c.it.args);
+            float z = biteFloat(" ", c.it.args);
 
             lastInstObj->moveTo(lastInstObj->modelMatrices.size() - 1, x, y, z);
 
-            x = biteFloat(" ", c.args);
-            y = biteFloat(" ", c.args);
-            z = biteFloat(" ", c.args);
+            x = biteFloat(" ", c.it.args);
+            y = biteFloat(" ", c.it.args);
+            z = biteFloat(" ", c.it.args);
 
             lastInstObj->rotateTo(lastInstObj->modelMatrices.size() - 1, x, y,
                                   z);
 
-            x = biteFloat(" ", c.args);
-            y = biteFloat(" ", c.args);
-            z = biteFloat(" ", c.args);
+            x = biteFloat(" ", c.it.args);
+            y = biteFloat(" ", c.it.args);
+            z = biteFloat(" ", c.it.args);
 
             lastInstObj->scaleTo(lastInstObj->modelMatrices.size() - 1, x, y,
                                  z);
 
-            if (c.isNextCommand("instel")) {
-                c.step();
+            if (c.it.isNextCommand("instel")) {
+                c.it.step();
                 instelc.execute(c);
             }
         }
     };
 
-    class SkyboxCommand : public ICommand<LoaderContext> {
+    class SkyboxCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
-            string bufferName = bite(" ", c.args);
+        void execute(SceneLoaderContext& c) override {
+            string bufferName = bite(" ", c.it.args);
 
             array<filesystem::path, 6> skyboxSides;
             for_each(skyboxSides.begin(), skyboxSides.end(),
-                     [&c](auto& i) { i = c.cwd / bite(" ", c.args); });
+                     [&c](auto& i) { i = c.cwd / bite(" ", c.it.args); });
 
-            string tmp4 = bite(" ", c.args);
+            string tmp4 = bite(" ", c.it.args);
 
             size_t which = 0;
 
@@ -723,38 +633,38 @@ private:
 
             c.model->addNewSkybox(skyboxSides, *c.meshBuffers.at(which), tmp4);
 
-            string nextCommand = c.getNextCommand();
+            string nextCommand = c.it.getNextCommand();
             while (nextCommand == "move" || nextCommand == "scale" ||
                    nextCommand == "rot") {
                 if (nextCommand == "move") {
-                    c.step();
+                    c.it.step();
                     skmovec.o = &c.model->getSkyboxObject(tmp4);
                     skmovec.execute(c);
                 }
                 if (nextCommand == "scale") {
-                    c.step();
+                    c.it.step();
                     skscalec.o = &c.model->getSkyboxObject(tmp4);
                     skscalec.execute(c);
                 }
                 if (nextCommand == "rot") {
-                    c.step();
+                    c.it.step();
                     skrotc.o = &c.model->getSkyboxObject(tmp4);
                     skrotc.execute(c);
                 }
-                nextCommand = c.getNextCommand();
+                nextCommand = c.it.getNextCommand();
             }
         }
     };
 
-    class BckColCommand : public ICommand<LoaderContext> {
+    class BckColCommand : public ICommand<SceneLoaderContext> {
     public:
-        void execute(LoaderContext& c) override {
+        void execute(SceneLoaderContext& c) override {
             float r, g, b, a;
 
-            r = biteFloat(" ", c.args);
-            g = biteFloat(" ", c.args);
-            b = biteFloat(" ", c.args);
-            a = biteFloat(" ", c.args);
+            r = biteFloat(" ", c.it.args);
+            g = biteFloat(" ", c.it.args);
+            b = biteFloat(" ", c.it.args);
+            a = biteFloat(" ", c.it.args);
 
             c.model->setBackgroundColor(r, g, b, a);
         }
