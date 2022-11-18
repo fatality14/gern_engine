@@ -28,6 +28,8 @@ public:
     }
 
     void renderLoop() {
+        controller->init();
+
         doContinue = true;
         while (!glfwWindowShouldClose(&window->getWindow())) {
             glfwPollEvents();

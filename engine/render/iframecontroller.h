@@ -9,5 +9,6 @@ public:
         static_assert(std::is_base_of<IFrameModel, T>::value,
                       "Template parameter T must be derived from IFrameModel");
     }
-    void frameFunction(T& data);
+    virtual void init() = 0;
+    virtual void frameFunction() = 0;
 };

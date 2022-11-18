@@ -52,6 +52,7 @@ public:
 
     void setDrawMode(GLuint GL_drawmode) { drawmode = GL_drawmode; }
 
+    //TODO add common draw methods to simplify draw method body
     virtual void draw(int flags = 0) = 0;
 
     const string& getDrawMeshName() { return buffer->getMeshName(); }

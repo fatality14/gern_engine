@@ -8,6 +8,7 @@
 #include <common/common.h>
 #include <common/loader.h>
 
+//TODO add stop, start functions
 class Animation : private ULoader {
 public:
     float animationTimeMult;

@@ -10,9 +10,12 @@ public:
     FrameModel* m;
 
     int amount = 1;
-    bool once = true;
 
-    void frameFunction() {
+    void init() override{
+        m->window->toggleCursor();
+    }
+
+    void frameFunction() override {
         static MeshObject* currObj;
         static SkeletonObject* currSklObj;
         static InstancedObject* currInstObj;

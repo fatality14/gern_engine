@@ -10,6 +10,8 @@ public:
     int fbWidth;
     int fbHeight;
 
+    bool isCursorHidden = false;
+
     GLenum pmFace;
     GLenum pmMode;
 
@@ -54,6 +56,15 @@ public:
             GLDB(glFrontFace(GL_CW));
         }
     }
+    void toggleCursor(){
+        if(isCursorHidden){
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+        isCursorHidden = !isCursorHidden;
+    }
     GLFWwindow& getWindow() { return *window; }
 
 private:
@@ -93,11 +104,7 @@ private:
         GLDB(glEnable(GL_BLEND));
         GLDB(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-#if HIDE_CURSOR == 1
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-#else
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-#endif
+        toggleCursor();
     }
     void initWindow() {
         initWindowData();

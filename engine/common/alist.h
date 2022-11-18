@@ -36,7 +36,8 @@ public:
 private:
 };
 
-// O stands for owning
+//TODO mark all inherit classes with Owning word
+// O stands for owning, rename O to Owning
 template <class T> class AListO : public AList<T> {
 public:
     ~AListO() { this->wipe(); }

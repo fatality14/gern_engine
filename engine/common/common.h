@@ -1,18 +1,18 @@
 #pragma once
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
-#include <string_view>
 #include <memory>
+#include <string_view>
 
 #include <common/gl.h>
 #include <common/glm.h>
 
 #include <SOIL2.h>
+#include <algorithm>
 #include <flags.h>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -27,7 +27,8 @@ float someCounter = 0;
     while (GLenum e = glGetError()) {                                          \
         cout << "Caught OpenGL error: " << hex << e << endl                    \
              << "In line: " << __LINE__ << ", file: " << __FILE__ << endl;     \
-        throw string("GLDB error");                                            \
+        cout << string("GLDB error");                                          \
+        exit(-1);                                                              \
     }
 #define GLDBR(r, f)                                                            \
     while (glGetError() != GL_NO_ERROR)                                        \
@@ -36,7 +37,8 @@ float someCounter = 0;
     while (GLenum e = glGetError()) {                                          \
         cout << "Caught OpenGL error: " << e << endl                           \
              << "In line: " << __LINE__ << ", file: " << __FILE__ << endl;     \
-        throw string("GLDBR error");                                           \
+        cout << string("GLDB error");                                          \
+        exit(-1);                                                              \
     }
 #else
 #define GLDB(f) f
