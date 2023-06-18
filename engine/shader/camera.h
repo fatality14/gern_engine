@@ -1,9 +1,9 @@
 #pragma once
 
+#include <common/alist.h>
 #include <common/common.h>
-#include <common/list.h>
 
-class Camera : public ICommon{
+class Camera : public ICommon {
 public:
     string name;
 
@@ -19,7 +19,8 @@ public:
     float movementSpeed = 0.1f;
     float sensitivity = 5.f;
 
-    Camera(glm::vec3 location, float movementSpeed = 0.1, float sensitivity = 5, string name = "noname"){
+    Camera(const glm::vec3& location, float movementSpeed = 0.1, float sensitivity = 5,
+           const string& name = "noname") {
         this->name = name;
 
         this->movementSpeed = movementSpeed;
@@ -32,6 +33,4 @@ public:
     }
 };
 
-class CameraList : public AListO<Camera>{
-
-};
+class CameraList : public AListO<Camera> {};

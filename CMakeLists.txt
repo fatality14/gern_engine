@@ -17,8 +17,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 
-set(CMAKE_FIND_LIBRARY_PREFIXES "")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll" ".a")
+set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll" ".a" ".so")
 
 add_executable(ogl main.cpp)
 
@@ -29,7 +29,9 @@ target_include_directories(ogl PRIVATE
     thirdparty/GLFW/
     thirdparty/SOIL2/
     thirdparty/glm/
-    libs/)
+    libs/
+    usrsrc/
+)
 
 #[[ use on your own risk
 file(GLOB ALL_HEADERS
@@ -54,10 +56,20 @@ target_precompile_headers(ogl PRIVATE
     ${ALL_HEADERS})
 ]]
 
-find_library(GLEW32 glew32 libs)
-find_library(GLFW3 glfw3 libs)
-find_library(SOIL libsoil2 libs)
-find_library(OGL opengl32 libs)
+message(${CMAKE_SYSTEM_NAME})
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    find_library(GLEW32 libGLEW.so.2.2 libs/linux)
+    find_library(GLFW3 glfw3 libs/linux)
+    find_library(SOIL libsoil2 libs/linux)
+    find_library(OGL opengl libs/linux)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_library(GLEW32 glew32 libs)
+    find_library(GLFW3 glfw3 libs)
+    find_library(SOIL libsoil2 libs)
+    find_library(OGL opengl32 libs)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
 
 #find_package(OpenGL REQUIRED)
 

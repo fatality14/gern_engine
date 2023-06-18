@@ -16,9 +16,10 @@ add const qualifiers where it need to be
 11
 rename some GL_* definitions to own enums
 
-!12
+12+
 provide glAttachShader not only for two shaders at a time but multiple in Shader class
 split shad to two commands in SceneLoader
+split shader.h to shaderloader, shaderfragment and shderprogram files
 
 13?
 it is possible to reconstruct *Object render by using VBO, the only thing need is to make multiple VBO
@@ -29,7 +30,7 @@ make counter instead of noname in object etc names
 16
 hide window pointers etc in *Object classes
 
-17
++-17
 disallow multiple calls of loadTexture() in Texture class, also genTextureColorBuffers() in Framebuffer class, check for others
 or just let hot change
 
@@ -51,8 +52,8 @@ or make interface for a lot of different cases instead
 27
 add namespaces
 
-28
-+remove GLfloat etc where it must be just float etc
++28
+remove GLfloat etc where it must be just float etc
 check types in SceneLoader, they must be equal to what constructors get
 e.g. FrmbCommand variables for Framebuffer
 
@@ -63,7 +64,7 @@ a bug in animation while moving bone, it moves according to default object posit
 pass user function in setDefaultEvents
 or which is better make Event class
 
-31
++31
 split "sklobj" in sceneloader to "sklobj" and "anm" to use animation multiple times
 
 32?
@@ -71,20 +72,23 @@ do something with *List, IObject and other common cases
 
 33
 consider change setShaderParams method in IShaderField
+might use parameter pack
 
 34
 do something with name field, it should display field usage
 
 36?
 move load method to ILoader and override it in loaders
+might use parameter pack
 
 37
 in case of different mesh file formats modify MeshLoader
 
 38
 make Window proxy pattern
+there's only one instance of Window allowed for each process
 
-!39
++39
 make AnimationList and all related for SceneLoader
 
 +41
@@ -96,9 +100,11 @@ add GUIObject and 2d object
 
 44
 allow to split SceneLoader scene.txt by multiple files
+should be done as a main logic wrapper
 
-!45
++45
 add material manual properties command for SceneLoader tex* commands
+(resolved as a bad feature as it is already implemented in mat comand)
 
 48
 refactor other loaders
@@ -113,12 +119,16 @@ this code must be compiled in executable not to slowdown render
 
 51
 add CMakeList to compile other libraries
+or else add compilation guide (which might be better for possible library updates)
 
-52
+!52
 check every refrence and pointer for null after loading
 
-56
-also check if the sufficient num args provided while parsing files
+!56
+check if the sufficient num args provided while parsing files
+
++57
+split animation.h to animationloader and animation files
 
 lastplan:
 

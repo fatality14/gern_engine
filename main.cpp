@@ -1,32 +1,41 @@
-#include <render/renderer.h>
-#include <render/sceneloader.h>
 #include <chrono>
+#include <filesystem>
+#include <renderer.h>
+#include <sceneloader.h>
 
-int main (){
+int main(int argc, char* argv[]) {
     int window_width = 1366;
     int window_height = 768;
 
     Renderer renderer(window_width, window_height);
-//    SceneLoader sl;
-
     SceneLoader sl;
 
-//    auto start = std::chrono::steady_clock::now();
-    try{
-        sl.load("C:\\Users\\1234\\Documents\\qtprojs\\ogl\\resources\\scenes\\test.txt", *renderer.model);
-    }
-    catch(string e){
+    auto start = std::chrono::steady_clock::now();
+    try {
+        if (argc == 2) {
+            const filesystem::path path = argv[1];
+            if (!path.empty()) {
+                sl.load(path, *renderer.model);
+            }
+        } else {
+            throw string(
+                "You must specify scene file path as a first argument.");
+        }
+    } catch (const string& e) {
         cout << e << endl;
         return -1;
-    }
-    catch(...){
+    } catch (...) {
         cout << "Unresolved error caught\n";
         return -1;
     }
 
-//    auto end = std::chrono::steady_clock::now();
-//    std::chrono::duration<double> elapsed_seconds = end-start;
-//    std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed_seconds).count() << "s\n";
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "load time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     elapsed_seconds)
+                     .count()
+              << "ms\n";
 
     renderer.renderLoop();
 

@@ -28,6 +28,8 @@ struct Material{
 
 uniform Material material;
 
+vec3 testFoo(in vec3 arg);
+
 vec3 calcDiffuseLightVec(in vec3 lightPosition, in vec3 color){
     //vec from pos to light
     vec3 posToLightDirVec = normalize(lightPosition - vs_position);
@@ -64,7 +66,7 @@ vec3 calcFullLight(in vec3 lightPosition, Material material, in float attenuatio
 
 void main()
 {
-    vec3 lightning = calcFullLight(lightPos0, material, 50, specularTex);
+    vec3 lightning = testFoo(calcFullLight(lightPos0, material, 50, specularTex));
     vec4 tex = texture(texture0, vs_texcoord);
 
     //vec3 posToCamVec = normalize(vs_position - cameraPos);

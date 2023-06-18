@@ -1,5 +1,5 @@
 1
-download https://github.com/zhenya11114/soil2-cmake
+download https://github.com/fatality14/soil2-cmake
 2
 open in qt creator (or smth else) with cmake
 3

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "common/iposition.h"
 #include <common/common.h>
 
-class JointPosition : public ICommon{
+class JointPosition : public IPosition{
 public:
     glm::vec3 tip;
     glm::vec3 origin;
@@ -30,63 +31,63 @@ public:
         transform = glm::translate(transform, -origin);
     }
 
-    void move(float x, float y, float z){
+    void move(float x, float y, float z) override{
         location.x += x;
         location.y += y;
         location.z += z;
         updateMatrices();
     }
-    void move(glm::vec3 location){
+    void move(glm::vec3 location) override{
         this->location += location;
         updateMatrices();
     }
-    void moveTo(float x, float y, float z){
+    void moveTo(float x, float y, float z) override{
         location.x = x;
         location.y = y;
         location.z = z;
         updateMatrices();
     }
-    void moveTo(glm::vec3 location){
+    void moveTo(glm::vec3 location) override{
         this->location = location;
         updateMatrices();
     }
-    void rotate(float x, float y, float z){
+    void rotate(float x, float y, float z) override{
         rotation.x += x;
         rotation.y += y;
         rotation.z += z;
         updateMatrices();
     }
-    void rotate(glm::vec3 rotation){
+    void rotate(glm::vec3 rotation) override{
         this->rotation += rotation;
         updateMatrices();
     }
-    void rotateTo(float x, float y, float z){
+    void rotateTo(float x, float y, float z) override{
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
         updateMatrices();
     }
-    void rotateTo(glm::vec3 rotation){
+    void rotateTo(glm::vec3 rotation) override{
         this->rotation = rotation;
         updateMatrices();
     }
-    void scaleBy(float x, float y, float z){
+    void scaleBy(float x, float y, float z) override{
         scale.x += x;
         scale.y += y;
         scale.z += z;
         updateMatrices();
     }
-    void scaleBy(glm::vec3 scale){
+    void scaleBy(glm::vec3 scale) override{
         this->scale += scale;
         updateMatrices();
     }
-    void scaleTo(float x, float y, float z){
+    void scaleTo(float x, float y, float z) override{
         scale.x = x;
         scale.y = y;
         scale.z = z;
         updateMatrices();
     }
-    void scaleTo(glm::vec3 scale){
+    void scaleTo(glm::vec3 scale) override{
         this->scale = scale;
         updateMatrices();
     }
