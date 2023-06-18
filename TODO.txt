@@ -100,9 +100,6 @@ allow to split SceneLoader scene.txt by multiple files
 !45
 add material manual properties command for SceneLoader tex* commands
 
-47 (18)
-add opengl debug mode
-
 48
 refactor other loaders
 
