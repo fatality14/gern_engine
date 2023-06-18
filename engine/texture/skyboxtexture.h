@@ -37,7 +37,7 @@ public:
         GLDB(glBindTexture(GL_TEXTURE_CUBE_MAP, textureId));
 
         for (size_t i = 0; i < facePaths.size(); i++) {
-            unique_ptr<unsigned char[]> image (SOIL_load_image(facePaths.at(i).c_str(), &image_width,
+            unique_ptr<unsigned char[]> image (SOIL_load_image(facePaths.at(i).string().c_str(), &image_width,
                                     &image_height, NULL, SOIL_LOAD_RGB));
             if (image) {
                 GLDB(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,

@@ -504,11 +504,11 @@ private:
 
             PoseList* poses = c.poseLoader.parseKeyPoses(anmPath);
             Animation* anm = new Animation(o->buffer->getMesh().joints, anmMult,
-                                           anmStart, anmPath);
+                                           anmStart, anmPath.string());
             anm->setKeyPoses(*poses);
 
             o->addAnimation(*anm);
-            o->setCurrAnimation(anmPath);
+            o->setCurrAnimation(anmPath.string());
 
             string nextCommand = c.it.getNextCommand();
             if (c.it.isNextCommand("anm")) {

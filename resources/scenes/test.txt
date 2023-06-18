@@ -1,4 +1,4 @@
-cwd /home/fatality14/Downloads/gern_engine/
+cwd C:\Users\1234\Documents\qtprojs\ogl
 mesh resources/models/box.obj skybox
 mesh resources/models/quad.obj quad
 mesh resources/models/sphere.obj sphere

@@ -38,7 +38,7 @@ TODO: add more explanations here
 
 ### Compiling
 Current build compilation was performed using:
-* MinGW 7.3 x64
+* MinGW 8.0 x64
 * CMake 3.5
 * ccache 4.6 (optional, *might be enabled in CMakeLists*)
 

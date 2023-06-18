@@ -36,7 +36,7 @@ public:
         image_width = 0;
         image_height = 0;
 
-        unique_ptr<unsigned char[]> image (SOIL_load_image(path.c_str(), &image_width, &image_height, NULL,
+        unique_ptr<unsigned char[]> image (SOIL_load_image(path.string().c_str(), &image_width, &image_height, NULL,
                                 SOIL_LOAD_RGBA));
 
         GLDB(glBindTexture(GL_TEXTURE_2D, textureId));
